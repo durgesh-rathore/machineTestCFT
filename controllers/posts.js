@@ -9,7 +9,7 @@ const fs = require("fs");
 
 exports.new = function (req, res) {
 
-console.log("===========",req.body);
+
     
 
   try {
