@@ -1,5 +1,7 @@
 app.js
- config/
+ config/db.js
+ config/constants.js
+ 
  bin/
 logs
 *.log

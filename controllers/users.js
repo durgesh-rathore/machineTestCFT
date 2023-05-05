@@ -42,7 +42,7 @@ exports.signup = function (req, res) {
                 if (users.length > 0) {
                   return res.json({
                     success: false,
-                    message: "Mobile number id already exists.",
+                    message: "Mobile number already exists.",
                   });
                 } else {
                   let password = await encryptPassword(req.body.password);
