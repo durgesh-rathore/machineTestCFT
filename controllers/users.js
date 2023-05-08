@@ -60,7 +60,7 @@ exports.signup = function (req, res) {
                       if (user) {
                         return res.json({
                           success: true,
-                          response: user.insertId,
+                          user_id: user.insertId,
                           message: "Signup successfully.",
                         });
                       } else {
