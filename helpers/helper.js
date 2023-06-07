@@ -7,6 +7,7 @@ var connection = require("../config/db");
 async function save(tbl,data) {
     
     var sql = 'INSERT INTO '+tbl+' SET ?';
+    console.log("ddddddddddd==========",data);
     return new Promise((resolve, reject)=> {
       connection.query(sql,data, function(err,data1){
             if(err) {
@@ -31,7 +32,7 @@ async function save(tbl,data) {
               return reject(err);
             }
             
-            resolve(data.insertId);
+            resolve(data);
             
         });
     })   

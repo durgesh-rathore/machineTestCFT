@@ -58,9 +58,15 @@ exports.signup = function (req, res) {
                     async function (err, user) {
                       if (err) throw err;
                       if (user) {
+                        var token = jwt.sign({ id: user.insertId }, constants.SECRET, {
+                          expiresIn: "7d", // expires in 24 hours
+                        });
                         return res.json({
                           success: true,
                           user_id: user.insertId,
+                          token: "JWT " + token,
+                          name:req.body.name,
+                          profile_picture:null,
                           message: "Signup successfully.",
                         });
                       } else {
@@ -84,7 +90,6 @@ exports.signup = function (req, res) {
 };
 
 exports.signin = async function (req, res) {
-  
   if (!req.body.email) {
     res.json({ success: false, message: "Email id is required." });
   } else if (!req.body.password) {
@@ -95,7 +100,7 @@ exports.signin = async function (req, res) {
       async function (err, users) {
         if (users.length > 0) {
           var Password = "";
-          if (users[0].is_reset==1) {
+          if (users[0].is_reset == 1) {
             Password = await checkPassword(
               req.body.password,
               users[0].dumy_password
@@ -106,9 +111,8 @@ exports.signin = async function (req, res) {
               users[0].password
             );
           }
-          
+
           if (Password) {
-          
             var token = jwt.sign({ id: users[0].id }, constants.SECRET, {
               expiresIn: "7d", // expires in 24 hours
             });
@@ -250,25 +254,25 @@ exports.forgotPassword = async function (req, res) {
   if (req.body.email == undefined || req.body.email == "") {
     return res.json({ success: true, message: "Please enter email id" });
   } else {
-    var sql =
-      'SELECT * FROM users WHERE  email="' +
-      req.body.email +
-      '"';
+    var sql = 'SELECT * FROM users WHERE  email="' + req.body.email + '"';
     console.log(sql, "sql");
     connection.query(sql, async function (err, users) {
       if (err) {
         console.log("======", err);
       } else if (users.length > 0) {
         var otp = Math.floor(1000 + Math.random() * 90000000);
-        console.log("otp===========",otp);
-        let password = await encryptPassword(otp+"");
+        console.log("otp===========", otp);
+        let password = await encryptPassword(otp + "");
 
         connection.query(
-          "UPDATE users SET  is_reset=1 ,dumy_password='" + password + "'  WHERE id= " + users[0].id,
+          "UPDATE users SET  is_reset=1 ,dumy_password='" +
+            password +
+            "'  WHERE id= " +
+            users[0].id,
           function (err, campaign) {
             console.log(err, "err");
             if (!err) {
-// send email of this email id
+              // send email of this email id
               return res.json({
                 success: true,
                 message: "Password  sent on your email id",
@@ -291,11 +295,13 @@ exports.resetPassword = async function (req, res) {
     req.body.user_id == "" ||
     req.body.password == ""
   ) {
-    
     return res.json({ success: false, message: "Please Enter Valid" });
   } else {
-    if(req.body.password.length<8){
-      return res.json({ success: false, message: "Password must be 8 character" });
+    if (req.body.password.length < 8) {
+      return res.json({
+        success: false,
+        message: "Password must be 8 character",
+      });
     }
     let password = await encryptPassword(req.body.password);
 
@@ -315,3 +321,122 @@ exports.resetPassword = async function (req, res) {
     });
   }
 };
+
+exports.getProfile = function (req, res) {
+  if (!req.query.login_user_id) {
+    return res.json({
+      success: false,
+      message: "You not login user.",
+    });
+  } else {
+    connection.query(
+      "SELECT users.mobile_number,users.created_datetime,email,users.id,users.name,CONCAT('" +
+        constants.BASE_URL +
+        "','images/profiles/',users.profile_picture) AS profile_picture,(SELECT COUNT(*) FROM users_requests WHERE users_requests.request_for=users.id AND users_requests.is_follow=1 ) AS following_count,(SELECT COUNT(*) FROM users_requests WHERE users_requests.request_for=users.id AND users_requests.is_follow=1 AND users_requests.is_accepted=1 ) AS followers_count  FROM users  WHERE users.id = " +
+        req.query.login_user_id +
+        "",
+      function (err, users) {
+        console.log(err);
+
+        return res.json({
+          success: true,
+          message: "user profile",
+          response: users[0],
+        });
+      }
+    );
+  }
+};
+
+exports.updateUserProfile = function (req, res) {
+  try {
+    console.log(req.body, "req.body");
+    if (
+      req.body.name == "" ||
+      req.body.email == "" ||
+      req.body.mobile_number == "" ||
+      req.body.login_user_id==""
+    ) {
+      return res.json({ success: false, message: "All fields are required." });
+    } else {
+      connection.query(
+        "SELECT id FROM users WHERE email = ? AND id!="+req.body.login_user_id,
+        req.body.email,
+        async function (err, users) {
+          if (users.length > 0) {
+            return res.json({
+              success: false,
+              message: "Email id already exists.",
+            });
+          } else {
+            connection.query(
+              "SELECT id FROM users WHERE mobile_number = ? AND id!="+req.body.login_user_id,
+              req.body.mobile_number,
+              async function (err, users) {
+                if (users.length > 0) {
+                  return res.json({
+                    success: false,
+                    message: "Mobile number already exists.",
+                  });
+                } else {
+                  var newUser = {
+                    name: req.body.name,
+                    email: req.body.email.toLowerCase(),
+                    mobile_number: req.body.mobile_number,
+                  };
+                  if (
+                    req.body.password != "" &&
+                    req.body.password != undefined
+                     ) {
+                      if(req.body.password.length < 8){
+
+                    return res.json({
+                      success: false,
+                      message: "Minimum 8 character in password .",
+                    });
+                  } else {
+                    let password = await encryptPassword(req.body.password);
+                    newUser.password = password;
+                  }
+                }
+
+                  if (
+                    req.file &&
+                    req.file.filename != "" &&
+                    req.file.filename != undefined
+                  ) {
+                    newUser.profile_picture = req.file.filename;
+                  }
+                  connection.query(
+                    "UPDATE users SET ? WHERE id=" +
+                      req.body.login_user_id +
+                      " ",
+                    newUser,
+                    async function (err, user) {
+                      if (err) throw err;
+                      if (user) {
+                        return res.json({
+                          success: true,
+                          user_id: user.insertId,
+                          message: "Update profile successful.",
+                        });
+                      } else {
+                        return res.json({
+                          success: false,
+                          message: "Something went wrong.",
+                        });
+                      }
+                    }
+                  );
+                }
+              }
+            );
+          }
+        }
+      );
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+

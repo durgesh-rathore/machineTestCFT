@@ -1,16 +1,35 @@
-var express = require('express');
-var groupController=require('../controllers/group');
+var express = require("express");
+var groupController = require("../controllers/group");
+var checkUserStatus = require("../config/checkUserStatus");
 var router = express.Router();
 
+router.post("/add", checkUserStatus.userStatus, groupController.add);
+router.post(
+  "/addMembersInGroup",
+  checkUserStatus.userStatus,
+  groupController.addMembersInGroup
+);
+router.get(
+  "/getGroupList",
+  checkUserStatus.userStatus,
+  groupController.getGroupList
+);
 
-
-router.post('/add',groupController.add) 
-// router.post('/followUser',friend.followUser)
-
-
-
- 
-
-
+// split groups api's
+router.post(
+  "/addSplitGroup",
+//   checkUserStatus.userStatus,
+  groupController.addSplitGroup
+);
+router.post(
+  "/addMembersInSplitGroup",
+//   checkUserStatus.userStatus,
+  groupController.addMembersInSplitGroup
+);
+router.get(
+  "/getSplitGroupList",
+//   checkUserStatus.userStatus,
+  groupController.getSplitGroupList
+);
 
 module.exports = router;
