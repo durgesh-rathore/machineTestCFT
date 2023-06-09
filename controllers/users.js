@@ -96,7 +96,9 @@ exports.signin = async function (req, res) {
     res.json({ success: false, message: "Password is required." });
   } else {
     connection.query(
-      'SELECT users.* FROM users WHERE users.email = "' + req.body.email + '"',
+     "SELECT users.*, CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
+      constants.BASE_URL +
+      "','images/profiles/',users.profile_picture) ELSE '' END AS profile_picture FROM users WHERE users.email = '" + req.body.email + "'",
       async function (err, users) {
         if (users.length > 0) {
           var Password = "";

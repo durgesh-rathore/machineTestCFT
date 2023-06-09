@@ -11,6 +11,9 @@ var a =
   constants.BASE_URL +
   "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
 exports.getChats = async (req, res) => {
+
+  console.log("req.query===",req.query);
+  var sql='';
   var page = req.query.page ? req.query.page : 0;
   if (
     req.query.user_id != "" &&
@@ -18,9 +21,9 @@ exports.getChats = async (req, res) => {
     req.query.user_id != null && req.query.is_group==0
   ) {
     sql =
-      "SELECT chats.*,CONCAT('" +
+      "SELECT chats.*,case when chats.images IS NOT NULL then chats.images   else ''  end AS images, CONCAT('" +
       constants.BASE_URL +
-      "','images/profiles/',users.profile_picture) AS profile_picture FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN(" +
+      "','images/profiles/',users.profile_picture) AS profile_picture,users.name FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN(" +
       req.query.login_user_id +
       "," +
       req.query.user_id +
@@ -32,12 +35,12 @@ exports.getChats = async (req, res) => {
       page * 30 +
       ",30";
   }
-  if (req.query.group_id) {
+  if (req.query.is_group==1) {
     sql =
       "SELECT chats.*,CONCAT('" +
       constants.BASE_URL +
-      "','images/profiles/',users.profile_picture) AS profile_picture,users.name FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE group_id=" +
-      req.query.group_id +
+      "','images/profiles/',users.profile_picture) AS profile_picture,users.name,case when chats.images IS NOT NULL then chats.images   else ''  end AS images FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to=" +
+      req.query.user_id +
       " ORDER BY chats.id DESC  Limit " +
       page * 30 +
       ",30";
@@ -46,6 +49,39 @@ exports.getChats = async (req, res) => {
   connection.query(sql, function (err, chatList) {
     console.log(err, chatList);
     if (chatList.length > 0) {
+      
+      function parseImagesSync(chatList, index, callback) {
+  if (index < chatList.length) {
+    const chatItem = chatList[index];
+    if (chatItem.images != null && chatItem.images !== '' && chatItem.images !== undefined) {
+      chatItem.images = JSON.parse(chatItem.images);
+    }
+    parseImagesSync(chatList, index + 1, callback);
+  } else {
+    callback();
+  }
+}
+
+
+function processChatList(chatList) {
+  parseImagesSync(chatList, 0, () => {
+    // Perform any further operations on the chatList
+    console.log(chatList);
+  });
+}
+
+processChatList(chatList);
+
+
+
+
+
+
+
+
+
+
+
       return res.json({
         response: chatList,
         success: true,
@@ -158,11 +194,11 @@ exports.getDirectMessages = async (req, res) => {
 
    
   }
-var sql="SELECT chats.*,gf.is_group,gf.type,gf.id AS users_id,CASE WHEN gf.is_group!=0 THEN gf.type ELSE '' END AS group_type, CASE WHEN gf.is_group=0 THEN ou.name ELSE '' END AS name,(SELECT COUNT(*) FROM chats WHERE chats.send_by=ou.id AND is_seen=0 ) AS newMessageCount  , CASE WHEN gf.is_group!=0 THEN gf.name ELSE '' END AS group_name,CASE WHEN gf.is_group=1  THEN     (SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN groups_users ON groups_users.user_id=users.id WHERE groups_users.group_id= gf.id )  END   AS group_users_image,CASE WHEN gf.is_group=0  THEN (  CASE WHEN ou.profile_picture IS NOT NULL THEN CONCAT('" +
+var sql="SELECT chats.*,gf.is_group,gf.type,CASE WHEN gf.is_group=1 THEN gf.id ELSE ou.id END AS user_id,CASE WHEN gf.is_group!=0 THEN gf.type ELSE '' END AS group_type, CASE WHEN gf.is_group=0 THEN ou.name ELSE '' END AS name,(SELECT COUNT(*) FROM chats WHERE chats.send_by=ou.id AND is_seen=0 ) AS newMessageCount  , CASE WHEN gf.is_group!=0 THEN gf.name ELSE '' END AS group_name,CASE WHEN gf.is_group=1  THEN     (SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN groups_users ON groups_users.user_id=users.id WHERE groups_users.group_id= gf.id )  END   AS group_users_image,CASE WHEN gf.is_group=0  THEN (  CASE WHEN ou.profile_picture IS NOT NULL THEN CONCAT('" +
 constants.BASE_URL +
 "images/profiles/',ou.profile_picture)  ELSE '' END ) ELSE '' END AS profile_picture,(SELECT TIMESTAMPDIFF(MINUTE, chats.created_datetime , CURRENT_TIMESTAMP)  FROM chats WHERE (chats.sent_to=gf.id)   ORDER BY chats.created_datetime DESC LIMIT 1) AS last_times_user_in FROM `chats` LEFT JOIN users AS gf ON gf.id=chats.sent_to LEFT JOIN groups_users  gu ON  gu.group_id=gf.id LEFT JOIN users  ou ON  ou.id=send_by WHERE (sent_to=" +
 req.query.login_user_id +" OR gu.user_id="+
-req.query.login_user_id +")"+ search+ " GROUP BY chats.sent_to,chats.send_by  Limit " +
+req.query.login_user_id +")"+ search+ "  GROUP BY chats.sent_to, ( case when chats.is_group=1 then chats.is_group else chats.send_by  end )  Limit " +
 page * 10 +
 ",10 ";
 
@@ -172,10 +208,8 @@ page * 10 +
     var sqlCountsDM =
     "SELECT chats.id FROM `chats` LEFT JOIN users AS gf ON gf.id=chats.sent_to LEFT JOIN groups_users  gu ON  gu.group_id=gf.id LEFT JOIN users  ou ON  ou.id=send_by WHERE (sent_to=" +
     req.query.login_user_id +" OR gu.user_id="+
-    req.query.login_user_id +")"+ search+ " GROUP BY chats.sent_to,chats.send_by";
-
-
-    console.log("sqlCountsDM===",sqlCountsDM);
+    req.query.login_user_id +")"+ search+ " GROUP BY chats.sent_to, ( case when chats.is_group=1 then chats.is_group else chats.send_by  end )"
+    // console.log("sqlCountsDM===",sqlCountsDM);
 
     var sqlCountsSplit =
       "SELECT COUNT(*) AS counts FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE user1.id=" +
@@ -205,7 +239,7 @@ page * 10 +
         } else {
           return res.json({
             response: [],
-            DMCounts: sqlCountsDMResult,
+            DMCounts: sqlCountsDMResult.length,
             splitCount: sqlCountsSplitResult[0].counts,
             success: true,
             message: "No More post",
@@ -228,9 +262,7 @@ exports.sendMessage = async (req, res) => {
     };
     if (req.body.user_id) {
       data.sent_to = req.body.user_id;
-    } else {
-      data.group_id = req.body.group_id;
-    }
+    } 
     if (req.body.message) {
       data.message = req.body.message;
     }
@@ -253,15 +285,18 @@ exports.sendFiles = async (req, res) => {
     };
     if (req.body.user_id) {
       data.sent_to = req.body.user_id;
-    } else {
-      data.group_id = req.body.group_id;
-    }
+    } 
     var images = [];
     if (req.files.length > 0) {
       for (let i = 0; i < req.files.length; i++) {
         images.push(req.files[i].filename);
       }
       data.images = JSON.stringify(images);
+    }else{
+      return res.json({
+        success: false,
+        message: " Please select image.",
+           });
     }
     console.log("============", data.images);
 
@@ -271,7 +306,7 @@ exports.sendFiles = async (req, res) => {
       return res.json({
         success: true,
         message: " file sent.",
-        response: data.images,
+        response:{ chat_images:images},
       });
     } else {
       return res.json({ success: false, message: "something went wrong" });

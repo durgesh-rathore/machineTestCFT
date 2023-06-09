@@ -113,21 +113,21 @@ exports.getGroupList = function (req, res) {
 
   var sql = " ";
   sql =
-    "SELECT users.id,users.type,users.name,( SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN groups_users ON groups_users.user_id=users.id WHERE groups_users.group_id=users.id AND groups_users.user_id!=" +
+    "SELECT users.id,users.type,users.name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN groups_users ON groups_users.user_id=u1.id WHERE groups_users.group_id=users.id AND groups_users.user_id!=" +
     req.query.login_user_id +
-    "  ) AS group_users_image  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id  LEFT JOIN users ON users.id=groups_users.user_id     WHERE users.is_group=1 AND users.id=" +
+    "  ) AS group_users_image  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id     WHERE users.is_group=1 AND groups_users.user_id=" +
     req.query.login_user_id +
     condition +
-    " Limit " +
+    " GROUP BY users.id Limit " +
     page * 10 +
     ",10";
   console.log(sql);
   connection.query(sql, function (err, groupUsers) {
     console.log(err);
     var sqlCounts =
-      "SELECT COUNT(*) AS counts FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id  LEFT JOIN users ON users.id=groups_users.user_id     WHERE users.is_group=1 AND  users.id=" +
+      "SELECT users.id FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id  WHERE users.is_group=1 AND  groups_users.user_id=" +
       req.query.login_user_id +
-      condition;
+      condition +" GROUP BY users.id ";
     connection.query(sqlCounts, function (err, group_user_count) {
       if (err) {
         console.log(err);
@@ -135,14 +135,14 @@ exports.getGroupList = function (req, res) {
       if (groupUsers.length > 0) {
         return res.json({
           response: groupUsers,
-          total_comment: group_user_count[0].counts,
+          total_group: group_user_count.length,
           success: true,
           message: "post .",
         });
       } else {
         return res.json({
           response: groupUsers,
-          total_comment: group_user_count[0].counts,
+          total_group: group_user_count.length,
           success: true,
           message: "post .",
         });

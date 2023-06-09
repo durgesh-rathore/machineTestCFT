@@ -1,6 +1,6 @@
 var connection = require("./config/db");
 var { save, findByIdAndUpdate } = require("./helpers/helper");
-
+var clients=[];
 module.exports = io => {
   io.on('connection', socket => {
     console.log('User has connect55');
@@ -12,28 +12,13 @@ module.exports = io => {
 
     socket.on('user-login', uid => {
       console.log('user-login : ', uid);
-
-// Wirte Query if required
-    //   User.findById(uid).exec((err, user) => {
-    //     if (user) {
-    //       user.isOnline = true;
-    //       user.save();
-    //     }
-    //   });
-
+      clients[uid.uid]=socket
+      console.log("uid for ",uid,clients[uid.uid])
 
     });
 
     socket.on('user-setOffline', uid => {
       console.log('user-offline : ', uid);
-
-      // Wirte Query if required
-    //   User.findById(uid).exec((err, user) => {
-    //     if (user) {
-    //       user.isOnline = false;
-    //       user.save();
-    //     }
-    //   });
 
     });
 
@@ -42,13 +27,36 @@ module.exports = io => {
       socket.join(`chat-${roomId}`);
     });
     // {'send_by': userId,'sent_to' :'2', 'newMessage': message, 'name': login_userName,'group_id':''    ,'image': ''};
-    socket.on('user-send-message', ({ send_by, sent_to,newMessage,name,group_id,image }) => {
-      
-      console.log("{ conversation, newMessage }========", send_by, sent_to,newMessage,name,group_id,image);
-      socket
+    socket.on('user-send-message', async ({ send_by, sent_to,newMessage,name,is_group,image,createdDatetime,profile_picture }) => {
+
+
+      if(image=='' || image==null || image==undefined || newMessage!='' && send_by!=sent_to  ){
+
+        var data={
+          message:newMessage,
+          send_by:send_by,
+          sent_to:sent_to,
+          is_group:is_group,
+          }
+     await save("chats",data)
+    }
+      console.log("{ conversation, newMessage }========", send_by, sent_to,newMessage,name,is_group,image,createdDatetime,profile_picture);
+      // socket
         // .to(`chat-${conversation._id}`)
-        .emit('receive-message', { send_by, sent_to,newMessage,name,group_id,image });
-    });
+      // console.log("============client==",clients)
+      console.log("============client1111111111111111==",clients[sent_to]);
+
+if(clients[sent_to]!=undefined && is_group==0){
+       clients[sent_to]
+  // socket
+  .emit('receive-message', { send_by, sent_to,newMessage,name,is_group,image,createdDatetime ,profile_picture});
+}else if(is_group==1){
+  console.log("send into group========")
+socket.broadcast.to(`chat-${group_id}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,image,createdDatetime ,profile_picture});
+// io.to(room).emit('notification', { message: 'New notification!' });
+
+}
+    })    ;
 
     socket.on('user-typing-message', ({ cid, uid, isTyping, name }) => {
       // connection.query("SELECT * FROM users WHERE id=3 ", function (err,result){

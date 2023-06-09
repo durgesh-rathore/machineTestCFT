@@ -45,8 +45,9 @@ build/Release
 node_modules/
 
  jspm_packages/
- public/images/postImages/
- public/images/profiles
+#  public/images/postImages/
+ public/images/profiles/
+ public/images/postImage/
 
 # TypeScript v1 declaration files
 typings/

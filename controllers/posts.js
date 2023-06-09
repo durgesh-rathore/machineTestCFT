@@ -138,8 +138,8 @@ exports.getPostsAndEventsList = function (req, res) {
       constants.BASE_URL +
       "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id WHERE " +
     condition +
-    " GROUP BY events.id  ORDER BY events.created_datetime  Limit " +
-    page * 8 +
+    " GROUP BY events.id  ORDER BY events.id DESC  Limit " +
+    (page * 8) +
     ",8";
   console.log("===", sql);
   connection.query(sql, function (err, post_list) {
