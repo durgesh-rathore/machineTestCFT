@@ -245,7 +245,8 @@ exports.userInterest = function (req, res) {
           //   "'	 WHERE id = " +
           //   req.body.user_id +
           //   "";
-            req.body.interest_fields.forEach(element => {
+          
+          JSON.parse(req.body.interest_fields).forEach(element => {
               var obj={
                 user_id:req.body.user_id,
                 interest_id:element

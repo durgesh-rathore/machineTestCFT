@@ -41,19 +41,23 @@ else{
           // var group_members=[1,2,3,4];
           var group_members = req.body.group_members.split(",");
 
-          var group_users = {};
-          group.group_id = group.insertId;
+          // var group_users = {};
+          // group.group_id = group.insertId;
           group_members.push(req.body.group_admin_id);
           group_members.forEach((element) => {
+
             var group_users = {
               group_id: group.insertId,
               user_id: element,
             };
-            let sql = "INSERT INTO groups_users SET ?";
-            connection.query(sql, group_users, async (error) => {
-              if (error) console.log(error);
-              console.log("ddd"); //item added!
-            });
+            // let sql = "INSERT INTO groups_users SET ?";
+            // connection.query(sql, group_users, async (error) => {
+            //   if (error) console.log(error);
+            //   console.log("ddd"); //item added!
+
+            // });
+            save("groups_users", group_users);
+            group_users={};
           });
 
           console.log("group_user======", group_users);
