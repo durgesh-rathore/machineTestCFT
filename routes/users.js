@@ -12,6 +12,11 @@ router.get('/', function(req, res, next) {
 router.post('/signup',users.signup) 
 router.post('/signin',users.signin)
 
+router.post('/socialLogin',users.socialLogin);
+
+
+
+
 router.get('/getInterestList',checkUserStatus.userStatus,users.getInterestList);
 router.post('/userInterest',checkUserStatus.userStatus,users.userInterest)
 router.post('/userFavoriteColors',checkUserStatus.userStatus,users.userFavoriteColors) 

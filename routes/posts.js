@@ -1,29 +1,52 @@
-var express = require('express');
-var {uploadFiles  } = require("../config/custom");
-var checkUserStatus = require('../config/checkUserStatus')
-var postController=require('../controllers/posts');
+var express = require("express");
+var { uploadFiles } = require("../config/custom");
+var checkUserStatus = require("../config/checkUserStatus");
+var postController = require("../controllers/posts");
 var router = express.Router();
 
-
-
-router.post('/new',checkUserStatus.userStatus,uploadFiles('public/images/postImage').single("image"),postController.new) 
-router.get('/getPostsAndEventsList',checkUserStatus.userStatus,postController.getPostsAndEventsList) 
-router.post('/saveComment',checkUserStatus.userStatus, postController.saveComment);
-router.get('/getCommentListOnPosts',checkUserStatus.userStatus,postController.getCommentListOnPosts) 
-router.post('/postEvent',checkUserStatus.userStatus,uploadFiles('public/images/postImage').single("image"),postController.postEvent);
-router.post('/liked',checkUserStatus.userStatus,postController.liked);
-router.get('/getLikedListOnPosts',checkUserStatus.userStatus,postController.getLikedListOnPosts) 
-router.post('/attending',checkUserStatus.userStatus,postController.attending);
-router.post('/likedOnComment',checkUserStatus.userStatus,postController.likedOnComment);
-router.get('/getMyPostsAndEvent',checkUserStatus.userStatus,postController.getMyPostsAndEvent);
-
-
-
-
-
-
-
-
-
+router.post(
+  "/new",
+  checkUserStatus.userStatus,
+  uploadFiles("public/images/postImage").single("image"),
+  postController.new
+);
+router.get(
+  "/getPostsAndEventsList",
+//   checkUserStatus.userStatus,
+  postController.getPostsAndEventsList
+);
+router.post(
+  "/saveComment",
+  checkUserStatus.userStatus,
+  postController.saveComment
+);
+router.get(
+  "/getCommentListOnPosts",
+  checkUserStatus.userStatus,
+  postController.getCommentListOnPosts
+);
+router.post(
+  "/postEvent",
+  checkUserStatus.userStatus,
+  uploadFiles("public/images/postImage").single("image"),
+  postController.postEvent
+);
+router.post("/liked", checkUserStatus.userStatus, postController.liked);
+router.get(
+  "/getLikedListOnPosts",
+  checkUserStatus.userStatus,
+  postController.getLikedListOnPosts
+);
+router.post("/attending", checkUserStatus.userStatus, postController.attending);
+router.post(
+  "/likedOnComment",
+  checkUserStatus.userStatus,
+  postController.likedOnComment
+);
+router.get(
+  "/getMyPostsAndEvent",
+  checkUserStatus.userStatus,
+  postController.getMyPostsAndEvent
+);
 
 module.exports = router;

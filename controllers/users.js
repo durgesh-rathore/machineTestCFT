@@ -2,10 +2,11 @@ var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
 var { encryptPassword, checkPassword } = require("../config/custom");
-// var helper = require('../../Helpers/helper');
+var {sendMail,save} = require('../helpers/helper');
 var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+
 
 exports.signup = function (req, res) {
   try {
@@ -58,15 +59,19 @@ exports.signup = function (req, res) {
                     async function (err, user) {
                       if (err) throw err;
                       if (user) {
-                        var token = jwt.sign({ id: user.insertId }, constants.SECRET, {
-                          expiresIn: "7d", // expires in 24 hours
-                        });
+                        var token = jwt.sign(
+                          { id: user.insertId },
+                          constants.SECRET,
+                          {
+                            expiresIn: "7d", // expires in 24 hours
+                          }
+                        );
                         return res.json({
                           success: true,
                           user_id: user.insertId,
                           token: "JWT " + token,
-                          name:req.body.name,
-                          profile_picture:null,
+                          name: req.body.name,
+                          profile_picture: null,
                           message: "Signup successfully.",
                         });
                       } else {
@@ -96,9 +101,11 @@ exports.signin = async function (req, res) {
     res.json({ success: false, message: "Password is required." });
   } else {
     connection.query(
-     "SELECT users.*, CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
-      constants.BASE_URL +
-      "','images/profiles/',users.profile_picture) ELSE '' END AS profile_picture FROM users WHERE users.email = '" + req.body.email + "'",
+      "SELECT users.*, CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
+        constants.BASE_URL +
+        "','images/profiles/',users.profile_picture) ELSE '' END AS profile_picture FROM users WHERE users.email = '" +
+        req.body.email +
+        "'",
       async function (err, users) {
         if (users.length > 0) {
           var Password = "";
@@ -135,6 +142,55 @@ exports.signin = async function (req, res) {
           } else {
             return res.json({ success: false, message: "Password not match." });
           }
+        } else {
+          return res.json({ success: false, message: "Email id not match." });
+        }
+      }
+    );
+  }
+};
+
+exports.socialLogin = async function (req, res) {
+  if (!req.body.email) {
+    res.json({ success: false, message: "Email id is required." });
+  } else {
+    connection.query(
+      "SELECT users.*, CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
+        constants.BASE_URL +
+        "','images/profiles/',users.profile_picture) ELSE '' END AS profile_picture FROM users WHERE users.email = '" +
+        req.body.email +
+        "'",
+      async function (err, users) {
+        if (users.length > 0) {
+          //auth_token
+          if (
+            req.body.auth_token != "" ||
+            req.body.auth_token != null ||
+            req.body.auth_token != undefined
+          ) {
+            connection.query(
+              "UPDATE users SET auth_token='" +
+                req.body.auth_token +
+                "' WHERE id=" +
+                users[0].id +
+                " ",
+              async function (err, user) {
+                if (err) throw err;
+                if (user) {
+                }
+              }
+            );
+          }
+
+          var token = jwt.sign({ id: users[0].id }, constants.SECRET, {
+            expiresIn: "7d", // expires in 24 hours
+          });
+          return res.json({
+            success: true,
+            token: "JWT " + token,
+            response: users[0],
+            message: "Login successfully.",
+          });
         } else {
           return res.json({ success: false, message: "Email id not match." });
         }
@@ -183,27 +239,36 @@ exports.userInterest = function (req, res) {
             message: "Please enter required  detail.",
           });
         } else {
-          var sql =
-            "UPDATE users SET interest_fields	 = '" +
-            req.body.interest_fields +
-            "'	 WHERE id = " +
-            req.body.user_id +
-            "";
-          console.log("=======", sql);
-          connection.query(sql, function (err, result) {
-            if (err) {
-              return res.json({
-                success: false,
-                message: "Something went wrong.",
-              });
-            } else {
+          // var sql =
+          //   "UPDATE users SET interest_fields	 = '" +
+          //   req.body.interest_fields +
+          //   "'	 WHERE id = " +
+          //   req.body.user_id +
+          //   "";
+            req.body.interest_fields.forEach(element => {
+              var obj={
+                user_id:req.body.user_id,
+                interest_id:element
+              }
+  
+              save("users_interest", obj);
+              obj={};
+            });
+          //      console.log("=======", sql);
+          // connection.query(sql, function (err, result) {
+          //   if (err) {
+          //     return res.json({
+          //       success: false,
+          //       message: "Something went wrong.",
+          //     });
+          //   } else {
               return res.json({
                 success: true,
                 message: "Interest fields save succesful.",
               });
             }
-          });
-        }
+          // });
+        // }
       }
     );
   }
@@ -275,6 +340,12 @@ exports.forgotPassword = async function (req, res) {
             console.log(err, "err");
             if (!err) {
               // send email of this email id
+              var data={
+                email:req.body.email,
+                password:otp,
+              }
+
+              sendMail(data)
               return res.json({
                 success: true,
                 message: "Password  sent on your email id",
@@ -285,7 +356,7 @@ exports.forgotPassword = async function (req, res) {
           }
         );
       } else {
-        return res.json({ success: true, message: "Email Id not exist" });
+        return res.json({ success: false, message: "Email Id not exist" });
       }
     });
   }
@@ -357,12 +428,13 @@ exports.updateUserProfile = function (req, res) {
       req.body.name == "" ||
       req.body.email == "" ||
       req.body.mobile_number == "" ||
-      req.body.login_user_id==""
+      req.body.login_user_id == ""
     ) {
       return res.json({ success: false, message: "All fields are required." });
     } else {
       connection.query(
-        "SELECT id FROM users WHERE email = ? AND id!="+req.body.login_user_id,
+        "SELECT id FROM users WHERE email = ? AND id!=" +
+          req.body.login_user_id,
         req.body.email,
         async function (err, users) {
           if (users.length > 0) {
@@ -372,7 +444,8 @@ exports.updateUserProfile = function (req, res) {
             });
           } else {
             connection.query(
-              "SELECT id FROM users WHERE mobile_number = ? AND id!="+req.body.login_user_id,
+              "SELECT id FROM users WHERE mobile_number = ? AND id!=" +
+                req.body.login_user_id,
               req.body.mobile_number,
               async function (err, users) {
                 if (users.length > 0) {
@@ -389,18 +462,17 @@ exports.updateUserProfile = function (req, res) {
                   if (
                     req.body.password != "" &&
                     req.body.password != undefined
-                     ) {
-                      if(req.body.password.length < 8){
-
-                    return res.json({
-                      success: false,
-                      message: "Minimum 8 character in password .",
-                    });
-                  } else {
-                    let password = await encryptPassword(req.body.password);
-                    newUser.password = password;
+                  ) {
+                    if (req.body.password.length < 8) {
+                      return res.json({
+                        success: false,
+                        message: "Minimum 8 character in password .",
+                      });
+                    } else {
+                      let password = await encryptPassword(req.body.password);
+                      newUser.password = password;
+                    }
                   }
-                }
 
                   if (
                     req.file &&
@@ -441,4 +513,3 @@ exports.updateUserProfile = function (req, res) {
     console.error(error);
   }
 };
-

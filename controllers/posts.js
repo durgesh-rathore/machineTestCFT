@@ -8,6 +8,11 @@ const path = require("path");
 const fs = require("fs");
 const e = require("cors");
 
+var a =
+  "CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
+  constants.BASE_URL +
+  "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
+
 exports.new = async function (req, res) {
   console.log("dddd",req)
   try {
@@ -29,7 +34,7 @@ exports.new = async function (req, res) {
     if (c) {
       if (req.body.visibilitySelectUsers != 1) {
         var visibility_data={};
-        visibility_data.comment_id = c;
+        visibility_data.post_id = c;
         visibility_data.user_id = req.body.user_id;
         visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
         await visibility(visibility_data);
@@ -80,7 +85,7 @@ async function visibility(data) {
       data.user_id.length > 0 &&
       data.visibilitySelectUsers == 4
     ) {
-      visibility_data.user_id = data.user_id;
+      visibility_data.user_id = data.login_user_id;
       data.user_id.split(',').forEach(async (element) => {
         visibility_data.not_visible = 1;
         visibility_data.group_id = element;
@@ -102,11 +107,15 @@ exports.getPostsAndEventsList = function (req, res) {
 
 
   var condition =
-    " (events.visibilitySelectUsers=1 OR visibility.user_id=" +
-    req.query.login_user_id +
+    " ((events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +    req.query.login_user_id +
+    " AND users_requests.is_accepted=1  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (ur2.request_for=" +    req.query.login_user_id +
+    " AND ur2.is_accepted=1  AND ur2.is_reject=0  AND ur2.is_block=0  )     OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )      )  OR visibility.user_id=" +    req.query.login_user_id +
     " OR groups_users.group_id=" +
     req.query.login_user_id +
-    " ) AND (visibility.not_visible=0 OR visibility.not_visible IS NULL) ";
+    " ) AND (visibility.not_visible=0 OR visibility.not_visible IS NULL)  OR events.user_id ="+req.query.login_user_id;
+
+
+   
     if (req.query.myProfile == "1") {
       condition = "events.user_id	 ="+req.query.login_user_id;
     }  
@@ -128,7 +137,7 @@ exports.getPostsAndEventsList = function (req, res) {
   sql =
     "SELECT events.description,CONCAT('" +
     constants.BASE_URL +
-    "','images/postImage/',events.image) AS post_image,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id) AS liked_by,(SELECT attending.attending_type FROM attending  WHERE attending.post_id=events.id AND attending.user_id=1 LIMIT 1) AS attending_type,(SELECT COUNT(*) FROM attending  WHERE attending.post_id=events.id AND attending.attending_type=1 AND attending.user_id!=" +
+    "','images/postImage/',events.image) AS post_image,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id) AS liked_by,(SELECT attending.attending_type FROM attending  WHERE attending.post_id=events.id AND attending.user_id!="+req.query.login_user_id+" LIMIT 1) AS attending_type,(SELECT COUNT(*) FROM attending  WHERE attending.post_id=events.id AND attending.attending_type=1 AND attending.user_id!=" +
     req.query.login_user_id +
     "  )   AS attending_users_count,  (SELECT  GROUP_CONCAT(users.profile_picture)  FROM attending LEFT JOIN users ON users.id=attending.user_id  WHERE attending.post_id=events.id  AND attending.user_id!=" +
     req.query.login_user_id +
@@ -136,7 +145,7 @@ exports.getPostsAndEventsList = function (req, res) {
     req.query.login_user_id +
       "  AND likes.post_id=events.id  LIMIT 1) AS is_liked,(SELECT comments.comment FROM comments  WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments,(SELECT users.name FROM comments LEFT JOIN users ON users.id=comments.comment_by WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments_by,TIMESTAMPDIFF(MINUTE, events.updated_datetime , CURRENT_TIMESTAMP) AS create_minute_ago,events.*,users.name,CONCAT('" +
       constants.BASE_URL +
-      "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id WHERE " +
+      "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON users_requests.request_for=users.id  LEFT JOIN users_requests ur2 ON ur2.user_id=users.id WHERE " +
     condition +
     " GROUP BY events.id  ORDER BY events.id DESC  Limit " +
     (page * 8) +
@@ -147,7 +156,7 @@ exports.getPostsAndEventsList = function (req, res) {
     if (post_list.length > 0) {
       var sqlCounts =
         
-        "SELECT events.id FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id WHERE "+condition+" GROUP BY events.id";
+        "SELECT events.id FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON users_requests.request_for=users.id        LEFT JOIN users_requests ur2 ON ur2.user_id=users.id WHERE "+condition+" GROUP BY events.id";
       connection.query(sqlCounts, function (err, counts) {
         if (err) {
           console.log(err);
@@ -193,7 +202,7 @@ exports.saveComment = async function (req, res) {
 exports.getCommentListOnPosts = function (req, res) {
   var page = req.query.page ? req.query.page : 0;
   sql =
-    "SELECT  comments.id,users.name,comments.comment , users.profile_picture,(SELECT likes.is_likes FROM likes WHERE likes.liked_by="+req.query.login_user_id+" AND likes.comment_id=comments.id ) AS is_like,(SELECT COUNT(*) FROM likes WHERE likes.is_likes=1 AND likes.comment_id=comments.id ) AS comments_like_count FROM comments LEFT JOIN users ON users.id=comments.comment_by WHERE comments.post_id=" +
+    "SELECT  comments.id,users.name,comments.comment , "+a+" ,(SELECT likes.is_likes FROM likes WHERE likes.liked_by="+req.query.login_user_id+" AND likes.comment_id=comments.id ) AS is_like,(SELECT COUNT(*) FROM likes WHERE likes.is_likes=1 AND likes.comment_id=comments.id ) AS comments_like_count FROM comments LEFT JOIN users ON users.id=comments.comment_by WHERE comments.post_id=" +
     req.query.post_id +
     " Limit " +
     page +
@@ -393,6 +402,8 @@ exports.likedOnComment = async function (req, res) {
     });
   }
 };
+
+
 
 exports.getMyPostsAndEvent = function (req, res) {
   var page = req.query.page ? req.query.page : 0;

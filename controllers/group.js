@@ -6,7 +6,11 @@ var { encryptPassword, checkPassword } = require("../config/custom");
 var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-
+var a =
+  "CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
+  constants.BASE_URL +
+  "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
+  
 exports.add = function (req, res) {
   console.log("===========", req.body);
   try {
@@ -23,8 +27,7 @@ exports.add = function (req, res) {
         if (presentgroup.length>0) {
           return res.json({
             success: true,
-            response: { group_id: group.insertId },
-            message: "Group already exist.",
+              message: "Group already exist.",
           });
         }
 else{
@@ -207,7 +210,7 @@ else{
                   });
                 });
 
-                console.log("group_user======", group_users);
+                // console.log("group_user======", group_users);
                 return res.json({
                   success: true,
                   response: { group_id: users.insertId },
@@ -248,7 +251,7 @@ exports.addMembersInSplitGroup = function (req, res) {
     message: "Added.",
   });
 };
-exports.getSplitGroupList = function (req, res) {
+exports.getSplitGroupList = function (req, res) { 
   var page = req.query.page ? req.query.page : 0;
 
   var condition = " ";
@@ -265,7 +268,7 @@ exports.getSplitGroupList = function (req, res) {
   }
 
    
-    var sql="SELECT billing_group.id,billing_group.spliting_amount,users2.name AS groups_Name,( SELECT GROUP_CONCAT(users.profile_picture) FROM users  LEFT JOIN  billing_group_users ON billing_group_users.user_id=users2.id WHERE users.id!="+ req.query.login_user_id +"  ) AS group_users_image,  (select sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/COUNT(*)  from billing_group_users WHERE billing_group_users.group_id=users2.id ) AS percentage  FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users.is_group=2 AND user1.id="+req.query.login_user_id+
+    var sql="SELECT billing_group.id,billing_group.spliting_amount,users2.name AS groups_Name,( SELECT GROUP_CONCAT(users.profile_picture) FROM users  LEFT JOIN  billing_group_users ON billing_group_users.user_id=users2.id WHERE users.id!="+ req.query.login_user_id +"  ) AS group_users_image,  (select sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/COUNT(*)  from billing_group_users WHERE billing_group_users.group_id=users2.id ) AS percentage  FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users2.is_group=2 AND billing_group_users.user_id="+req.query.login_user_id+
     condition +
     " Limit " +
     page * 10 +
@@ -274,9 +277,11 @@ exports.getSplitGroupList = function (req, res) {
   connection.query(sql, function (err, groupUsers) {
     var sqlCountsDM =
     "SELECT n1.id  FROM chats AS n1    LEFT JOIN chats n2 ON n2.group_id=n1.group_id     LEFT JOIN groups_users ON groups_users.group_id=n1.group_id       LEFT JOIN users ON users.id=n1.group_id      LEFT JOIN users ON users.id=n1.send_by     WHERE ( n1.sent_to=" + req.query.login_user_id + " ) OR (groups_users.user_id=" +   req.query.login_user_id +     ") AND n1.id!=n2.id AND (n1.id>n2.id OR n2.id is null   )  GROUP BY n1.send_by,n1.sent_to ";
+
 console.log("sqlCountsDM============>>",sqlCountsDM);
+
   var sqlCountsSplit =
-    "SELECT COUNT(*) AS counts FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users.is_group=2 AND user1.id=" +
+    "SELECT COUNT(*) AS counts FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users2.is_group=2 AND user1.id=" +
     req.query.login_user_id+condition;
 
   connection.query(sqlCountsSplit, function (err, sqlCountsSplitResult) {
@@ -284,21 +289,21 @@ console.log("sqlCountsDM============>>",sqlCountsDM);
       console.log(err);
     }
 
-    connection.query(sqlCountsDM, function (err, sqlCountsDMResult) {
-      if (err) {
-        console.log(err);
-      }
-      console.log(sqlCountsDMResult,"==========sqlCountsDMResult")
-      if(sqlCountsDMResult.length){
+    // connection.query(sqlCountsDM, function (err, sqlCountsDMResult) {
+    //   if (err) {
+    //     console.log(err);
+    //   }
+    //   console.log(sqlCountsDMResult,"==========sqlCountsDMResult")
+    //   if(sqlCountsDMResult.length){
 
-      }
+    //   }
 
       if (groupUsers.length > 0) {
         
 
         return res.json({
           response: groupUsers,
-          DMCounts: sqlCountsDMResult.length,
+          // DMCounts: sqlCountsDMResult.length,
           splitCount: sqlCountsSplitResult[0].counts,
 
           success: true,
@@ -307,13 +312,146 @@ console.log("sqlCountsDM============>>",sqlCountsDM);
       } else {
         return res.json({
           response: [],
-          DMCounts: sqlCountsDMResult.length,
+          // DMCounts: sqlCountsDMResult.length,
           splitCount: sqlCountsSplitResult[0].counts,
           success: true,
           message: "No More post",
         });
       }
-    });
+    // });
   });
 });
+};
+
+
+exports.leftGroup = function (req, res) {
+      
+  if(req.body.group_id==undefined || req.body.group_id=='' || req.body.group_id==null || req.body.login_user_id==undefined || req.body.login_user_id=='' || req.body.login_user_id==null){
+    return res.json({
+      success: true,
+      message: "Added.",
+    });
+  }else{
+
+  let sql = "DELETE FROM groups_users WHERE group_id ="+req.body.group_id+"  AND user_id="+req.body.login_user_id;
+  connection.query(sql,  async (error) => {
+    if (error){ console.log(error);
+    }else{
+        return res.json({
+        success: true,
+        message: "Left.",
+      });
+    }
+    
+  });
+
+  }
+};
+
+exports.deleteGroup = function (req, res) {
+      
+  if(req.body.group_id==undefined || req.body.group_id=='' || req.body.group_id==null || req.body.login_user_id==undefined || req.body.login_user_id=='' || req.body.login_user_id==null){
+    return res.json({
+      success: true,
+      message: "please select group_id.",
+    });
+  }else{
+var sql1="SELECT * FROM users WHERE users.group_admin_id="+req.body.login_user_id+"  AND users.id="+req.body.group_id+" ";
+     connection.query(sql1, async function(error,result1){   
+
+      if(error){
+        return res.json({
+          success: false,
+          message: "Something went wrong.",
+        });
+      }else if(result1.length>0){
+  let sql = "DELETE FROM groups_users WHERE group_id ="+req.body.group_id;
+  connection.query(sql, async function(error,result){
+    if (error){ console.log(error);
+    }else{
+        return res.json({
+        success: true,
+        message: "Group deleted.",
+      });
+    }
+    
+  });
+}else{
+
+  return res.json({
+    success: true,
+    message: "Only admin can delete group.",
+  });
+}
+});
+  }
+
+};
+
+
+
+exports.informationOfGroup = function (req, res) {
+  var page = req.query.page ? req.query.page : 0;
+
+  var condition = " ";
+
+  if (
+    req.query.search != "" &&
+    req.query.search != undefined &&
+    req.query.search != null
+  ) {
+    condition +=
+      '  AND ( users.type LIKE "%' +
+      req.query.search +
+      '%" OR users.name LIKE "%' +
+      req.query.search +
+      '%")  ';
+  }
+
+  var sql = " ";
+  var group_details_sql =
+    "SELECT users.id,users.type AS group_type ,users.name AS group_name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN groups_users ON groups_users.user_id=u1.id WHERE groups_users.group_id=users.id AND groups_users.user_id!=" +
+    req.query.login_user_id +
+    "  ) AS group_users_image  FROM users    WHERE users.is_group=1 AND users.id=" +req.query.group_id;
+    
+    console.log("group details sql==================",group_details_sql);
+    
+    connection.query(group_details_sql, function (err, group_details) { 
+      if(err){
+        console.log("somthing went wrong");
+        return res.json({
+          success:false,
+          message:"Something went wrong"
+        })
+      }
+
+
+    sql= "SELECT users.*, "+ a +"  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id="+req.query.group_id
+  console.log(sql);
+  connection.query(sql, function (err, groupUsers) {
+    console.log(err);
+    var sqlCounts =
+      "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id="+req.query.group_id;
+    connection.query(sqlCounts, function (err, group_user_count) {
+      if (err) {
+        console.log(err);
+      }
+      if (groupUsers.length > 0) {
+        return res.json({
+          response:{grop:group_details,users: groupUsers},
+          total_member_in_group: group_user_count.length,
+          success: true,
+          message: "Group info .",
+        });
+      } else {
+        return res.json({
+          response: [],
+          total_group: group_user_count.length,
+          success: true,
+          message: "Group info .",
+        });
+      }
+    });
+  });
+})
 };

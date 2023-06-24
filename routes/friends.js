@@ -15,7 +15,7 @@ router.get("/friendsList",
  friend.friendsList);
 router.get(
   "/getBlockUserList",
-  checkUserStatus.userStatus,
+  // checkUserStatus.userStatus,
   friend.getBlockUserList
 );
 

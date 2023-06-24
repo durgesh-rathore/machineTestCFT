@@ -2,6 +2,35 @@ var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 var connection = require("../config/db");
+const nodemailer = require("nodemailer");
+
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  auth: {
+    user: "vastram823@gmail.com",
+    pass: "zydrbnnikwjzwkgt",
+  },
+});
+async function sendMail(data) {
+  try {
+    var option = {
+      from: "vastram823@gmail.com",
+      to: data.email,
+      subject: "Reset you password",
+      html: "<h1>Your  dummy password is :</h2>"+data.password,
+    };
+       var info = await transporter.sendMail(option);
+
+     } catch (err) {
+      console.log("err===",err);
+     }
+}
+
+
 
 
 async function save(tbl,data) {
@@ -58,5 +87,6 @@ async function save(tbl,data) {
   module.exports={
   save,
   findOne,
-  findByIdAndUpdate
+  findByIdAndUpdate,
+  sendMail
   }

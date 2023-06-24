@@ -52,7 +52,7 @@ if(clients[sent_to]!=undefined && is_group==0){
   .emit('receive-message', { send_by, sent_to,newMessage,name,is_group,image,createdDatetime ,profile_picture});
 }else if(is_group==1){
   console.log("send into group========")
-socket.broadcast.to(`chat-${group_id}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,image,createdDatetime ,profile_picture});
+socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,image,createdDatetime ,profile_picture});
 // io.to(room).emit('notification', { message: 'New notification!' });
 
 }

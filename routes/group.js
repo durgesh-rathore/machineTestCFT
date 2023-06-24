@@ -32,4 +32,21 @@ router.get(
   groupController.getSplitGroupList
 );
 
+router.put(
+  "/leftGroup",
+//   checkUserStatus.userStatus,
+  groupController.leftGroup
+);
+router.delete(
+  "/deleteGroup",
+//   checkUserStatus.userStatus,
+  groupController.deleteGroup
+);
+
+router.get(
+  "/informationOfGroup",
+//   checkUserStatus.userStatus,
+  groupController.informationOfGroup
+);
+
 module.exports = router;
