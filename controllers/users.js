@@ -239,13 +239,7 @@ exports.userInterest = function (req, res) {
             message: "Please enter required  detail.",
           });
         } else {
-          // var sql =
-          //   "UPDATE users SET interest_fields	 = '" +
-          //   req.body.interest_fields +
-          //   "'	 WHERE id = " +
-          //   req.body.user_id +
-          //   "";
-          
+                   
           JSON.parse(req.body.interest_fields).forEach(element => {
               var obj={
                 user_id:req.body.user_id,
@@ -255,22 +249,12 @@ exports.userInterest = function (req, res) {
               save("users_interest", obj);
               obj={};
             });
-          //      console.log("=======", sql);
-          // connection.query(sql, function (err, result) {
-          //   if (err) {
-          //     return res.json({
-          //       success: false,
-          //       message: "Something went wrong.",
-          //     });
-          //   } else {
-              return res.json({
+                        return res.json({
                 success: true,
                 message: "Interest fields save succesful.",
               });
             }
-          // });
-        // }
-      }
+                }
     );
   }
 };
@@ -427,24 +411,16 @@ exports.updateUserProfile = function (req, res) {
     console.log(req.body, "req.body");
     if (
       req.body.name == "" ||
-      req.body.email == "" ||
-      req.body.mobile_number == "" ||
-      req.body.login_user_id == ""
+      req.body.name == undefined ||
+      req.body.login_user_id == undefined ||
+      req.body.login_user_id == null ||
+      req.body.login_user_id == ''
+      
+
     ) {
       return res.json({ success: false, message: "All fields are required." });
     } else {
-      connection.query(
-        "SELECT id FROM users WHERE email = ? AND id!=" +
-          req.body.login_user_id,
-        req.body.email,
-        async function (err, users) {
-          if (users.length > 0) {
-            return res.json({
-              success: false,
-              message: "Email id already exists.",
-            });
-          } else {
-            connection.query(
+                 connection.query(
               "SELECT id FROM users WHERE mobile_number = ? AND id!=" +
                 req.body.login_user_id,
               req.body.mobile_number,
@@ -457,23 +433,41 @@ exports.updateUserProfile = function (req, res) {
                 } else {
                   var newUser = {
                     name: req.body.name,
-                    email: req.body.email.toLowerCase(),
                     mobile_number: req.body.mobile_number,
-                  };
-                  if (
-                    req.body.password != "" &&
-                    req.body.password != undefined
+                      };
+                   if (
+                    req.body.dob != "" &&
+                    req.body.dob != undefined && req.body.dob != null
+                    
                   ) {
-                    if (req.body.password.length < 8) {
-                      return res.json({
-                        success: false,
-                        message: "Minimum 8 character in password .",
-                      });
-                    } else {
-                      let password = await encryptPassword(req.body.password);
-                      newUser.password = password;
-                    }
+                    newUser.dob=req.body.dob
                   }
+
+                  
+                  if (
+                    req.body.last_name != "" &&
+                    req.body.last_name != undefined && req.body.last_name != null
+                    
+                  ) {newUser.last_name=last_name}
+
+
+
+
+
+                  // if (
+                  //   req.body.password != "" &&
+                  //   req.body.password != undefined
+                  // ) {
+                  //   if (req.body.password.length < 8) {
+                  //     return res.json({
+                  //       success: false,
+                  //       message: "Minimum 8 character in password .",
+                  //     });
+                  //   } else {
+                  //     let password = await encryptPassword(req.body.password);
+                  //     newUser.password = password;
+                  //   }
+                  // }
 
                   if (
                     req.file &&
@@ -506,11 +500,10 @@ exports.updateUserProfile = function (req, res) {
                 }
               }
             );
-          }
-        }
-      );
+        
     }
   } catch (error) {
     console.error(error);
   }
 };
+
