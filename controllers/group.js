@@ -57,10 +57,11 @@ else{
 
             // });
             await save("groups_users", group_users);
+            console.log("group_user======", group_users);
             group_users={};
           });
 
-          console.log("group_user======", group_users);
+          
           return res.json({
             success: true,
             response: { group_id: group.insertId },

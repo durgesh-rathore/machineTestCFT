@@ -117,25 +117,14 @@ exports.getDirectMessages = async (req, res) => {
       req.query.search +
       '%" ) ';
   }
-  var sql1 =
-    "SELECT chats.*,gf.is_group,gf.type,CASE WHEN gf.is_group=1 THEN gf.id ELSE ou.id END AS user_id,CASE WHEN gf.is_group!=0 THEN gf.type ELSE '' END AS group_type, CASE WHEN gf.is_group=0 THEN ou.name ELSE '' END AS name,(SELECT COUNT(*) FROM chats WHERE chats.send_by=ou.id AND is_seen=0 ) AS newMessageCount  , CASE WHEN gf.is_group!=0 THEN gf.name ELSE '' END AS group_name,CASE WHEN gf.is_group=1  THEN     (SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN groups_users ON groups_users.user_id=users.id WHERE groups_users.group_id= gf.id )  END   AS group_users_image,CASE WHEN gf.is_group=0  THEN (  CASE WHEN ou.profile_picture IS NOT NULL THEN CONCAT('" +
-    constants.BASE_URL +
-    "images/profiles/',ou.profile_picture)  ELSE '' END ) ELSE '' END AS profile_picture,(SELECT TIMESTAMPDIFF(MINUTE, chats.created_datetime , CURRENT_TIMESTAMP)  FROM chats WHERE (chats.sent_to=gf.id)   ORDER BY chats.created_datetime DESC LIMIT 1) AS last_times_user_in FROM `chats` LEFT JOIN users AS gf ON gf.id=chats.sent_to LEFT JOIN groups_users  gu ON  gu.group_id=gf.id LEFT JOIN users  ou ON  ou.id=send_by WHERE (sent_to=" +
-    req.query.login_user_id +
-    " OR gu.user_id=" +
-    req.query.login_user_id +
-    ")" +
-    search +
-    "  GROUP BY chats.sent_to, ( case when chats.is_group=1 then chats.is_group else chats.send_by  end )  Limit " +
-    page * 10 +
-    ",10 ";
+  
 
 
     sql="SELECT users.is_group,users.type AS group_type,CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('http://192.168.0.164:3000/images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture,users.name,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by ,   (SELECT TIMESTAMPDIFF(MINUTE, chats.created_datetime , CURRENT_TIMESTAMP)  FROM chats WHERE (chats.sent_to=users.id)   ORDER BY chats.created_datetime DESC LIMIT 1) AS last_times_user_in ,(SELECT  chats.message  FROM chats WHERE (chats.sent_to=users.id)   ORDER BY chats.created_datetime DESC LIMIT 1) AS message ,  CASE WHEN users.is_group=1  THEN    (SELECT GROUP_CONCAT(users1.profile_picture) FROM users AS users1 LEFT JOIN groups_users ON groups_users.user_id=users1.id WHERE groups_users.group_id= users.id  )  END   AS group_users_image,CASE WHEN users.is_group=0  THEN (  CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
     constants.BASE_URL +
     "images/profiles/',users.profile_picture)  ELSE '' END ) ELSE '' END AS profile_picture,CASE WHEN users.is_group=0  THEN (SELECT COUNT(*) FROM chats WHERE chats.send_by=users.id AND is_seen=0 ) ELSE 0 END AS newMessageCount FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id!=" +
     req.query.login_user_id +
-    " Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')  )  AND users.id = '"+req.query.login_user_id +"' "  + search + "  GROUP BY users.id     limit  "+ (page * 10) +
+    " Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')  )  AND users.id! = '"+req.query.login_user_id +"' "  + search + "  GROUP BY users.id     limit  "+ (page * 10) +
     ",10 ";
 
   console.log("sql.....................................", sql, "===sql===");
@@ -147,7 +136,7 @@ exports.getDirectMessages = async (req, res) => {
     var sqlCountsDM= "  SELECT COUNT(*) AS counts FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id!=1 Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')   )  AND users.id = '"+req.query.login_user_id +"' "  + search + "  GROUP BY users.id    "
 
     var sqlCountsSplit =
-      "SELECT COUNT(*) AS counts FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE user1.id=" +
+      "SELECT COUNT(*) AS counts FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE user1.id!=" +
       req.query.login_user_id;
 
     connection.query(sqlCountsSplit, function (err, sqlCountsSplitResult) {
