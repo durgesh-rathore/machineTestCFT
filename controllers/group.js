@@ -2,7 +2,7 @@ var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
 var { encryptPassword, checkPassword } = require("../config/custom");
-// var helper = require('../../Helpers/helper');
+var {save} = require('../../Helpers/helper');
 var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -44,7 +44,7 @@ else{
           // var group_users = {};
           // group.group_id = group.insertId;
           group_members.push(req.body.group_admin_id);
-          group_members.forEach((element) => {
+          group_members.forEach(async (element) => {
 
             var group_users = {
               group_id: group.insertId,
@@ -56,7 +56,7 @@ else{
             //   console.log("ddd"); //item added!
 
             // });
-            save("groups_users", group_users);
+            await save("groups_users", group_users);
             group_users={};
           });
 
