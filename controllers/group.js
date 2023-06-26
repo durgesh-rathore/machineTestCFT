@@ -91,6 +91,7 @@ exports.addMembersInGroup = function (req, res) {
     };
     let sql = "INSERT INTO groups_users SET ?";
     connection.query(sql, group_users, async (error) => {
+      group_users={};
       if (error) console.log(error);
       // console.log("ddd"); //item added!
     });
