@@ -135,24 +135,16 @@ exports.getDirectMessages = async (req, res) => {
     constants.BASE_URL +
     "images/profiles/',users.profile_picture)  ELSE '' END ) ELSE '' END AS profile_picture,CASE WHEN users.is_group=0  THEN (SELECT COUNT(*) FROM chats WHERE chats.send_by=users.id AND is_seen=0 ) ELSE 0 END AS newMessageCount FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id!=" +
     req.query.login_user_id +
-    " Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')  )  "  + search + "  GROUP BY users.id     limit  "+ (page * 10) +
+    " Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')  )  AND users.id = '"+req.query.login_user_id +"' "  + search + "  GROUP BY users.id     limit  "+ (page * 10) +
     ",10 ";
 
   console.log("sql.....................................", sql, "===sql===");
 
   connection.query(sql, function (err, directMessages) {
     console.log(err, directMessages);
-    var sqlCountsDM1 =
-      "SELECT chats.id FROM `chats` LEFT JOIN users AS gf ON gf.id=chats.sent_to LEFT JOIN groups_users  gu ON  gu.group_id=gf.id LEFT JOIN users  ou ON  ou.id=send_by WHERE (sent_to=" +
-      req.query.login_user_id +
-      " OR gu.user_id=" +
-      req.query.login_user_id +
-      ")" +
-      search +
-      " GROUP BY chats.sent_to, ( case when chats.is_group=1 then chats.is_group else chats.send_by  end )";
-    // console.log("sqlCountsDM===",sqlCountsDM);
+  
 
-    var sqlCountsDM= "  SELECT COUNT(*) AS counts FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id!=1 Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')  )  "  + search + "  GROUP BY users.id    "
+    var sqlCountsDM= "  SELECT COUNT(*) AS counts FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id!=1 Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')   )  AND users.id = '"+req.query.login_user_id +"' "  + search + "  GROUP BY users.id    "
 
     var sqlCountsSplit =
       "SELECT COUNT(*) AS counts FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE user1.id=" +
