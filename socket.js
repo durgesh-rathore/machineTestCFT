@@ -27,10 +27,10 @@ module.exports = io => {
       socket.join(`chat-${roomId}`);
     });
     // {'send_by': userId,'sent_to' :'2', 'newMessage': message, 'name': login_userName,'group_id':''    ,'image': ''};
-    socket.on('user-send-message', async ({ send_by, sent_to,newMessage,name,is_group,image,createdDatetime,profile_picture }) => {
+    socket.on('user-send-message', async ({ send_by, sent_to,newMessage,name,is_group,images,createdDatetime,profile_picture }) => {
 
 
-      if(image=='' || image==null || image==undefined || newMessage!='' && send_by!=sent_to  ){
+      if(images=='' || images==null || images==undefined || newMessage!='' && send_by!=sent_to  ){
 
         var data={
           message:newMessage,
@@ -40,7 +40,7 @@ module.exports = io => {
           }
      await save("chats",data)
     }
-      console.log("{ conversation, newMessage }========", send_by, sent_to,newMessage,name,is_group,image,createdDatetime,profile_picture);
+      console.log("{ conversation, newMessage }========", send_by, sent_to,newMessage,name,is_group,images,createdDatetime,profile_picture);
       // socket
         // .to(`chat-${conversation._id}`)
       // console.log("============client==",clients)
@@ -49,10 +49,10 @@ module.exports = io => {
 if(clients[sent_to]!=undefined && is_group==0){
        clients[sent_to]
   // socket
-  .emit('receive-message', { send_by, sent_to,newMessage,name,is_group,image,createdDatetime ,profile_picture});
+  .emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture});
 }else if(is_group==1){
   console.log("send into group========")
-socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,image,createdDatetime ,profile_picture});
+socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture});
 // io.to(room).emit('notification', { message: 'New notification!' });
 
 }

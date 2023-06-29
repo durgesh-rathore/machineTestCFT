@@ -380,6 +380,61 @@ exports.resetPassword = async function (req, res) {
   }
 };
 
+exports.changePassword = async function (req, res) {
+  if (
+    req.body.user_id == undefined ||
+    req.body.user_id == "" ||
+    req.body.old_password == "" ||
+    req.body.new_password == ""
+
+  ) {
+    return res.json({ success: false, message: "Please Enter Valid" });
+  } else {
+    if (req.body.new_password.length < 8) {
+      return res.json({
+        success: false,
+        message: "Password must be 8 character",
+      });
+    }
+
+    connection.query(
+      "SELECT users.password FROM users WHERE users.id = '" +
+        req.body.user_id +
+        "'",
+      async function (err, users) {
+        if (users.length > 0) {
+          var is_Password = "";
+          is_Password = await checkPassword(
+              req.body.old_password,
+              users[0].password
+            );
+          }
+    
+          if (is_Password) {
+
+    let password = await encryptPassword(req.body.new_password);
+
+
+    sql =
+      "UPDATE users SET password = '" +
+      password +
+      "'  WHERE id = '" +
+      req.body.user_id +
+      "'";
+
+    connection.query(sql, function (err, result) {
+      if (err) {
+        console.log("error-=======", err);
+      } else {
+        return res.json({ success: true, message: "Password reset." });
+      }
+    });
+  }
+})
+};
+}
+
+
 exports.getProfile = function (req, res) {
   if (!req.query.login_user_id) {
     return res.json({
@@ -482,6 +537,8 @@ exports.updateUserProfile = function (req, res) {
                       " ",
                     newUser,
                     async function (err, user) {
+
+                      console.log("err===",err)
                       if (err) throw err;
                       if (user) {
                         return res.json({
@@ -506,4 +563,5 @@ exports.updateUserProfile = function (req, res) {
     console.error(error);
   }
 };
+
 

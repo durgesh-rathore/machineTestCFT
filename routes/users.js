@@ -23,9 +23,13 @@ router.post('/userFavoriteColors',checkUserStatus.userStatus,users.userFavoriteC
 
 router.put('/forgotPassword',users.forgotPassword) 
 router.put('/resetPassword',users.resetPassword) 
+router.put('/changePassword',users.changePassword) 
+
 router.get('/getProfile',checkUserStatus.userStatus,users.getProfile);
 
-router.put('/updateUserProfile',checkUserStatus.userStatus,uploadFiles('public/images/profile_picture').single("profile_picture"),users.updateUserProfile);
+router.post('/updateUserProfile',
+// checkUserStatus.userStatus,
+uploadFiles('public/images/profiles').single("profile_picture"),users.updateUserProfile);
 
 
 
