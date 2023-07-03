@@ -264,7 +264,7 @@ exports.getSpiltChats = async (req, res) => {
 
   if (req.query.group_id) {
     sql2 =
-      "SELECT bgc.chat_message,bgc.image FROM billing_group_chat AS bgc WHERE bgc.billing_group_id=" +
+      "SELECT bgc.chat_message,bgc.image FROM chats AS bgc WHERE bgc.sent_to=" +
       req.query.group_id +
       " ORDER BY bgc.created_datetime Limit " +
       page * 8 +
