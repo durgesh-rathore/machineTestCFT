@@ -258,14 +258,14 @@ exports.getSpiltChats = async (req, res) => {
       "SELECT users.name, billing_group.group_id,billing_group.spliting_amount,( SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id WHERE billing_group_users.group_id=billing_group.group_id AND billing_group_users.user_id!=" +
       req.query.login_user_id +
       "  ) AS group_users_image,(select sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/COUNT(*)  from `billing_group_users` WHERE billing_group_users.group_id=billing_group.group_id ) AS percentage  FROM billing_group  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users ON users.id=billing_group_users.group_id     WHERE billing_group_users.group_id=" +
-      req.query.group_id;
+      req.query.group_id +" GROUP BY users.id" ;
 
     console.log("ssq1========", sql1);
   }
 
   if (req.query.group_id) {
     sql2 =
-      "SELECT bgc.message,bgc.images FROM chats AS bgc WHERE bgc.sent_to=" +
+      "SELECT bgc.* FROM chats AS bgc WHERE bgc.sent_to=" +
       req.query.group_id +
       " ORDER BY bgc.created_datetime Limit " +
       page * 8 +
