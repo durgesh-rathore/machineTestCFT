@@ -1,0 +1,26 @@
+SELECT users.name,
+billing_group.group_id,
+billing_group.spliting_amount,
+
+COUNT(*) AS total_contributor,
+(select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.payment_amount IS NOT NULL) AS paid_contributor,
+
+(select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.payment_amount IS  NULL) AS pending_contributor,
+
+(select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.payment_amount IS  NULL) AS pending_contributor, 
+
+(select  billing_group.spliting_amount/COUNT(*)  from `billing_group_users` WHERE billing_group_users.group_id=billing_group.group_id ) AS each_split ,
+
+
+
+( SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id WHERE billing_group_users.group_id=billing_group.group_id AND billing_group_users.user_id!=2  ) AS group_users_image,
+
+(select ((billing_group.spliting_amount-sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end ))/billing_group.spliting_amount) *100  from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id ) AS percentage
+
+
+
+FROM billing_group  
+
+LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  
+
+LEFT JOIN users ON users.id=billing_group_users.group_id     WHERE billing_group_users.group_id=163
