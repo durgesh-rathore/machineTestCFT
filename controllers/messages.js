@@ -261,6 +261,8 @@ exports.getSpiltChats = async (req, res) => {
       req.query.group_id +" GROUP BY users.id" ;
 
     console.log("ssq1========", sql1);
+
+    // SELECT users.name,users.last_name,users.profile_picture,bgu.payment_amount FROM `users` LEFT JOIN billing_group_users bgu ON bgu.user_id=users.id WHERE bgu.group_id=163 AND bgu.payment_amount IS  NOT NULL
   }
 
  

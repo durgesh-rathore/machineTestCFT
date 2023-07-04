@@ -242,9 +242,9 @@ exports.friendsList = function (req, res) {
       a +
       ",users.name,users.id,users_requests.is_follow, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON users_requests.request_for=users.id WHERE  users.is_group=0 AND users.id !='" +
       req.query.login_user_id +
-      "'  AND  users_requests.request_for !='" +
+      "'  AND ( users_requests.request_for !='" +
       req.query.login_user_id +
-      "' AND users_requests.is_accepted=0 AND users_requests.is_reject=0  "+condition+" GROUP BY users.id limit  " +
+      "' OR users_requests.request_for IS NULL ) AND (users_requests.is_accepted=0 OR  users_requests.is_accepted IS NULL) AND (users_requests.is_reject=0 OR users_requests.is_reject IS NULL )  "+condition+" GROUP BY users.id limit  " +
       page * 10 +
       ", 10";
       console.log("explore ===",sql)
