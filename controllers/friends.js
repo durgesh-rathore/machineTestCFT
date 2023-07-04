@@ -257,9 +257,9 @@ exports.friendsList = function (req, res) {
       var sqlCount1 =
         "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON users_requests.request_for=users.id WHERE users.is_group=0 AND users.id !='" +
         req.query.login_user_id +
-        "' AND  users_requests.request_for !='" +
+        "' AND ( users_requests.request_for !='" +
         req.query.login_user_id +
-        "' AND users_requests.is_accepted=0 AND users_requests.is_reject=0 "+condition+"  GROUP BY users.id";
+        "' OR users_requests.request_for IS NULL ) AND (users_requests.is_accepted=0 OR  users_requests.is_accepted IS NULL) AND (users_requests.is_reject=0 OR users_requests.is_reject IS NULL ) "+condition+"  GROUP BY users.id";
       console.log("sqlCount1==========",sqlCount1);
       var sqlCountrequest =
         "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
