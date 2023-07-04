@@ -36,7 +36,7 @@ exports.getChats = async (req, res) => {
       page * 30 +
       ",30";
   }
-  if (req.query.is_group == 1) {
+  if (req.query.is_group == 1 || req.query.is_group == 2) {
     sql =
       "SELECT chats.*,CONCAT('" +
       constants.BASE_URL +
@@ -263,45 +263,25 @@ exports.getSpiltChats = async (req, res) => {
     console.log("ssq1========", sql1);
   }
 
-  if (req.query.group_id) {
-    sql2 =
-      "SELECT bgc.* FROM chats AS bgc WHERE bgc.sent_to=" +
-      req.query.group_id +
-      " ORDER BY bgc.created_datetime Limit " +
-      page * 8 +
-      ",8";
-  }
-  console.log("sql1=================", sql1);
-  console.log("sql2=================", sql2);
+ 
 
   connection.query(sql1, function (err, splitDetails) {
     console.log(err, splitDetails);
 
-    if (splitDetails.length > 0) {
-      connection.query(sql2, function (err, chatList) {
-        console.log(err, chatList);
-
-        if (chatList.length > 0) {
+    if (splitDetails.length > 0) {      
           return res.json({
-            response: { chatList: chatList, splitDetails: splitDetails[0] },
+            response: splitDetails[0] ,
             success: true,
-            message: "Chat list",
+            message: "split group",
           });
         } else {
           return res.json({
-            response: { chatList: [], splitDetails: splitDetails },
+            response:  {},
             success: true,
             // message: "",
           });
         }
       });
-    } else {
-      return res.json({
-        response: [],
-        success: false,
-        message: "No More chats",
-      });
-    }
-  });
+  
 };
 
