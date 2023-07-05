@@ -270,7 +270,7 @@ exports.getSplitGroupList = function (req, res) {
   var sql =
     "SELECT users2.id,users2.is_group,billing_group.event_date,billing_group.due_date,billing_group.spliting_amount,users2.name AS groups_Name,( SELECT GROUP_CONCAT(users.profile_picture) FROM users  LEFT JOIN  billing_group_users ON billing_group_users.user_id=users2.id WHERE users.id!=" +
     req.query.login_user_id +
-    "  ) AS group_users_image,  (select ((billing_group.spliting_amount-sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end ))/billing_group.spliting_amount) *100  from billing_group_users  WHERE billing_group_users.group_id=users2.id ) AS percentage , MONTH(billing_group.event_date) AS event_month,    YEARWEEK(billing_group.event_date) AS event_week,     YEARWEEK(CURRENT_DATE()) AS current_week ,    CASE             WHEN YEARWEEK(billing_group.event_date) = YEARWEEK(CURDATE()) THEN 'This week'             ELSE 'This Month'         END AS WMTag     FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users2.is_group=2 AND billing_group_users.user_id=" +
+    "  ) AS group_users_image,  (select (sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/billing_group.spliting_amount) *100  from billing_group_users  WHERE billing_group_users.group_id=users2.id ) AS percentage , MONTH(billing_group.event_date) AS event_month,    YEARWEEK(billing_group.event_date) AS event_week,     YEARWEEK(CURRENT_DATE()) AS current_week ,    CASE             WHEN YEARWEEK(billing_group.event_date) = YEARWEEK(CURDATE()) THEN 'This week'             ELSE 'This Month'         END AS WMTag     FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users2.is_group=2 AND billing_group_users.user_id=" +
     req.query.login_user_id +
     condition +
     " AND YEAR(billing_group.event_date) = YEAR(CURDATE()) AND MONTH(billing_group.event_date) = MONTH(CURDATE())   AND   billing_group.event_date>= CURDATE()  Limit " +
@@ -292,7 +292,7 @@ exports.getSplitGroupList = function (req, res) {
       req.query.login_user_id +
       condition;
 
-    connection.query(sqlCountsSplit, function (err, sqlCountsSplitResult) {
+    connection.query(sqlCountsSplit, async function (err, sqlCountsSplitResult) {
       if (err) {
         console.log(err);
       }
@@ -307,11 +307,30 @@ exports.getSplitGroupList = function (req, res) {
       //   }
 
       if (groupUsers.length > 0) {
+
+// for(let i=0;i<groupUsers.length-1;i++){
+
+var week=[];
+var month=[];
+
+await groupUsers.forEach(element => {
+if( element.WMTag =="This week"){
+  week.push(element)
+}else{
+  month.push(element)
+}
+ 
+});
+
+
+
+
         return res.json({
-          response: groupUsers,
+          // response: groupUsers,
+          response: {weekEvents:week,
+          monthEvents:month},
           // DMCounts: sqlCountsDMResult.length,
           splitCount: sqlCountsSplitResult[0].counts,
-
           success: true,
           message: "Direct message list",
         });
