@@ -285,8 +285,8 @@ if (splitDetails.length > 0) {
     let s2 = await dbScript(db_sql["Q1"], { var1: req.query.group_id,var2:'IS  NULL' });
     let user2 = await queryAsync(s2);
 
-    splitDetails[0].notPaidUsers=users2
-    splitDetails[0].PaidUsers=users1
+    splitDetails[0].notPaidUsers=user2
+    splitDetails[0].PaidUsers=user1
           return res.json({
             response: splitDetails[0] ,
             success: true,
