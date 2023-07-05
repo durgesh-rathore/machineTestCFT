@@ -1,6 +1,7 @@
 var connection = require("../config/db");
 var constants = require("../config/constants");
 var { encryptPassword, checkPassword } = require("../config/custom");
+const { db_sql, dbScript, queryAsync } = require("../helpers/db_scripts");
 var { save, findByIdAndUpdate } = require("../helpers/helper");
 
 var multer = require("multer");
@@ -254,23 +255,38 @@ exports.getSpiltChats = async (req, res) => {
     req.query.login_user_id != null &&
     req.query.group_id
   ) {
+
+    
+
     sql1 =
-      "SELECT users.name, billing_group.group_id,billing_group.spliting_amount,( SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id WHERE billing_group_users.group_id=billing_group.group_id AND billing_group_users.user_id!=" +
+      "SELECT users.name,(  SELECT  CASE WHEN billing_group_users.payment_amount IS NOT NULL THEN 1 ELSE 0 END FROM  billing_group_users WHERE billing_group_users.group_id= "+req.query.group_id +" AND billing_group_users.user_id=" +
+      req.query.login_user_id +
+      "  ) AS is_paid, billing_group.group_id,billing_group.spliting_amount,( SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id WHERE billing_group_users.group_id=billing_group.group_id AND billing_group_users.user_id!=" +
       req.query.login_user_id +
       "  ) AS group_users_image,COUNT(*) AS contributors,(select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.payment_amount IS NOT NULL) AS paid_contributor,      (select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.payment_amount IS  NULL) AS pending_contributor,(select ((billing_group.spliting_amount-sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end ))/billing_group.spliting_amount) *100  from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id ) AS percentage,(select  billing_group.spliting_amount/COUNT(*)  from `billing_group_users` WHERE billing_group_users.group_id=billing_group.group_id ) AS each_split   FROM billing_group  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users ON users.id=billing_group_users.group_id     WHERE billing_group_users.group_id=" +
       req.query.group_id +" GROUP BY users.id" ;
 
     console.log("ssq1========", sql1);
 
-    // SELECT users.name,users.last_name,users.profile_picture,bgu.payment_amount FROM `users` LEFT JOIN billing_group_users bgu ON bgu.user_id=users.id WHERE bgu.group_id=163 AND bgu.payment_amount IS  NOT NULL
+    
   }
 
  
 
-  connection.query(sql1, function (err, splitDetails) {
+  connection.query(sql1, async function (err, splitDetails) {
     console.log(err, splitDetails);
 
-    if (splitDetails.length > 0) {      
+    
+      
+if (splitDetails.length > 0) {    
+
+    let s1 = await dbScript(db_sql["Q1"], { var1: req.query.group_id,var2:'IS  NOT NULL' });
+      let user1 = await queryAsync(s1);
+    let s2 = await dbScript(db_sql["Q1"], { var1: req.query.group_id,var2:'IS  NULL' });
+    let user2 = await queryAsync(s2);
+
+    splitDetails[0].notPaidUsers=users2
+    splitDetails[0].PaidUsers=users1
           return res.json({
             response: splitDetails[0] ,
             success: true,
