@@ -1,9 +1,13 @@
 var constants = require("../config/constants");
 const connection = require("../config/db");
+var a =
+  "CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
+  constants.BASE_URL +
+  "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
 
 const db_sql = {
-  'Q1': " SELECT users.name,users.last_name,users.profile_picture,bgu.payment_amount FROM `users` LEFT JOIN billing_group_users bgu ON bgu.user_id=users.id WHERE bgu.group_id={var1} AND bgu.payment_amount {var2}",
-  'Q3': " SELECT users.name,users.last_name,users.profile_picture,bgu.payment_amount FROM `users` LEFT JOIN billing_group_users bgu ON bgu.user_id=users.id WHERE bgu.group_id={var1} AND bgu.payment_amount IS  NULL",
+  'Q1': " SELECT users.id,users.name, "+a +" ,bgu.payment_amount FROM `users` LEFT JOIN billing_group_users bgu ON bgu.user_id=users.id WHERE bgu.group_id={var1} AND bgu.payment_amount {var2}",
+  
 };
 // IS  NOT NULL
 
