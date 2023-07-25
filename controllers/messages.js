@@ -7,6 +7,9 @@ var { save, findByIdAndUpdate } = require("../helpers/helper");
 var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+// const fetch = require('node-fetch');
+const axios=require('axios');
+// import fetch from "node-fetch";
 
 var a =
   "CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
@@ -302,4 +305,5 @@ if (splitDetails.length > 0) {
       });
   
 };
+
 

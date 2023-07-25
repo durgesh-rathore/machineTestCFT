@@ -1,11 +1,13 @@
 var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
+require("./gifingcall");
 var { encryptPassword, checkPassword } = require("../config/custom");
 var { save } = require("../helpers/helper");
 var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+
 var a =
   "CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
   constants.BASE_URL +
