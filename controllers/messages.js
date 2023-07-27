@@ -260,13 +260,13 @@ exports.getSpiltChats = async (req, res) => {
   ) {
 
     
-
+    // AND billing_group_users.user_id!=" +
+    // req.query.login_user_id +
+    // " 
     sql1 =
       "SELECT users.name,(  SELECT  CASE WHEN billing_group_users.payment_amount IS NOT NULL THEN 1 ELSE 0 END FROM  billing_group_users WHERE billing_group_users.group_id= "+req.query.group_id +" AND billing_group_users.user_id=" +
       req.query.login_user_id +
-      "  ) AS is_paid, billing_group.group_id,billing_group.spliting_amount,( SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id WHERE billing_group_users.group_id=billing_group.group_id AND billing_group_users.user_id!=" +
-      req.query.login_user_id +
-      "  ) AS group_users_image,COUNT(*) AS contributors,(select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.payment_amount IS NOT NULL) AS paid_contributor,      (select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.payment_amount IS  NULL) AS pending_contributor,(select ROUND((sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/billing_group.spliting_amount) *100 ,2 ) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id ) AS percentage,(select  CEIL(billing_group.spliting_amount/COUNT(*)) from `billing_group_users` WHERE billing_group_users.group_id=billing_group.group_id ) AS each_split   FROM billing_group  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users ON users.id=billing_group_users.group_id     WHERE billing_group_users.group_id=" +
+      "  ) AS is_paid, billing_group.group_id,billing_group.spliting_amount,( SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id WHERE billing_group_users.group_id=billing_group.group_id  ) AS group_users_image,COUNT(*) AS contributors,(select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.payment_amount IS NOT NULL) AS paid_contributor,      (select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.payment_amount IS  NULL) AS pending_contributor,(select ROUND((sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/billing_group.spliting_amount) *100 ,2 ) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id ) AS percentage,(select  CEIL(billing_group.spliting_amount/COUNT(*)) from `billing_group_users` WHERE billing_group_users.group_id=billing_group.group_id ) AS each_split   FROM billing_group  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users ON users.id=billing_group_users.group_id     WHERE billing_group_users.group_id=" +
       req.query.group_id +" GROUP BY users.id" ;
 
     console.log("ssq1========", sql1);
