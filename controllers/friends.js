@@ -15,10 +15,13 @@ var a =
 exports.followUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
     connection.query(
-      "SELECT * FROM users_requests WHERE  user_id=" +
+      "SELECT * FROM users_requests WHERE ( user_id=" +
         req.body.login_user_id +
         " AND request_for=" +
-        req.body.request_for,
+        req.body.request_for +") OR ( request_for=" +
+        req.body.login_user_id +
+        " AND user_id=" +
+        req.body.request_for+" )",
       function (err, usersRequest) {
         if (usersRequest.length > 0) {
           return res.json({
