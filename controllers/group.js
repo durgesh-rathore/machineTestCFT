@@ -212,6 +212,7 @@ exports.addSplitGroup = function (req, res) {
                           if (error) console.log(error);
                           console.log("ddd"); //item added!
                         });
+                        group_users={};
                       });
 
                       // console.log("group_user======", group_users);
