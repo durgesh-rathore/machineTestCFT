@@ -5,6 +5,7 @@ var { encryptPassword, checkPassword } = require("../config/custom");
 var {sendMail,save} = require('../helpers/helper');
 var multer = require("multer");
 const path = require("path");
+const { db_sql, dbScript, queryAsync } = require("../helpers/db_scripts");
 const fs = require("fs");
 
 
@@ -430,6 +431,9 @@ exports.changePassword = async function (req, res) {
       }
     });
   }
+  else {
+    return res.json({ success: false, message: "Old password is wrong." });
+  }
 })
 };
 }
@@ -504,32 +508,18 @@ exports.updateUserProfile = function (req, res) {
                     req.body.last_name != undefined && req.body.last_name != null
                     
                   ) {newUser.last_name=last_name}
-
-
-
-
-
-                  // if (
-                  //   req.body.password != "" &&
-                  //   req.body.password != undefined
-                  // ) {
-                  //   if (req.body.password.length < 8) {
-                  //     return res.json({
-                  //       success: false,
-                  //       message: "Minimum 8 character in password .",
-                  //     });
-                  //   } else {
-                  //     let password = await encryptPassword(req.body.password);
-                  //     newUser.password = password;
-                  //   }
-                  // }
-
-                  if (
+                 if (
                     req.file &&
                     req.file.filename != "" &&
                     req.file.filename != undefined
                   ) {
+
                     newUser.profile_picture = req.file.filename;
+                    let s2 = await dbScript(db_sql["Q2"], { var1: req.body.login_user_id});
+                    let user = await queryAsync(s2);
+
+                    fs.unlink('./public/images/profiles/'+user[0].profile_picture, function(err){});
+
                   }
                   connection.query(
                     "UPDATE users SET ? WHERE id=" +
@@ -564,4 +554,12 @@ exports.updateUserProfile = function (req, res) {
   }
 };
 
+async function x(){
+  console.log("in x method ====");
+  // /home/user/Desktop/durgesh/ForgetMeNote/forgetmenote/public/images/profiles/Rectangle21png-1681901239083.png
+fs.unlink('./public/images/profiles/'+"Rectangle21png-1681901239083.png", function(err){
 
+  console.log(err);
+})
+
+}

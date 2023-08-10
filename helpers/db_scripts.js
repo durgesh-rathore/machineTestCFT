@@ -7,6 +7,7 @@ var a =
 
 const db_sql = {
   'Q1': " SELECT users.id,users.name, "+a +" ,bgu.payment_amount FROM `users` LEFT JOIN billing_group_users bgu ON bgu.user_id=users.id WHERE bgu.group_id={var1} AND bgu.payment_amount {var2}",
+  'Q2': " SELECT profile_picture FROM users WHERE id={var1}"
   
 };
 // IS  NOT NULL

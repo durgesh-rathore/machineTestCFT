@@ -112,19 +112,25 @@ exports.getPostsAndEventsList = function (req, res) {
     " AND ur2.is_accepted=1  AND ur2.is_reject=0  AND ur2.is_block=0  )     OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )      )  OR visibility.user_id=" +    req.query.login_user_id +
     " OR groups_users.group_id=" +
     req.query.login_user_id +
-    " ) AND (visibility.not_visible=0 OR visibility.not_visible IS NULL)  OR events.user_id ="+req.query.login_user_id;
+    " ) AND (visibility.not_visible=0 OR visibility.not_visible IS NULL) ";
 
 
    
     if (req.query.myProfile == "1") {
-      condition = "events.user_id	 ="+req.query.login_user_id;
+      condition = " events.user_id	 ="+req.query.login_user_id;
     }  
   if (req.query.type == "feed") {
     condition += "  AND events.post_type=1 ";
-  }
+    condition += " OR (events.user_id ="+req.query.login_user_id+" AND events.post_type=1  )"
+  } else{
   if (req.query.type == "event") {
     condition += "  AND events.post_type=0   ";
+    condition += " OR (events.user_id ="+req.query.login_user_id+" AND events.post_type=0  )"
+  }else{
+    condition += " OR events.user_id ="+req.query.login_user_id+" "
+
   }
+}
 
   if (req.query.search!= '' && req.query.search!= undefined && req.query.search!= null) {
     condition += '  AND (events.title LIKE "%'+req.query.search+'%" OR events.venue LIKE "%'+req.query.search+'%" OR events.description LIKE "%'+req.query.search+'%" OR events.type LIKE "%'+req.query.search+'%" OR users.name LIKE "%'+req.query.search+'%") ';
@@ -454,3 +460,4 @@ var condition=" "
     });
   });
 };
+
