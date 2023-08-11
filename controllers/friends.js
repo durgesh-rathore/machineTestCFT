@@ -271,10 +271,15 @@ exports.blockUser = function (req, res) {
 exports.acceptRequest = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
     connection.query(
-      " UPDATE users_requests SET is_accepted=1  WHERE user_id=" +
-        req.body.request_for +
-        " AND request_for=" +
-        req.body.login_user_id,
+      " UPDATE users_requests SET is_accepted=1  WHERE ( user_id=" +
+      req.body.login_user_id +
+      " AND request_for=" +
+      req.body.request_for +
+      ") OR ( request_for=" +
+      req.body.login_user_id +
+      " AND user_id=" +
+      req.body.request_for +
+      " )",
 
       async function (err, result) {
         if (err) throw err;
@@ -313,7 +318,7 @@ exports.friendsList = function (req, res) {
         a +
         ",users.name, users_requests.*,users.id,(SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
         req.query.login_user_id +
-        "' AND (users_requests.is_follow=1 OR users_requests.is_request=1) AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 " +
+        "' AND  users_requests.is_request=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 " +
         condition +
         " limit  " +
         page * 10 +
@@ -360,29 +365,31 @@ exports.friendsList = function (req, res) {
     // "' OR  users_requests.user_id IS NULL)
     connection.query(sql, async function (err, users) {
       var sqlCount1 =
-        "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON users_requests.request_for=users.id WHERE users.is_group=0 AND users.id !='" +
+        "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON users_requests.request_for=users.id WHERE users.is_group=0 AND users.id <>'" +
         req.query.login_user_id +
-        "' AND ( users_requests.request_for !='" +
+        "'  AND ( users_requests.request_for <>'" +
         req.query.login_user_id +
-        "' OR users_requests.request_for IS NULL ) AND (users_requests.is_accepted=0 OR  users_requests.is_accepted IS NULL) AND (users_requests.is_reject=0 OR users_requests.is_reject IS NULL ) " +
+        "' OR users_requests.request_for IS NULL ) AND (users_requests.is_accepted=0 OR  users_requests.is_accepted IS NULL) AND (users_requests.is_reject=0 OR users_requests.is_reject IS NULL ) AND (users_requests.is_request=0 OR users_requests.is_request IS NULL ) AND (users_requests.is_follow=0 OR users_requests.is_follow IS NULL )  " +
         condition +
         "  GROUP BY users.id";
       console.log("sqlCount1==========", sqlCount1);
       var sqlCountrequest =
         "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
         req.query.login_user_id +
-        "' AND users_requests.is_follow=1 AND users_requests.is_reject!=1 AND users_requests.is_block!=1 AND users_requests.is_accepted!=1 " +
+        "' AND  users_requests.is_request=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 " +
         condition +
         "";
 
       var sqlCountAll =
         "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
         req.query.login_user_id +
-        " Then users_requests.user_id ELSE users_requests.request_for END)  WHERE  ( users_requests.user_id='" +
+        " Then users_requests.user_id ELSE users_requests.request_for END)   WHERE  ( users_requests.user_id='" +
         req.query.login_user_id +
         " ' OR users_requests.request_for='" +
         req.query.login_user_id +
-        "' ) AND users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 " +
+        "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND (users_requests.is_accepted=1   OR ((users_requests.is_request=1 OR users_requests.is_follow=1) AND users_requests.user_id ='" +
+        req.query.login_user_id +
+        " ')   )   " +
         condition +
         "";
       connection.query(sqlCount1, async function (err, usersCountResult) {
