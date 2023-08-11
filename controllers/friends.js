@@ -142,10 +142,15 @@ exports.requestForUser = function (req, res) {
 exports.unFollowUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
     connection.query(
-      " UPDATE users_requests SET is_follow=0  WHERE user_id=" +
-        req.body.login_user_id +
-        " AND request_for=" +
-        req.body.request_for,
+      " UPDATE users_requests SET is_follow=0  WHERE ( user_id=" +
+      req.body.login_user_id +
+      " AND request_for=" +
+      req.body.request_for +
+      ") OR ( request_for=" +
+      req.body.login_user_id +
+      " AND user_id=" +
+      req.body.request_for +
+      " )",
 
       async function (err, result) {
         if (err) throw err;
@@ -226,10 +231,15 @@ exports.blockUser = function (req, res) {
     connection.query(
       " UPDATE users_requests SET is_block=" +
         req.body.is_block +
-        "  WHERE user_id=" +
+        "  WHERE ( user_id=" +
         req.body.login_user_id +
         " AND request_for=" +
-        req.body.request_for,
+        req.body.request_for +
+        ") OR ( request_for=" +
+        req.body.login_user_id +
+        " AND user_id=" +
+        req.body.request_for +
+        " )",
 
       async function (err, result) {
         if (err) throw err;
