@@ -311,9 +311,9 @@ exports.friendsList = function (req, res) {
       var sql =
         "SELECT " +
         a +
-        ",users.name,users.id, users_requests.*,(SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
+        ",users.name, users_requests.*,users.id,(SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
         req.query.login_user_id +
-        "' AND users_requests.is_follow=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 " +
+        "' AND (users_requests.is_follow=1 OR users_requests.is_request=1) AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 " +
         condition +
         " limit  " +
         page * 10 +
@@ -324,7 +324,7 @@ exports.friendsList = function (req, res) {
       var sql =
         "SELECT " +
         a +
-        ",users.name,users.id,users_requests.*, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
+        ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
         req.query.login_user_id +
         " Then users_requests.user_id ELSE users_requests.request_for END)  WHERE  ( users_requests.user_id='" +
         req.query.login_user_id +
