@@ -30,8 +30,12 @@ exports.followUser = function (req, res) {
               message: "Already following.",
             });
           } else {
+            const forf=" is_both_follow=1  "
+            if(usersRequest[0].is_follow == 0){
+              forf=" is_follow=1 "
+            }
             connection.query(
-              " UPDATE users_requests SET is_both_follow=1  WHERE ( user_id=" +
+              " UPDATE users_requests SET "+forf+"  WHERE ( user_id=" +
                 req.body.login_user_id +
                 " AND request_for=" +
                 req.body.request_for +
@@ -104,9 +108,10 @@ exports.requestForUser = function (req, res) {
             message: "Already requested.",
           });
         } else {
-          var users_request = {
+            var users_request = {
             user_id: req.body.login_user_id,
             request_for: req.body.request_for,
+            request_by:req.body.login_user_id,
             is_request: 1,
             //  suppose:55
           };
@@ -119,8 +124,7 @@ exports.requestForUser = function (req, res) {
               if (result) {
                 return res.json({
                   success: true,
-
-                  message: "Request .",
+                  message: "Request ."
                 });
               } else {
                 return res.json({
@@ -330,9 +334,9 @@ exports.friendsList = function (req, res) {
       var sql =
         "SELECT " +
         a +
-        ",users.name,users.id,users_requests.*, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON users_requests.request_for=users.id WHERE  users.is_group=0 AND users.id !='" +
+        ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON users_requests.request_for=users.id WHERE  users.is_group=0 AND users.id <>'" +
         req.query.login_user_id +
-        "'  AND ( users_requests.request_for !='" +
+        "'  AND ( users_requests.request_for <>'" +
         req.query.login_user_id +
         "' OR users_requests.request_for IS NULL ) AND (users_requests.is_accepted=0 OR  users_requests.is_accepted IS NULL) AND (users_requests.is_reject=0 OR users_requests.is_reject IS NULL ) AND (users_requests.is_request=0 OR users_requests.is_request IS NULL ) AND (users_requests.is_follow=0 OR users_requests.is_follow IS NULL )  " +
         condition +
