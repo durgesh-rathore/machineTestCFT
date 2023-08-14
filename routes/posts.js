@@ -43,10 +43,12 @@ router.post(
   checkUserStatus.userStatus,
   postController.likedOnComment
 );
+
+
 router.get(
-  "/getMyPostsAndEvent",
-  checkUserStatus.userStatus,
-  postController.getMyPostsAndEvent
+  "/getPostOrEventById",
+  // checkUserStatus.userStatus,
+  postController.getPostOrEventById
 );
 
 module.exports = router;

@@ -28,8 +28,13 @@ exports.new = async function (req, res) {
       userPost.image = req.file.filename;
       // console.log("jay shree ram");
     }
-
-    var c = await save("events", userPost);
+    var c
+    if(req.body.post_id){
+      var con=" event.id="+req.body.post_id;
+        c=await findByIdAndUpdate("events",userPost,con);
+    }else{
+       c = await save("events", userPost);
+    }
     console.log("c====", c);
     if (c) {
       if (req.body.visibilitySelectUsers != 1) {
@@ -409,55 +414,70 @@ exports.likedOnComment = async function (req, res) {
   }
 };
 
+exports.editNew = async function (req, res) {
+  if(req.body.post_id){
+  console.log("dddd",req)
+  try {
+    userPost = {
+      user_id: req.body.login_user_id,
+      post_type:1,
+      description: req.body.description,
+      visibilitySelectUsers: req.body.visibilitySelectUsers
+        ? req.body.visibilitySelectUsers
+        : 0,
+    };
+    if (req.file && req.file.filename != "" && req.file.filename != undefined) {
+      userPost.image = req.file.filename;
+      
+    }
 
-
-exports.getMyPostsAndEvent = function (req, res) {
-  var page = req.query.page ? req.query.page : 0;
-
-var condition=" "
-  if (req.query.type == "feed") {
-    condition += "  AND events.post_type=1 ";
-  }
-  if (req.query.type == "event") {
-    condition += "  AND events.post_type=0   ";
-  }
-
-
-  sql =
-    "SELECT events.title,CONCAT('" +
-    constants.BASE_URL +
-    "','images/postImage/',events.image) AS post_image FROM  events  WHERE user_id=" +
-    req.query.login_user_id + condition
-    " Limit " +
-    (page*10) +
-    ",10";
-
-  connection.query(sql, function (err, postData) {
-    console.log(err);
-    var sqlCounts =
-      "SELECT count(*) AS post_count FROM   events  WHERE user_id=" +
-      req.query.login_user_id +
-      condition+" ";
-    connection.query(sqlCounts, function (err, post_count) {
-      if (err) {
-        console.log(err);
+    var c = await save("events", userPost);
+    console.log("c====", c);
+    if (c) {
+      if (req.body.visibilitySelectUsers != 1) {
+        var visibility_data={};
+        visibility_data.post_id = c;
+        visibility_data.user_id = req.body.user_id;
+        visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
+        await visibility(visibility_data);
       }
+      return res.json({ success: true, message: "Feed Update." });
+    }
+    
+  } catch (error) {
+    console.error(error);
+
+  }
+}else{
+  return res.json({ success: false, message: "please select post." });
+}
+};
+
+exports.getPostOrEventById = function (req, res) {
+        sql =
+      "SELECT CONCAT('" +
+      constants.BASE_URL +
+      "','images/postImage/',events.image) AS post_image,events.*,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,TIME_FORMAT(events.end_time, '%H:%i') AS end_time FROM  events   WHERE events.id= " +
+      req.query.post_id +
+      "  AND user_id=   "+req.query.login_user_id+ " ";
+      
+    console.log("===", sql);
+    connection.query(sql, function (err, postData) {
+      console.log(err, postData);
       if (postData.length > 0) {
+
         return res.json({
           response: postData,
-          total_comment: post_count[0].post_count,
-          success: true,
-          message: "post .",
+          success: true
         });
+        
       } else {
         return res.json({
-          response: postData,
-          total_comment: post_count[0].post_count,
-          success: true,
-          message: "post .",
+          response: [],
+          totalPost: 0,
+          success: false,
+          message: "No More post",
         });
       }
     });
-  });
-};
-
+  };
