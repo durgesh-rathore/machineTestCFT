@@ -51,4 +51,11 @@ router.get(
   postController.getPostOrEventById
 );
 
+router.delete(
+  "/deletePostOrEventById",
+  // checkUserStatus.userStatus,
+  postController.deletePostOrEventById
+);
+
+
 module.exports = router;

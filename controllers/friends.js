@@ -437,3 +437,85 @@ exports.friendsList = function (req, res) {
 };
 
 exports.getBlockUserList = function (req, res) {};
+
+
+
+exports.friendsListForVisibitly = function (req, res) {
+  console.log(req.query," req.query ")
+      if (req.query.login_user_id) {
+      var page = req.query.page ? req.query.page : 0;
+      var condition = " ";
+      if (
+        req.query.search != "" &&
+        req.query.search != undefined &&
+        req.query.search != null
+      ) {
+        condition = '  AND (users.name LIKE "%' + req.query.search + '%") ';
+      }
+  
+     
+    
+        
+        var sql =
+          "SELECT  ( SELECT id FROM visibility WHERE visibility.user_id=users.id AND visibility.post_id="+  req.query.post_id+" ) AS is_checked, "  +
+          a +
+          ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
+          req.query.login_user_id +
+          " Then users_requests.user_id ELSE users_requests.request_for END)  WHERE  ( users_requests.user_id='" +
+          req.query.login_user_id +
+          " ' OR users_requests.request_for='" +
+          req.query.login_user_id +
+          "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND (users_requests.is_accepted=1   OR ((users_requests.is_request=1 OR users_requests.is_follow=1) AND users_requests.user_id ='" +
+          req.query.login_user_id +
+          " ')   )   " +
+          condition +
+          " limit  " +
+          page * 10 +
+          ", 10";
+        console.log("allFriends ===", sql);
+     
+    
+      connection.query(sql, async function (err, users) {
+       
+       
+        var sqlCountAll =
+          "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
+          req.query.login_user_id +
+          " Then users_requests.user_id ELSE users_requests.request_for END)   WHERE  ( users_requests.user_id='" +
+          req.query.login_user_id +
+          " ' OR users_requests.request_for='" +
+          req.query.login_user_id +
+          "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND (users_requests.is_accepted=1   OR ((users_requests.is_request=1 OR users_requests.is_follow=1) AND users_requests.user_id ='" +
+          req.query.login_user_id +
+          " ')   )   " +
+          condition +
+          "";
+                  connection.query(
+                    sqlCountAll,
+                    async function (err, sqlCountAllResult) {
+                      if (err) {
+                        console.log("====", err);
+                      } else {
+                        return res.json({
+                          response: users,
+                          friendsTotalCount: sqlCountAllResult[0].total_count,
+                          success: true,
+                          message: "users list",
+                        });
+                      }
+                    }
+                  );
+                } )
+              
+          }
+        
+     else {
+      return res.json({
+        response: [],
+        success: false,
+        message: "Not valid user",
+      });
+    }
+  };
+
+  

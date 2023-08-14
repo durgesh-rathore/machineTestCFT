@@ -15,6 +15,9 @@ var a =
 
 exports.new = async function (req, res) {
   console.log("dddd",req)
+  const conditionForPost= req.body.post_id && req.body.post_id!="undefined" && req.body.post_id!="null" && req.body.post_id!=""
+  console.log("condition for post == ",conditionForPost);
+
   try {
     userPost = {
       user_id: req.body.login_user_id,
@@ -26,16 +29,25 @@ exports.new = async function (req, res) {
     };
     if (req.file && req.file.filename != "" && req.file.filename != undefined) {
       userPost.image = req.file.filename;
-      // console.log("jay shree ram");
+      if( conditionForPost){
+        var postD=findOne("events"," id= "+req.body.id);
+      fs.unlink('./public/images/postImage/'+postD[0].image, function(err){});
     }
-    var c
-    if(req.body.post_id){
-      var con=" event.id="+req.body.post_id;
+      
+    }
+    
+
+    var c;
+    if( conditionForPost){
+      var con=` events.id=${req.body.post_id} AND events.user_id=${req.body.login_user_id} `;
         c=await findByIdAndUpdate("events",userPost,con);
+        console.log("c==== when are we editing", c );
     }else{
        c = await save("events", userPost);
+       console.log("c==== when are we creating", c );
     }
-    console.log("c====", c);
+    console.log("c==== perfection ", c ); 
+    
     if (c) {
       if (req.body.visibilitySelectUsers != 1) {
         var visibility_data={};
@@ -44,7 +56,12 @@ exports.new = async function (req, res) {
         visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
         await visibility(visibility_data);
       }
+      if( conditionForPost){
+      return res.json({ success: true, message: "Feed updated successfully." });
+      }
+   else{
       return res.json({ success: true, message: "Feed created." });
+    }
     }
     
   } catch (error) {
@@ -414,44 +431,7 @@ exports.likedOnComment = async function (req, res) {
   }
 };
 
-exports.editNew = async function (req, res) {
-  if(req.body.post_id){
-  console.log("dddd",req)
-  try {
-    userPost = {
-      user_id: req.body.login_user_id,
-      post_type:1,
-      description: req.body.description,
-      visibilitySelectUsers: req.body.visibilitySelectUsers
-        ? req.body.visibilitySelectUsers
-        : 0,
-    };
-    if (req.file && req.file.filename != "" && req.file.filename != undefined) {
-      userPost.image = req.file.filename;
-      
-    }
 
-    var c = await save("events", userPost);
-    console.log("c====", c);
-    if (c) {
-      if (req.body.visibilitySelectUsers != 1) {
-        var visibility_data={};
-        visibility_data.post_id = c;
-        visibility_data.user_id = req.body.user_id;
-        visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
-        await visibility(visibility_data);
-      }
-      return res.json({ success: true, message: "Feed Update." });
-    }
-    
-  } catch (error) {
-    console.error(error);
-
-  }
-}else{
-  return res.json({ success: false, message: "please select post." });
-}
-};
 
 exports.getPostOrEventById = function (req, res) {
         sql =
@@ -481,3 +461,44 @@ exports.getPostOrEventById = function (req, res) {
       }
     });
   };
+
+  exports.deletePostOrEventById = function (req, res) {
+    console.log(req.query,"............... deletePostOrEventById ")
+    sql =
+  "SELECT  events.id  FROM  events   WHERE events.id= " +
+  req.query.post_id +
+  "  AND user_id=   "+req.query.login_user_id+ " ";
+  
+console.log("===", sql);
+connection.query(sql, function (err, postData) {
+
+  console.log(err, postData);
+  if (postData.length > 0) {
+    const deleteSql=" DELETE FROM events  WHERE events.id ="+postData[0].id+" ";
+
+    connection.query(deleteSql, function (err, deletedRes) {
+
+if(err){console.log(err)
+  return res.json({
+    message:"Something went wrong.",
+    success: false
+  });
+
+}else{
+    return res.json({
+      message:"Post Deleted.",
+      success: true
+    });
+  }
+  })
+    
+  } else {
+    return res.json({
+      response: [],
+      totalPost: 0,
+      success: false,
+      message: " Post isn't exits",
+    });
+  }
+});
+};

@@ -21,4 +21,11 @@ router.get(
   friend.getBlockUserList
 );
 
+
+router.get(
+  "/friendsListForVisibitly",
+  // checkUserStatus.userStatus,
+  friend.friendsListForVisibitly
+);
+
 module.exports = router;

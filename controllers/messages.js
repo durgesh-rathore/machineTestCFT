@@ -129,7 +129,7 @@ exports.getDirectMessages = async (req, res) => {
     "images/profiles/',users.profile_picture)  ELSE '' END ) ELSE '' END AS profile_picture,CASE WHEN users.is_group=0  THEN (SELECT COUNT(*) FROM chats WHERE chats.send_by=users.id AND chats.sent_to=" +
     req.query.login_user_id +" AND is_seen=0 ) ELSE 0 END AS newMessageCount FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id!=" +
     req.query.login_user_id +
-    " Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')  )  AND users.id <> '"+req.query.login_user_id +"' "  + search + "  GROUP BY users.id     limit  "+ (page * 10) +
+    " Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')  )  AND users.id <> '"+req.query.login_user_id +"' "  + search + "  GROUP BY users.id     limit  "+ (page * 10) +
     ",10 ";
 
   console.log("sql.....................................", sql, "===sql===");
