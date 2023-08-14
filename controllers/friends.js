@@ -320,7 +320,7 @@ exports.friendsList = function (req, res) {
         req.query.login_user_id +
         "' AND  users_requests.is_request=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 " +
         condition +
-        " limit  " +
+        " ORDER BY users.id DESC limit  " +
         page * 10 +
         ", 10";
       console.log("request ===", sql);
@@ -339,7 +339,7 @@ exports.friendsList = function (req, res) {
         req.query.login_user_id +
         " ')   )   " +
         condition +
-        " limit  " +
+        "  ORDER BY users.id DESC  limit  " +
         page * 10 +
         ", 10";
       console.log("allFriends ===", sql);
@@ -357,7 +357,7 @@ exports.friendsList = function (req, res) {
         req.query.login_user_id +
         "' )  " +
         condition +
-        " GROUP BY users.id limit  " +
+        " GROUP BY users.id  ORDER BY users.id DESC  limit  " +
         page * 10 +
         ", 10";
       console.log("explore ===", sql);
