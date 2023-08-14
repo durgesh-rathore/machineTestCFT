@@ -30,7 +30,7 @@ exports.new = async function (req, res) {
     if (req.file && req.file.filename != "" && req.file.filename != undefined) {
       userPost.image = req.file.filename;
       if( conditionForPost){
-        var postD=findOne("events"," id= "+req.body.id);
+        var postD=findOne("events"," id= "+req.body.post_id);
       fs.unlink('./public/images/postImage/'+postD[0].image, function(err){});
     }
       
@@ -68,6 +68,76 @@ exports.new = async function (req, res) {
     console.error(error);
   }
 };
+
+exports.postEvent = async function (req, res) {
+  var data = {};
+  const conditionForPost= req.body.post_id && req.body.post_id!="undefined" && req.body.post_id!="null" && req.body.post_id!=""
+  console.log(conditionForPost," =========conditionForPost====");
+
+  if (req.file) {
+    data.image = req.file.filename;
+    if( conditionForPost){
+      var postD=findOne("events"," id= "+req.body.post_id);
+    fs.unlink('./public/images/postImage/'+postD[0].image, function(err){});
+  }
+  }
+  data.user_id = req.body.login_user_id;
+  if(req.body.title && req.body.title!='undefined' && req.body.title!="null"){
+  data.title =  req.body.title;
+  }
+  if(req.body.type && req.body.type!='undefined' && req.body.type!="null"){
+  data.type = req.body.type;
+  }
+  if(req.body.start_date && req.body.start_date!='undefined' && req.body.start_date!="null"){
+  data.start_date = req.body.start_date;
+}
+  if(req.body.end_date && req.body.end_date!='undefined' && req.body.end_date!="null"){
+  data.end_date = req.body.end_date;
+}
+
+  if(req.body.start_time && req.body.start_time!='undefined' && req.body.start_time!="null"){
+  data.start_time = req.body.start_time;
+}
+  if(req.body.end_time && req.body.end_time!='undefined' && req.body.end_time!="null"){
+  data.end_time = req.body.end_time;
+}
+  if(req.body.venue && req.body.venue!='undefined' && req.body.venue!="null"){
+  data.venue = req.body.venue;
+}
+  if(req.body.description && req.body.description!='undefined' && req.body.description!="null"){
+  data.description = req.body.description;
+  }
+  
+  data.visibilitySelectUsers = req.body.visibilitySelectUsers;
+  data.post_datetime = new Date();
+  var c;
+  if( conditionForPost){
+    var con=` events.id=${req.body.post_id} AND events.user_id=${req.body.login_user_id} `;
+      c=await findByIdAndUpdate("events",data,con);
+      console.log("c==== when are we editing", c );
+  }else{
+     c = await save("events", userPost);
+     console.log("c==== when are we creating", c );
+  }
+  console.log("c====", c);
+  if (c) {
+
+    if (req.body.visibilitySelectUsers != 1) {
+      var visibility_data={};
+      visibility_data.post_id = c;
+      visibility_data.user_id = req.body.user_id;
+      visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
+      await visibility(visibility_data);
+    }
+  }
+  if( conditionForPost){
+      return res.json({ success: true, message: "Event updated successfully." });
+      }
+   else{
+      return res.json({ success: true, message: "Event created." });
+    }
+};
+
 
 async function visibility(data) {
   console.log("===========", data);
@@ -261,35 +331,6 @@ console.log("sql====",sql);
 
 
 
-exports.postEvent = async function (req, res) {
-  var data = {};
-  if (req.file) {
-    data.image = req.file.filename;
-  }
-  data.user_id = req.body.login_user_id;
-  data.title =  req.body.title;
-  data.type = req.body.type;
-  data.start_date = req.body.start_date;
-  data.end_date = req.body.end_date;
-  data.start_time = req.body.start_time;
-  data.end_time = req.body.end_time;
-  data.venue = req.body.venue;
-  data.description = req.body.description;
-  data.visibilitySelectUsers = req.body.visibilitySelectUsers;
-  data.post_datetime = new Date();
-  var c = await save("events", data);
-  console.log("c====", c);
-  if (c) {
-    if (req.body.visibilitySelectUsers != 1) {
-      var visibility_data={};
-      visibility_data.post_id = c;
-      visibility_data.user_id = req.body.user_id;
-      visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
-      await visibility(visibility_data);
-    }
-  }
-  return res.json({ success: true, message: "Event created ." });
-};
 
 exports.liked = async function (req, res) {
   if (req.body.liked_by && req.body.post_id) {
@@ -447,7 +488,7 @@ exports.getPostOrEventById = function (req, res) {
       if (postData.length > 0) {
 
         return res.json({
-          response: postData,
+          response: postData[0],
           success: true
         });
         
@@ -502,3 +543,8 @@ if(err){console.log(err)
   }
 });
 };
+
+
+
+// 1) interest isSecureContext
+// 2.
