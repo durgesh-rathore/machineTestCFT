@@ -30,7 +30,7 @@ exports.followUser = function (req, res) {
               message: "Already following.",
             });
           } else {
-            const forf=" is_both_follow=1  "
+            var forf=" is_both_follow=1  "
             if(usersRequest[0].is_follow == 0){
               forf=" is_follow=1 "
             }
