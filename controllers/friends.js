@@ -428,9 +428,9 @@ exports.friendsList = function (req, res) {
       var sql =
         "SELECT " +
         a +
-        ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON users_requests.request_for=users.id  LEFT JOIN users_requests UR ON UR.user_id=users.id       WHERE users.is_group=0     AND ( users_requests.request_for <>'" +
+        ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON users_requests.request_for=users.id  LEFT JOIN users_requests UR ON UR.user_id=users.id       WHERE users.is_group=0     AND ( users_requests.user_id <>'" +
         req.query.login_user_id +
-        "' OR users_requests.is_both_follow=0 OR (users_requests.is_both_follow IS null AND ( UR.user_id <>'" +
+        "' OR users_requests.is_both_follow=0 OR (users_requests.is_both_follow IS null AND ( UR.request_for <>'" +
         req.query.login_user_id +
         "' OR UR.is_both_follow IS NULL OR UR.is_both_follow=0) ) )  AND users.id <>'" +        req.query.login_user_id +
         "'  AND ( users_requests.request_for <>'" +
