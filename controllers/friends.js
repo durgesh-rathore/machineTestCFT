@@ -5,6 +5,7 @@ var { encryptPassword, checkPassword } = require("../config/custom");
 var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const e = require("express");
 var a =
   "CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
   constants.BASE_URL +
@@ -102,7 +103,7 @@ exports.followUser = function (req, res) {
     );
   }
 };
-exports.requestForUser = function (req, res) {
+exports.requestForUser = function (req, res) { 
   if (req.body.login_user_id && req.body.request_for) {
     connection.query(
       "SELECT * FROM users_requests WHERE ( user_id=" +
@@ -116,10 +117,31 @@ exports.requestForUser = function (req, res) {
         " )",
       function (err, usersRequest) {
         if (usersRequest.length > 0) {
+          if(usersRequest[0].is_request==1){
           return res.json({
             success: true,
             message: "Already requested.",
           });
+        }else{
+          var updateSql=" ";
+          if(usersRequest[0].user_id==req.body.login_user_id){
+           updateSql =
+          " UPDATE users_requests SET is_request=1,request_by="+req.body.login_user_id+"  WHERE id= " +
+          usersRequest[0].id;
+          }else{
+            updateSql =
+            " UPDATE users_requests SET is_request=1,request_by="+req.body.login_user_id+",user_id  ="+ req.body.login_user_id+" request_for=" + usersRequest[0].user_id +"  WHERE id= " +
+            usersRequest[0].id;
+          }
+          connection.query(updateSql, async function (err, result) {
+            if (err) throw err;
+            if (result) {
+              return res.json({
+                success: true,
+                message: "Request .",
+              });
+            }})
+        }
         } else {
           var users_request = {
             user_id: req.body.login_user_id,
