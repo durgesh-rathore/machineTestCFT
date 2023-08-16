@@ -10,25 +10,7 @@ var a =
   constants.BASE_URL +
   "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
 
-var updateSql = " ";
-if (usersRequest[0].is_both_follow == 1) {
-  if (req.body.login_user_id == usersRequest[0].request_for) {
-    updateSql =
-      " UPDATE users_requests SET is_both_follow=0  WHERE id= " +
-      usersRequest[0].id;
-  } else if (req.body.login_user_id == usersRequest[0].user_id) {
-    updateSql =
-      " UPDATE users_requests SET  user_id=" +
-      usersRequest[0].request_for +
-      ",request_for=" +
-      usersRequest[0].user_id +
-      ", is_both_follow=0  WHERE id= " +
-      usersRequest[0].id;
-  }
-} else {
-  updateSql =
-    " UPDATE users_requests SET is_follow=0  WHERE id= " + usersRequest[0].id;
-}
+
 
 exports.followUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
