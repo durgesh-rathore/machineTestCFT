@@ -2,7 +2,7 @@ var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
 
-var { save, findByIdAndUpdate } = require("../helpers/helper");
+var { save, findByIdAndUpdate,findOne } = require("../helpers/helper");
 var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -179,7 +179,7 @@ async function visibility(data) {
     ) {
       visibility_data.user_id = data.login_user_id;
       data.user_id.split(',').forEach(async (element) => {
-        visibility_data.not_visible = 1;
+        // visibility_data.not_visible = 1;
         visibility_data.group_id = element;
 
         var c = await save("visibility", visibility_data);
