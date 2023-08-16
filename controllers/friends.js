@@ -512,11 +512,15 @@ exports.friendsListForVisibitly = function (req, res) {
     ) {
       condition = '  AND (users.name LIKE "%' + req.query.search + '%") ';
     }
+    var ch=' ';
+    if(req.query.post_id && req.query.post_id!="undefined" && req.query.post_id!="null"){
+    ch="(  SELECT id FROM visibility WHERE visibility.user_id=users.id AND visibility.post_id=" +
+      req.query.post_id +
+      " ) AS is_checked, "
+    }
 
     var sql =
-      "SELECT  ( SELECT id FROM visibility WHERE visibility.user_id=users.id AND visibility.post_id=" +
-      req.query.post_id +
-      " ) AS is_checked, " +
+      "SELECT   " + ch +
       a +
       ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
       req.query.login_user_id +
@@ -531,7 +535,7 @@ exports.friendsListForVisibitly = function (req, res) {
       " limit  " +
       page * 10 +
       ", 10";
-    console.log("allFriends ===", sql);
+    console.log("friendsListForVisibitly ===", sql);
 
     connection.query(sql, async function (err, users) {
       var sqlCountAll =
