@@ -1,291 +1,184 @@
+// const axios = require("axios");
+// const Client = require("dwolla-v2").Client;
 
-// const fetch = require('node-fetch');
-// const axios=require('axios');
+// const dwollaApiKey = "gAvWg0Bhcse1tXUkN2PgdPButgCdfOIuWw7eeVsAVRI2mugCzp";
+// const dwollaApiSecret = "ABjaijSSo5toaSUubw1z4rdYTTlkVaDQqJFnmuvAZvtjGNtNkq";
 
-// const axios = require('axios');
+// const dwolla = new Client({
+//   environment: "sandbox", // Defaults to "production"
+//   key: dwollaApiKey,
+//   secret: dwollaApiSecret,
+// });
 
-// const accessKey = 'AKIAJBNQWSFQQVPLAJKQ';  // Replace with your Access Key ID
-// const secretKey = 'YOUR_SECRET_KEYa9SkvzeXOYj9FwuFpzNKd2uk0ooYKZL9nVku6oHC';  // Replace with your Secret Access Key
-// const associateTag = 'forgetmenote-20';  // Replace with your Amazon Associate Tag
-// const productASIN = 'B07XYZ1234';  // Replace with the ASIN of the product you want to retrieve variations for
-
-// const endpoint = 'https://webservices.amazon.com/paapi5/getvariations';
-// const params = {
-//   ASIN: productASIN,
-//   Resources: [
-//     'Images.Primary.Medium',
-//     'ItemInfo.Title',
-//     'Offers.Listings.Price',
-//     'VariationSummary.VariationDimension'
-//   ],
-//   PartnerTag: associateTag,
-//   PartnerType: 'Associates', // Replace with 'Associates' if you are an Associate
-//   AWSAccessKeyId: accessKey,
-// };
-
-// axios.get(endpoint, { params })
-//   .then(response => {
-//     const data = response.data;
-//     console.log(data);
-//     // Process the data as needed
-//   })
-//   .catch(error => {
-//     console.error('Error fetching variations:', error,error.response.data);
-//   });
-
-
-// async function fetchAmazonData1() {
-//   const url = 'https://webservices.amazon.com/paapi5/searchitems.in';
-//   const headers = {
-//     'Host': 'webservices.amazon.com',
-//     'Content-Type': 'application/json; charset=UTF-8',
-//     'X-Amz-Date': '20230718T124857Z',
-//     'X-Amz-Target': 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems',
-//     'Content-Encoding': 'amz-1.0',
-//     'User-Agent': 'paapi-docs-curl/1.0.0',
-//     'Authorization': 'AWS4-HMAC-SHA256 Credential=AKIAJBNQWSFQQVPLAJKQ/20230718/us-east-1/ProductAdvertisingAPI/aws4_request SignedHeaders;host;x-amz-date;x-amz-target Signature=aebe598ca31280a84ca95373bb57d23f69a847e314e1a55cff6f9d5e5d399f61',
-//   };
-
-//   const body = JSON.stringify({
-//     'Marketplace': 'https://www.amazon.com',
-//     'PartnerType': 'Associates',
-//     'PartnerTag': 'dd',
-//     'Keywords': 'kindle',
-//     'SearchIndex': 'All',
-//     'ItemCount': 3,
-//     'Resources': ['Images.Primary.Large', 'ItemInfo.Title', 'Offers.Listings.Price'],
-//   });
-
-//   try {
-//     const response = await axios.post(url, {
-//       method: 'POST',
-//       headers,
-//       body,
+// async function createDwollaCustomer(data) {
+//   await dwolla
+//     .post("customers", {
+//       firstName: data.firstName ? data.firstName : "",
+//       lastName: data.lastName ? data.lastName : "",
+//       email: data.email,
+//     })
+//     .then((res) => {
+//       console.log("res =========222222 ", res.headers.get("location"));
+//     })
+//     .catch((err) => {
+//       console.log("err====", err);
 //     });
-
-//     const data = await response.json();
-//     console.log(data); // Process the response data here
-
-//   } catch (error) {
-//     console.error('Error:', error,error.message);
-//   }
 // }
 
-// const axios = require('axios');
+// const senderAccountId = '97336de6-15ac-4b0a-a8c0-dd0a1e481ce0';
+// const receiverAccountId = '59d754c6-4e7e-4b4f-971b-d916802790f3';
 
-// async function fetchAmazonData() {
-//   const url = 'https://webservices.amazon.com/paapi5/searchitems.in';
-//   const headers = {
-//     'Host': 'webservices.amazon.com',
-//     'Content-Type': 'application/json; charset=UTF-8',
-//     'X-Amz-Date': '20230718T124857Z',
-//     'X-Amz-Target': 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems',
-//     'User-Agent': 'paapi-docs-curl/1.0.0',
-//     'Authorization': 'AWS4-HMAC-SHA256 Credential= AKIAJBNQWSFQQVPLAJKQ/20230718/us-east-1/ProductAdvertisingAPI/aws4_request SignedHeaders=content-type;host;x-amz-date;x-amz-target Signature=a9SkvzeXOYj9FwuFpzNKd2uk0ooYKZL9nVku6oHC',
+// Using dwolla-v2 - https://github.com/Dwolla/dwolla-v2-node
+
+// async function fundingSource() {
+//   var customerUrl =
+//     "https://api-sandbox.dwolla.com/customers/59d754c6-4e7e-4b4f-971b-d916802790f3";
+//   var requestBody = {
+//     routingNumber: "222222226",
+//     accountNumber: "123456589",
+//     bankAccountType: "checking",
+//     name: "Second users",
 //   };
 
-//   const data = {
-//     'Marketplace': 'https://www.amazon.com',
-//     'PartnerType': 'Associates',
-//     'PartnerTag': 'forgetmenote-20', // Replace with your Amazon Associates partner tag
-//     'Keywords': 'kindle',
-//     'SearchIndex': 'All',
-//     'ItemCount': 3,
-//     'Resources': ['Images.Primary.Large', 'ItemInfo.Title', 'Offers.Listings.Price'],
+//   dwolla
+//     .post(`${customerUrl}/funding-sources`, requestBody)
+//     .then((res) =>
+//       console.log(
+//         "ddddddd funding tranfer post===",
+//         res.headers.get("location")
+//       )
+//     )
+//     .catch((err) => {
+//       console.log("funding transfer====",err);
+//     }); // => 'https://api-sandbox.dwolla.com/funding-sources/375c6781-2a17-476c-84f7-db7d2f6ffb31'
+// }
+
+// fundingSource();
+// async function getFundingSource(){
+
+// var fundingSourceUrl =
+//   "https://api.dwolla.com/funding-sources/277eba0b-1e2d-4ecd-8694-384cbebdbb55";
+
+// await dwolla.get(fundingSourceUrl).then(function(res) {
+//   console.log("ddd===11122",res.body.name); // => 'Test checking account'
+// }).catch(err=>{console.log("getFunding error====",err)});
+// }
+// getFundingSource();
+
+// async function microDeposits(){
+// var fundingSourceUrl =
+//   "https://api-sandbox.dwolla.com/funding-sources/277eba0b-1e2d-4ecd-8694-384cbebdbb55";
+
+//   var requestBody = {
+//     amount1: {
+//       value: "0.03",
+//       currency: "USD",
+//     },
+//     amount2: {
+//       value: "0.09",
+//       currency: "USD",
+//     },
 //   };
 
-//   try {
-//     const response = await axios.post(url, data, { headers });
+// await dwolla.post(`${fundingSourceUrl}/micro-deposits`,requestBody).then(res=>{
+//     console.log(res,"  res of microDeposits")
+// }).catch(err=>{console.log(err," err in microDeposits===")});
 
-//     console.log('Response:', response.data); // Process the response data here
+// }
+// microDeposits();
 
-//   } catch (error) {
-//     console.error('Error:', error.message);
-//   }
+
+// async function tranfer1() {
+//   var transferRequest = {
+//     _links: {
+//       source: {
+//         href: "https://api-sandbox.dwolla.com/c9d0e4bd-aecd-499d-81e3-352c9b39dbc1",
+//       },
+//       destination: {
+//         href: "https://api-sandbox.dwolla.com/funding-sources/277eba0b-1e2d-4ecd-8694-384cbebdbb55",
+//       },
+//     },
+//     amount: {
+//       currency: "USD",
+//       value: 2.00,
+//     },
+//   };
+
+//   dwolla
+//     .post("transfers", transferRequest)
+//     .then(function (res) {
+//       console.log("for the link of ", res.headers.get("location")); // => 'https://api-sandbox.dwolla.com/transfers/d76265cd-0951-e511-80da-0aa34a9b2388'
+//     })
+//     .catch((err) => {
+//       console.log("error at the time of tranfer===", err);
+//     });
 // }
 
-// fetchAmazonData();
 
 
 
-// fetchAmazonData();
+// async function tranfer() {
+// // Using dwolla-v2 - https://github.com/Dwolla/dwolla-v2-node
+// var headers = {
+//     "Idempotency-Key": "19051a62-3403-11e6-ac61-9e71128cae77",
+//   };
+// var requestBody = {
+//     "_links": {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Call the function to execute the fetch request
-// fetchAmazonData();
-
-// const axios = require('axios');
-// const crypto = require('crypto');
-
-// Replace these with your actual API credentials
-
-// const ACCESS_KEY = 'AKIAJBNQWSFQQVPLAJKQ';
-// const SECRET_KEY = 'a9SkvzeXOYj9FwuFpzNKd2uk0ooYKZL9nVku6oHC';
-// const ASSOCIATE_TAG = 'forgetmenote-20';
-
-// // Define the search query and other parameters
-// const searchQuery = 'laptop';
-// const searchIndex = 'Electronics'; // You can change this to a different search index
-// const responseGroup = 'ItemAttributes,Images'; // Include additional item attributes and images in the response
-
-// // Function to generate the Amazon Product Advertising API signature
-// function generateSignature(url) {
-//   const timestamp = new Date().toISOString();
-//   const signatureInput = `GET\nwebservices.amazon.com\n/onca/xml\n${url}\nAWSAccessKeyId=${ACCESS_KEY}&AssociateTag=${ASSOCIATE_TAG}&Operation=ItemSearch&SearchIndex=${searchIndex}&Keywords=${searchQuery}&ResponseGroup=${responseGroup}&Timestamp=${encodeURIComponent(timestamp)}`;
-
-//   return crypto.createHmac('sha256', SECRET_KEY).update(signatureInput).digest('base64');
+//         "source": {
+//             "href": "https://api-sandbox.dwolla.com/c9d0e4bd-aecd-499d-81e3-352c9b39dbc1",
+//           },
+//           "destination": {
+//             "href": "https://api-sandbox.dwolla.com/funding-sources/277eba0b-1e2d-4ecd-8694-384cbebdbb55",
+//           },
+//     //   source: {
+//     //     href: "https://api-sandbox.dwolla.com/funding-sources/707177c3-bf15-4e7e-b37c-55c3898d9bf4",
+//     //   },
+//     //   destination: {
+//     //     href: "https://api-sandbox.dwolla.com/funding-sources/AB443D36-3757-44C1-A1B4-29727FB3111C",
+//     //   },
+//     },
+//     "amount": {
+//       "currency": "USD",
+//       "value": "1.00",
+//     },
+//     "metadata": {
+//       "paymentId": "12345678",
+//       "note": "payment for completed work Dec. 1",
+//     },
+//     "clearing": {
+//       "destination": "next-available",
+//     },
+//     "achDetails": {
+//       "source": {
+//         "addenda": {
+//           "values": ["ABC123_AddendaValue"],
+//         },
+//       },
+//       "destination": {
+//         "addenda": {
+//           "values": ["ZYX987_AddendaValue"],
+//         },
+//       },
+//     },
+//     "correlationId": "8a2cdc8d-629d-4a24-98ac-40b735229fe2",
+//   };
+  
+//   dwolla
+//     .post("transfers", requestBody,headers)
+//     .then((res) => console.log(res.headers.get("location")))
+//     .catch(err=>{console.log(err,"tranfert time")}); 
+//     // => 'https://api-sandbox.dwolla.com/transfers/74c9129b-d14a-e511-80da-0aa34a9b2388'
 // }
+  
+// tranfer();
 
-// // Function to make the API call and get product search results
-// async function getProductSearchResults() {
-//   const timestamp = new Date().toISOString();
-//   const signature = generateSignature(`AWSAccessKeyId=${ACCESS_KEY}&AssociateTag=${ASSOCIATE_TAG}&Operation=ItemSearch&SearchIndex=${searchIndex}&Keywords=${searchQuery}&ResponseGroup=${responseGroup}&Timestamp=${encodeURIComponent(timestamp)}`);
+// async function checkTranferStatus() {
+//   var transferUrl =
+//     "https://api.dwolla.com/transfers/d76265cd-0951-e511-80da-0aa34a9b2388";
 
-//   const url = `http://webservices.amazon.com/onca/xml?AWSAccessKeyId=${ACCESS_KEY}&AssociateTag=${ASSOCIATE_TAG}&Operation=ItemSearch&SearchIndex=${searchIndex}&Keywords=${searchQuery}&ResponseGroup=${responseGroup}&Timestamp=${encodeURIComponent(timestamp)}&Signature=${encodeURIComponent(signature)}`;
-
-//   try {
-//     const response = await axios.get(url);
-//     // Process the response here (e.g., extract and display product information)
-//     console.log(response.data);
-//   } catch (error) {
-//     console.error('Error making API call:', error);
-//   }
-// }
-
-// // Call the function to get the product search results
-// getProductSearchResults();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const axios = require('axios');
-
-// API Request Configuration
-// const requestConfig = {
-//   method: 'post',
-//   url: 'https://webservices.amazon.com/',
-//   headers: {
-//     'Content-Type': 'application/json; charset=utf-8',
-//     'Content-Encoding': 'amz-1.0',
-//     'x-amz-date': '20160925T120000Z',
-//     'x-amz-target': 'com.amazon.paapi5.v1.ProductAdvertisingAPIv1.SearchItems',
-//     'Authorization': 'AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE, SignedHeaders=content-type;host;x-amz-date;x-amz-target, Signature=&5d672d79c15b13162d9279b0855cfba6789a8edb4c82c400e06b5924a6f2b5d7;'
-//   },
-//   data: {} // Replace this with your actual JSON payload if required.
-// };
-
-// // Make the API request
-// axios(requestConfig)
-//   .then((response) => {
-//     console.log('Response:', response.data);
-//   })
-//   .catch((error) => {
-//     console.error('Error:',error, error.message);
+//   dwolla.get(transferUrl).then(function (res) {
+//     res.body.status; // => 'processed'
 //   });
-
-
-
-
-
-
-// "use strict"
-
-// const ACCESS_KEY = 'AKIAJBNQWSFQQVPLAJKQ';
-// const SECRET_KEY = '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';
-// const ASSOCIATE_TAG = 'forgetmenote-20 ';
-
-// const util = require('util')
-// const OperationHelper = require('apac').OperationHelper
-
-// let opHelper = new OperationHelper({
-//     awsId: 'AKIAQII73ULSYM4OY7UZ',
-//     awsSecret: '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',
-//     assocId: 'forgetmenote-20'
-// })
-
-// const operation = 'ItemSearch'
-// const params = {
-//     'SearchIndex': 'Electronic',
-//     'Keywords': 'Mouse',
-//     'ResponseGroup': 'ItemAttributes,Offers'
 // }
-
-// opHelper.execute(operation, params).then((results, responseBody) => {
-//     console.log("11111111111111111111111",results,results.result.html.body)
-//     console.log("22222222222222222222222",responseBody);
-// }).catch((err) => {
-
-//     console.error("333333333333333333333333",err);
-// })
-
-// or if you have async/await support...
-
-// try {
-//     let response = 
-//     opHelper.execute(operation, params)
-//     response.then(resutl=>{console.log(resutl)});
-//     console.log("4444444444444444444",response);
-//     console.log("55555555555555555555",response.responseBody)
-// } catch(err) {
-//     console.error("6666666666666666666",err);
-// }
-
-// traditional callback style is also supported for backwards compatibility
-
-// opHelper.execute('ItemSearch', {
-//     'SearchIndex': 'Books',
-//     'Keywords': 'harry potter',
-//     'ResponseGroup': 'ItemAttributes,Offers'
-// }, function (err, results) {
-
-//     console.log("77777777777777777777",results);
-// })
-
-
-
-
-// const {OperationHelper} = require('apac');
- 
-// const opHelper = new OperationHelper({
-//     awsId:     'AKIAQII73ULSYM4OY7UZ',
-//     awsSecret: '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',
-//     assocId:   'forgetmenote-20'
-//     // assocId:   'dd'
-// });
- 
-// opHelper.execute('ItemSearch', {
-//   'SearchIndex': 'Books',
-//   'Keywords': 'harry potter',
-//   'ResponseGroup': 'ItemAttributes,Offers'
-// }).then((response) => {
-//     console.log("Results object: ", response.result);
-//     console.log("Raw response body: ", response.responseBody);
-// }).catch((err) => {
-//     console.error("Something went wrong! ", err);
-// });
+// checkTranferStatus();
