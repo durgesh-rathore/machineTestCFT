@@ -22,11 +22,12 @@ exports.new = async function (req, res) {
     userPost = {
       user_id: req.body.login_user_id,
       post_type:1,
-      description: req.body.description,
-      visibilitySelectUsers: req.body.visibilitySelectUsers
-        ? req.body.visibilitySelectUsers
-        : 0,
+      description: req.body.description
     };
+if(req.body.visibilitySelectUsers && req.body.visibilitySelectUsers!="undefined" && req.body.visibilitySelectUsers!="null" ){
+    userPost.visibilitySelectUsers= req.body.visibilitySelectUsers
+        
+}
     if (req.file && req.file.filename != "" && req.file.filename != undefined) {
       userPost.image = req.file.filename;
       if( conditionForPost){
@@ -109,7 +110,11 @@ exports.postEvent = async function (req, res) {
   data.description = req.body.description;
   }
   
-  data.visibilitySelectUsers = req.body.visibilitySelectUsers;
+  // data.visibilitySelectUsers = req.body.visibilitySelectUsers;
+  if(req.body.visibilitySelectUsers && req.body.visibilitySelectUsers!="undefined" && req.body.visibilitySelectUsers!="null" ){
+    data.visibilitySelectUsers= req.body.visibilitySelectUsers
+        
+}
   data.post_datetime = new Date();
   var c;
   if( conditionForPost){
@@ -201,8 +206,8 @@ exports.getPostsAndEventsList = function (req, res) {
 
   var condition =
     " ((events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +    req.query.login_user_id +
-    " AND users_requests.is_accepted=1  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (ur2.request_for=" +    req.query.login_user_id +
-    " AND ur2.is_accepted=1  AND ur2.is_reject=0  AND ur2.is_block=0  )     OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )      )  OR visibility.user_id=" +    req.query.login_user_id +
+    " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 OR users_requests.is_request=1)  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (ur2.request_for=" +    req.query.login_user_id +
+    " AND (ur2.is_accepted=1 OR ur2.is_both_follow=1 OR ur2.is_request=1)   AND ur2.is_reject=0  AND ur2.is_block=0  )     OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )      )  OR visibility.user_id=" +    req.query.login_user_id +
     " OR groups_users.group_id=" +
     req.query.login_user_id +
     " ) AND (visibility.not_visible=0 OR visibility.not_visible IS NULL) ";
