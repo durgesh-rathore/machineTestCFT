@@ -31,7 +31,8 @@ exports.new = async function (req, res) {
       userPost.image = req.file.filename;
       if( conditionForPost){
         var postD=findOne("events"," id= "+req.body.post_id);
-      fs.unlink('./public/images/postImage/'+postD[0].image, function(err){});
+        console.log(postD,"====dddddddd");
+      fs.unlink('./public/images/postImage/'+postD.image, function(err){});
     }
       
     }
