@@ -2,7 +2,7 @@ var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
 var { encryptPassword, checkPassword } = require("../config/custom");
-var {sendMail,save} = require('../helpers/helper');
+var {sendMail,save,findByIdAndUpdate} = require('../helpers/helper');
 var multer = require("multer");
 const path = require("path");
 const { db_sql, dbScript, queryAsync } = require("../helpers/db_scripts");
@@ -54,6 +54,9 @@ exports.signup = function (req, res) {
                     password: password,
                     mobile_number: req.body.mobile_number,
                   };
+                  if(req.body.device_token && req.body.device_token!='undefined' && req.body.device_token!="null"){
+                    newUser.device_token=req.body.device_token
+                  }
                   connection.query(
                     "INSERT INTO users SET ?",
                     newUser,
@@ -133,6 +136,11 @@ exports.signin = async function (req, res) {
                 message: "Login successfully.",
               });
             } else {
+              if(req.body.device_token && req.body.device_token!='undefined' && req.body.device_token!="null"){
+                
+                findByIdAndUpdate("users",{divice_token:req.body.divice_token}," id="+users[0].id);
+
+              }
               return res.json({
                 success: true,
                 token: "JWT " + token,

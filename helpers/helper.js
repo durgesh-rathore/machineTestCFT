@@ -2,8 +2,23 @@ var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 var connection = require("../config/db");
+var constants = require("../config/constants");
 const nodemailer = require("nodemailer");
 
+const gcm = require('node-gcm');
+
+async function pushNotification(device_token,message,status,title = 'ForgetMeNote') {
+  // Set up the sender with your GCM/FCM API key (declare this once for multiple messages) 
+  var sender = new gcm.Sender(constants.FIREBASE_NOTIFICATION_KEY);
+     var message = new gcm.Message({
+      data: { title: title, message: message, status : status},
+      notification: { title: title, body: message}
+  });
+  // Actually send the message
+  sender.send(message, { registrationTokens: [device_token] }, function (err, response) {
+      if (err) console.error(err);
+  });
+}
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -88,5 +103,6 @@ async function save(tbl,data) {
   save,
   findOne,
   findByIdAndUpdate,
-  sendMail
+  sendMail,
+  pushNotification
   }
