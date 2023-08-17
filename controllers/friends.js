@@ -126,11 +126,11 @@ exports.requestForUser = function (req, res) {
           var updateSql=" ";
           if(usersRequest[0].user_id==req.body.login_user_id){
            updateSql =
-          " UPDATE users_requests SET is_request=1,is_follow=1,request_by="+req.body.login_user_id+"  WHERE id= " +
+          " UPDATE users_requests SET is_request=1,request_by="+req.body.login_user_id+"  WHERE id= " +
           usersRequest[0].id;
           }else{
             updateSql =
-            " UPDATE users_requests SET is_request=1,is_follow=1,request_by="+req.body.login_user_id+",user_id  ="+ req.body.login_user_id+" request_for=" + usersRequest[0].user_id +"  WHERE id= " +
+            " UPDATE users_requests SET is_request=1,request_by="+req.body.login_user_id+",user_id  ="+ req.body.login_user_id+" request_for=" + usersRequest[0].user_id +"  WHERE id= " +
             usersRequest[0].id;
           }
           connection.query(updateSql, async function (err, result) {
@@ -147,8 +147,8 @@ exports.requestForUser = function (req, res) {
             user_id: req.body.login_user_id,
             request_for: req.body.request_for,
             request_by: req.body.login_user_id,
-            is_request: 1,
-            is_follow:1,
+            is_request: 1
+            
             //  suppose:55
           };
           connection.query(
