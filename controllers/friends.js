@@ -451,9 +451,9 @@ exports.friendsList = function (req, res) {
     connection.query(sql, async function (err, users) {
       // COUNT(users.id) AS total_count
       var sqlCount1 =
-        "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") OR  (users_requests.user_id=users.id AND users_requests.request_for="+req.query.login_user_id+"))     WHERE users.is_group=0 AND users_requests.is_both_follow<>1    AND ( users_requests.user_id <>'" +
+        "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") OR  (users_requests.user_id=users.id AND users_requests.request_for="+req.query.login_user_id+"))     WHERE users.is_group=0   AND ( users_requests.user_id <>'" +
         req.query.login_user_id +
-        "'   AND users_requests.request_for<> "+req.query.login_user_id+" OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND (users_requests.is_request=0 OR users_requests.is_request IS null ) AND ( users_requests.request_for <>' "+req.query.login_user_id+"' OR users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  )" +
+        "'   AND users_requests.request_for<> "+req.query.login_user_id+" OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND (users_requests.is_request=0 OR users_requests.is_request IS null ) AND (users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  )   AND (  case when (users_requests.request_for = users.id) THEN false ELSE true END  ) AND users.id<>"+req.query.login_user_id+" " +
         condition +
         " GROUP BY users.id";
 
