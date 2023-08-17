@@ -404,29 +404,41 @@ exports.friendsList = function (req, res) {
       console.log("allFriends ===", sql);
     }
     if (req.query.type == "explore") {
+
+      // var sql =
+      // "SELECT " +
+      // a +
+      // ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON (users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") LEFT JOIN users_requests UR ON (UR.user_id=users.id  AND UR.request_for="+req.query.login_user_id+" )    WHERE users.is_group=0     AND ( users_requests.user_id <>'" +
+      // req.query.login_user_id +
+      // "' OR users_requests.is_both_follow=0 OR (users_requests.is_both_follow IS null AND ( UR.request_for <>'" +
+      // req.query.login_user_id +
+      // "' OR UR.is_both_follow IS NULL OR UR.is_both_follow=0) ) )  AND users.id <>'" +
+      // req.query.login_user_id +
+      // "'  AND ( users_requests.request_for <>'" +
+      // req.query.login_user_id +
+      // "' OR users_requests.request_for IS NULL ) AND (users_requests.user_id <>'" +
+      // req.query.login_user_id +
+      // " ' OR users_requests.is_accepted=0 OR  users_requests.is_accepted IS NULL) AND ( users_requests.user_id <>'" +
+      // req.query.login_user_id +
+      // " ' OR users_requests.is_reject=0 OR users_requests.is_reject IS NULL ) AND (users_requests.user_id <>'" +
+      // req.query.login_user_id +
+      // " ' OR users_requests.is_request=0 OR users_requests.is_request IS NULL ) AND ((users_requests.user_id <>'" +
+      // req.query.login_user_id +
+      // " ' OR users_requests.is_follow=0 OR users_requests.is_follow IS NULL )  OR users_requests.user_id<> '" +
+      // req.query.login_user_id +
+      // "' )  " +
+      // condition +
+      // " GROUP BY users.id  ORDER BY users.id DESC  limit  " +
+      // page * 10 +
+      // ", 10";
       // users_requests.user_id IS NULL AND
+
       var sql =
         "SELECT " +
         a +
-        ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON (users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") LEFT JOIN users_requests UR ON (UR.user_id=users.id  AND UR.request_for="+req.query.login_user_id+" )    WHERE users.is_group=0     AND ( users_requests.user_id <>'" +
+        ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") OR  (users_requests.user_id=users.id AND users_requests.request_for="+req.query.login_user_id+"))     WHERE users.is_group=0     AND ( users_requests.user_id <>'" +
         req.query.login_user_id +
-        "' OR users_requests.is_both_follow=0 OR (users_requests.is_both_follow IS null AND ( UR.request_for <>'" +
-        req.query.login_user_id +
-        "' OR UR.is_both_follow IS NULL OR UR.is_both_follow=0) ) )  AND users.id <>'" +
-        req.query.login_user_id +
-        "'  AND ( users_requests.request_for <>'" +
-        req.query.login_user_id +
-        "' OR users_requests.request_for IS NULL ) AND (users_requests.user_id <>'" +
-        req.query.login_user_id +
-        " ' OR users_requests.is_accepted=0 OR  users_requests.is_accepted IS NULL) AND ( users_requests.user_id <>'" +
-        req.query.login_user_id +
-        " ' OR users_requests.is_reject=0 OR users_requests.is_reject IS NULL ) AND (users_requests.user_id <>'" +
-        req.query.login_user_id +
-        " ' OR users_requests.is_request=0 OR users_requests.is_request IS NULL ) AND ((users_requests.user_id <>'" +
-        req.query.login_user_id +
-        " ' OR users_requests.is_follow=0 OR users_requests.is_follow IS NULL )  OR users_requests.user_id<> '" +
-        req.query.login_user_id +
-        "' )  " +
+        "'   AND users_requests.request_for<> "+req.query.login_user_id+" ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND (users_requests.is_request=0 OR users_requests.is_request IS null ) AND ( users_requests.request_for <>' "+req.query.login_user_id+"' OR users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  )" +
         condition +
         " GROUP BY users.id  ORDER BY users.id DESC  limit  " +
         page * 10 +
@@ -437,28 +449,14 @@ exports.friendsList = function (req, res) {
     // req.query.login_user_id +
     // "' OR  users_requests.user_id IS NULL)
     connection.query(sql, async function (err, users) {
+      // COUNT(users.id) AS total_count
       var sqlCount1 =
-        "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON (users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") LEFT JOIN users_requests UR ON (UR.user_id=users.id  AND UR.request_for="+req.query.login_user_id+" )     WHERE users.is_group=0     AND ( users_requests.user_id <>'" +
+        "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") OR  (users_requests.user_id=users.id AND users_requests.request_for="+req.query.login_user_id+"))     WHERE users.is_group=0     AND ( users_requests.user_id <>'" +
         req.query.login_user_id +
-        "' OR users_requests.is_both_follow=0 OR (users_requests.is_both_follow IS null AND ( UR.request_for <>'" +
-        req.query.login_user_id +
-        "' OR UR.is_both_follow IS NULL OR UR.is_both_follow=0) ) )  AND users.id <>'" +
-        req.query.login_user_id +
-        "'  AND ( users_requests.request_for <>'" +
-        req.query.login_user_id +
-        "' OR users_requests.request_for IS NULL ) AND (users_requests.user_id <>'" +
-        req.query.login_user_id +
-        " ' OR users_requests.is_accepted=0 OR  users_requests.is_accepted IS NULL) AND ( users_requests.user_id <>'" +
-        req.query.login_user_id +
-        " ' OR users_requests.is_reject=0 OR users_requests.is_reject IS NULL ) AND (users_requests.user_id <>'" +
-        req.query.login_user_id +
-        " ' OR users_requests.is_request=0 OR users_requests.is_request IS NULL ) AND ((users_requests.user_id <>'" +
-        req.query.login_user_id +
-        " ' OR users_requests.is_follow=0 OR users_requests.is_follow IS NULL )  OR users_requests.user_id<> '" +
-        req.query.login_user_id +
-        "' )  " +
+        "'   AND users_requests.request_for<> "+req.query.login_user_id+" ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND (users_requests.is_request=0 OR users_requests.is_request IS null ) AND ( users_requests.request_for <>' "+req.query.login_user_id+"' OR users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  )" +
         condition +
         " GROUP BY users.id";
+        
       console.log("sqlCount1==========", sqlCount1);
       var sqlCountrequest =
         "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
