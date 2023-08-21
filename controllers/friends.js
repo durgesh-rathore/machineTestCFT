@@ -4,15 +4,13 @@ var constants = require("../config/constants");
 var { encryptPassword, checkPassword } = require("../config/custom");
 var multer = require("multer");
 const path = require("path");
-var { pushNotification,findOne } = require("../helpers/helper");
+var { pushNotification, findOne } = require("../helpers/helper");
 const fs = require("fs");
 const e = require("express");
 var a =
   "CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
   constants.BASE_URL +
   "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
-
-
 
 exports.followUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
@@ -26,7 +24,7 @@ exports.followUser = function (req, res) {
         " AND user_id=" +
         req.body.request_for +
         " )",
-     async function (err, usersRequest) {
+      async function (err, usersRequest) {
         if (usersRequest.length > 0) {
           if (usersRequest[0].is_both_follow == 1) {
             return res.json({
@@ -34,58 +32,74 @@ exports.followUser = function (req, res) {
               message: "Already following.",
             });
           } else {
-
-            
-             connection.query(
-      "SELECT * FROM users WHERE id ="+req.body.request_for +" ",
-     async function (err, notificationFor) {
-
-            console.log(notificationFor,"ddddddd notificationFor===")
-            
-            var forf = " is_both_follow=1  ";
-            if (usersRequest[0].is_follow == 0) {
-              if (req.body.login_user_id == usersRequest[0].request_for) {
-                forf =
-                  "  is_follow=1,user_id=" +
-                  usersRequest[0].request_for +
-                  ",request_for=" +
-                  usersRequest[0].user_id +
-                  "  ";
-                  pushNotification(notificationFor[0].divice_token,"Follow you ","");
-              } else if (req.body.login_user_id == usersRequest[0].user_id) {
-                forf = " is_follow=1 ";
-                pushNotification(notificationFor[0].divice_token,"Follow you ","");
-              }
-              pushNotification(notificationFor[0].divice_token,"Follow you ","");
-            }else{
-              pushNotification(notificationFor[0].divice_token,"Follow Back you ","");
-            }
             connection.query(
-              " UPDATE users_requests SET " +
-                forf +
-                "  WHERE ( user_id=" +
-                req.body.login_user_id +
-                " AND request_for=" +
-                req.body.request_for +
-                ") OR ( request_for=" +
-                req.body.login_user_id +
-                " AND user_id=" +
-                req.body.request_for +
-                " )",
+              "SELECT * FROM users WHERE id =" + req.body.request_for + " ",
+              async function (err, notificationFor) {
+                console.log(notificationFor, "ddddddd notificationFor===");
 
-              async function (err, result) {
-                if (err) throw err;
-                if (result) {
-                  return res.json({
-                    success: true,
-                    response: result.insertId,
-                    message: "followed.",
-                  });
+                var forf = " is_both_follow=1  ";
+                if (usersRequest[0].is_follow == 0) {
+                  if (req.body.login_user_id == usersRequest[0].request_for) {
+                    forf =
+                      "  is_follow=1,user_id=" +
+                      usersRequest[0].request_for +
+                      ",request_for=" +
+                      usersRequest[0].user_id +
+                      "  ";
+                    pushNotification(
+                      notificationFor[0].divice_token,
+                      "Follow you ",
+                      ""
+                    );
+                  } else if (
+                    req.body.login_user_id == usersRequest[0].user_id
+                  ) {
+                    forf = " is_follow=1 ";
+                    pushNotification(
+                      notificationFor[0].divice_token,
+                      "Follow you ",
+                      ""
+                    );
+                  }
+                  pushNotification(
+                    notificationFor[0].divice_token,
+                    "Follow you ",
+                    ""
+                  );
+                } else {
+                  pushNotification(
+                    notificationFor[0].divice_token,
+                    "Follow Back you ",
+                    ""
+                  );
                 }
+                connection.query(
+                  " UPDATE users_requests SET " +
+                    forf +
+                    "  WHERE ( user_id=" +
+                    req.body.login_user_id +
+                    " AND request_for=" +
+                    req.body.request_for +
+                    ") OR ( request_for=" +
+                    req.body.login_user_id +
+                    " AND user_id=" +
+                    req.body.request_for +
+                    " )",
+
+                  async function (err, result) {
+                    if (err) throw err;
+                    if (result) {
+                      return res.json({
+                        success: true,
+                        response: result.insertId,
+                        message: "followed.",
+                      });
+                    }
+                  }
+                );
               }
             );
-           }) 
-           }
+          }
         } else {
           var users_request = {
             user_id: req.body.login_user_id,
@@ -100,15 +114,16 @@ exports.followUser = function (req, res) {
               if (err) throw err;
               console.log("follow", err);
               if (result) {
-
-
-                
-                  connection.query(
-      "SELECT * FROM users WHERE id ="+req.body.request_for +" ",
-     async function (err, notificationFor) {
-                pushNotification(notificationFor[0].divice_token,"Follow you ","");
-              })
-
+                connection.query(
+                  "SELECT * FROM users WHERE id =" + req.body.request_for + " ",
+                  async function (err, notificationFor) {
+                    pushNotification(
+                      notificationFor[0].divice_token,
+                      "Follow you ",
+                      ""
+                    );
+                  }
+                );
 
                 return res.json({
                   success: true,
@@ -128,7 +143,7 @@ exports.followUser = function (req, res) {
     );
   }
 };
-exports.requestForUser = function (req, res) { 
+exports.requestForUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
     connection.query(
       "SELECT * FROM users_requests WHERE ( user_id=" +
@@ -140,45 +155,64 @@ exports.requestForUser = function (req, res) {
         " AND user_id=" +
         req.body.request_for +
         " )",
-    async  function (err, usersRequest) {
+      async function (err, usersRequest) {
         if (usersRequest.length > 0) {
-          if(usersRequest[0].is_request==1){
-          return res.json({
-            success: true,
-            message: "Already requested.",
-          });
-        }else{
-          var notificationFor=  await findOne("users","id="+req.body.request_for);
-          
+          if (usersRequest[0].is_request == 1) {
+            return res.json({
+              success: true,
+              message: "Already requested.",
+            });
+          } else {
+            var notificationFor = await findOne(
+              "users",
+              "id=" + req.body.request_for
+            );
 
-          var updateSql=" ";
-          if(usersRequest[0].user_id==req.body.login_user_id){
-           updateSql =
-          " UPDATE users_requests SET is_request=1,request_by="+req.body.login_user_id+"  WHERE id= " +
-          usersRequest[0].id;
-          pushNotification(notificationFor.divice_token,"Frieds request for you","");
-          }else{
-            updateSql =
-            " UPDATE users_requests SET is_request=1,request_by="+req.body.login_user_id+",user_id  ="+ req.body.login_user_id+", request_for=" + usersRequest[0].user_id +"  WHERE id= " +
-            usersRequest[0].id;
-            pushNotification(notificationFor.divice_token,"Frieds request for you","");
+            var updateSql = " ";
+            if (usersRequest[0].user_id == req.body.login_user_id) {
+              updateSql =
+                " UPDATE users_requests SET is_request=1,request_by=" +
+                req.body.login_user_id +
+                "  WHERE id= " +
+                usersRequest[0].id;
+              pushNotification(
+                notificationFor.divice_token,
+                "Frieds request for you",
+                ""
+              );
+            } else {
+              updateSql =
+                " UPDATE users_requests SET is_request=1,request_by=" +
+                req.body.login_user_id +
+                ",user_id  =" +
+                req.body.login_user_id +
+                ", request_for=" +
+                usersRequest[0].user_id +
+                "  WHERE id= " +
+                usersRequest[0].id;
+              pushNotification(
+                notificationFor.divice_token,
+                "Frieds request for you",
+                ""
+              );
+            }
+            connection.query(updateSql, async function (err, result) {
+              if (err) throw err;
+              if (result) {
+                return res.json({
+                  success: true,
+                  message: "Request .",
+                });
+              }
+            });
           }
-          connection.query(updateSql, async function (err, result) {
-            if (err) throw err;
-            if (result) {
-              return res.json({
-                success: true,
-                message: "Request .",
-              });
-            }})
-        }
         } else {
           var users_request = {
             user_id: req.body.login_user_id,
             request_for: req.body.request_for,
             request_by: req.body.login_user_id,
-            is_request: 1
-            
+            is_request: 1,
+
             //  suppose:55
           };
           connection.query(
@@ -207,84 +241,65 @@ exports.requestForUser = function (req, res) {
 };
 exports.unFollowUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
-    if(req.body.unfriend!=1){
-    connection.query(
-      "SELECT * FROM users_requests WHERE ( user_id=" +
-        req.body.login_user_id +
-        " AND request_for=" +
-        req.body.request_for +
-        ") OR ( request_for=" +
-        req.body.login_user_id +
-        " AND user_id=" +
-        req.body.request_for +
-        " )",
-      function (err, usersRequest) {
-        if (usersRequest.length > 0) {
-          var updateSql = " ";
-          if (usersRequest[0].is_both_follow == 1) {
-            if (req.body.login_user_id == usersRequest[0].request_for) {
-              updateSql =
-                " UPDATE users_requests SET is_both_follow=0  WHERE id= " +
-                usersRequest[0].id;
-            } else if (req.body.login_user_id == usersRequest[0].user_id) {
-              updateSql =
-                " UPDATE users_requests SET  user_id=" +
-                usersRequest[0].request_for +
-                ",request_for=" +
-                usersRequest[0].user_id +
-                ", is_both_follow=0  WHERE id= " +
-                usersRequest[0].id;
-            }
-          } else {
-            updateSql =
-              " UPDATE users_requests SET is_follow=0  WHERE id= " +
-              usersRequest[0].id;
-          }
-          connection.query(updateSql, async function (err, result) {
-            if (err) throw err;
-            if (result) {
-              return res.json({
-                success: true,
-                response: result.insertId,
-                message: "Unfollow .",
-              });
+          connection.query(
+        "SELECT * FROM users_requests WHERE ( user_id=" +
+          req.body.login_user_id +
+          " AND request_for=" +
+          req.body.request_for +
+          ") OR ( request_for=" +
+          req.body.login_user_id +
+          " AND user_id=" +
+          req.body.request_for +
+          " )",
+        function (err, usersRequest) {
+          if (usersRequest.length > 0) {
+            var updateSql = " ";
+            if (usersRequest[0].is_both_follow == 1) {
+              if (req.body.login_user_id == usersRequest[0].request_for) {
+                updateSql =
+                  " UPDATE users_requests SET is_both_follow=0  WHERE id= " +
+                  usersRequest[0].id;
+              } else if (req.body.login_user_id == usersRequest[0].user_id) {
+                updateSql =
+                  " UPDATE users_requests SET  user_id=" +
+                  usersRequest[0].request_for +
+                  ",request_for=" +
+                  usersRequest[0].user_id +
+                  ", is_both_follow=0  WHERE id= " +
+                  usersRequest[0].id;
+              }
             } else {
-              return res.json({
-                success: false,
-                message: "Something went wrong.",
-              });
+              updateSql =
+                " UPDATE users_requests SET is_follow=0  WHERE id= " +
+                usersRequest[0].id;
             }
-          });
-        }else{
-          return res.json({
-            success: false,
-            message: "Something went wrong .",
-          });
+            connection.query(updateSql, async function (err, result) {
+              if (err) throw err;
+              if (result) {
+                return res.json({
+                  success: true,
+                  response: result.insertId,
+                  message: "Unfollow .",
+                });
+              } else {
+                return res.json({
+                  success: false,
+                  message: "Something went wrong.",
+                });
+              }
+            });
+          } else {
+            return res.json({
+              success: false,
+              message: "Something went wrong .",
+            });
+          }
         }
-      }
-    );
-    }else{
-      var updateSql =" UPDATE users_requests SET  is_both_follow=0,is_follow=0,is_request=0,is_accepted=0,request_by=0 WHERE ( user_id=" +
-      req.body.login_user_id +
-      " AND request_for=" +
-      req.body.request_for +
-      ") OR ( request_for=" +
-      req.body.login_user_id +
-      " AND user_id=" +
-      req.body.request_for +
-      " )";
-
-      connection.query(updateSql, async function (err, result) {
-        if (err) throw err;
-        if (result) {
-          return res.json({
-            success: true,
-            message: "UnFriend.",
-          });
-        }})
-    }
+      );
+    
   }
 };
+
 
 exports.rejectUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
@@ -295,47 +310,37 @@ exports.rejectUser = function (req, res) {
         req.body.request_for,
       function (err, usersRequest) {
         if (usersRequest.length > 0) {
-          connection.query(
-            " UPDATE users_requests SET is_reject=1  WHERE user_id=" +
-              req.body.login_user_id +
-              " AND request_for=" +
-              req.body.request_for,
-            async function (err, result) {
-              if (err) throw err;
-              if (result) {
-                return res.json({
-                  success: true,
-                  message: "Rejected .",
-                });
-              } else {
-                return res.json({
-                  success: false,
-                  message: "Something went wrong.",
-                });
-              }
+          var updateSql =
+            " UPDATE users_requests SET  is_both_follow=0,is_follow=0,is_request=0,is_accepted=0,request_by=0 WHERE ( user_id=" +
+            req.body.login_user_id +
+            " AND request_for=" +
+            req.body.request_for +
+            ") OR ( request_for=" +
+            req.body.login_user_id +
+            " AND user_id=" +
+            req.body.request_for +
+            " )";
+          connection.query(updateSql, async function (err, result) {
+            if (err) throw err;
+            if (result) {
+              return res.json({
+                success: true,
+                message: "Rejected .",
+              });
+            } else {
+              return res.json({
+                success: false,
+                message: "Something went wrong.",
+              });
             }
-          );
-        } else {
-          var users_request = {
-            user_id: req.body.login_user_id,
-            request_for: req.body.request_for,
-            is_reject: 1,
-          };
+          });
+        }else{
 
-          connection.query(
-            "INSERT INTO users_requests SET ?",
-            users_request,
-            async function (err, result) {
-              if (err) throw err;
-              if (result) {
-                return res.json({
-                  success: true,
+          return res.json({
+            success: false,
+            message: "Something went wrong.",
+          });
 
-                  message: "Rejected .",
-                });
-              }
-            }
-          );
         }
       }
     );
@@ -460,14 +465,22 @@ exports.friendsList = function (req, res) {
       console.log("allFriends ===", sql);
     }
     if (req.query.type == "explore") {
-
-      
       var sql =
         "SELECT " +
         a +
-        ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") OR  (users_requests.user_id=users.id AND users_requests.request_for="+req.query.login_user_id+"))     WHERE   users.is_group=0   AND ( users_requests.user_id <>'" +
+        ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id=" +
         req.query.login_user_id +
-        "'   AND users_requests.request_for<> "+req.query.login_user_id+" OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>"+req.query.login_user_id+" ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.request_for = users.id AND users_requests.is_follow=1) THEN false ELSE true END   )  AND users.id<>"+req.query.login_user_id+" " +
+        ") OR  (users_requests.user_id=users.id AND users_requests.request_for=" +
+        req.query.login_user_id +
+        "))     WHERE   users.is_group=0   AND ( users_requests.user_id <>'" +
+        req.query.login_user_id +
+        "'   AND users_requests.request_for<> " +
+        req.query.login_user_id +
+        " OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>" +
+        req.query.login_user_id +
+        " ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.request_for = users.id AND users_requests.is_follow=1) THEN false ELSE true END   )  AND users.id<>" +
+        req.query.login_user_id +
+        " " +
         condition +
         " GROUP BY users.id  ORDER BY users.id DESC  limit  " +
         page * 10 +
@@ -477,12 +490,22 @@ exports.friendsList = function (req, res) {
     //  AND ( users_requests.user_id!='" +
     // req.query.login_user_id +
     // "' OR  users_requests.user_id IS NULL)
-    connection.query(sql, async function (err, users) { 
+    connection.query(sql, async function (err, users) {
       // COUNT(users.id) AS total_count
       var sqlCount1 =
-        "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") OR  (users_requests.user_id=users.id AND users_requests.request_for="+req.query.login_user_id+"))    WHERE   users.is_group=0   AND ( users_requests.user_id <>'" +
+        "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id=" +
         req.query.login_user_id +
-        "'   AND users_requests.request_for<> "+req.query.login_user_id+" OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>"+req.query.login_user_id+" ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.request_for = users.id AND users_requests.is_follow=1) THEN false ELSE true END   )   AND users.id<>"+req.query.login_user_id+" " +
+        ") OR  (users_requests.user_id=users.id AND users_requests.request_for=" +
+        req.query.login_user_id +
+        "))    WHERE   users.is_group=0   AND ( users_requests.user_id <>'" +
+        req.query.login_user_id +
+        "'   AND users_requests.request_for<> " +
+        req.query.login_user_id +
+        " OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>" +
+        req.query.login_user_id +
+        " ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.request_for = users.id AND users_requests.is_follow=1) THEN false ELSE true END   )   AND users.id<>" +
+        req.query.login_user_id +
+        " " +
         condition +
         " GROUP BY users.id";
 
@@ -562,15 +585,21 @@ exports.friendsListForVisibitly = function (req, res) {
     ) {
       condition = '  AND (users.name LIKE "%' + req.query.search + '%") ';
     }
-    var ch=' ';
-    if(req.query.post_id && req.query.post_id!="undefined" && req.query.post_id!="null"){
-    ch="(  SELECT id FROM visibility WHERE visibility.user_id=users.id AND visibility.post_id=" +
-      req.query.post_id +
-      " ) AS is_checked, "
+    var ch = " ";
+    if (
+      req.query.post_id &&
+      req.query.post_id != "undefined" &&
+      req.query.post_id != "null"
+    ) {
+      ch =
+        "(  SELECT id FROM visibility WHERE visibility.user_id=users.id AND visibility.post_id=" +
+        req.query.post_id +
+        " ) AS is_checked, ";
     }
 
     var sql =
-      "SELECT   " + ch +
+      "SELECT   " +
+      ch +
       a +
       ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id<>" +
       req.query.login_user_id +
