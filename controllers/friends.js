@@ -46,14 +46,14 @@ exports.followUser = function (req, res) {
                   ",request_for=" +
                   usersRequest[0].user_id +
                   "  ";
-                  pushNotification(notificationFor.device_token,"Follow you ","");
+                  pushNotification(notificationFor.divice_token,"Follow you ","");
               } else if (req.body.login_user_id == usersRequest[0].user_id) {
                 forf = " is_follow=1 ";
-                pushNotification(notificationFor.device_token,"Follow you ","");
+                pushNotification(notificationFor.divice_token,"Follow you ","");
               }
-              pushNotification(notificationFor.device_token,"Follow you ","");
+              pushNotification(notificationFor.divice_token,"Follow you ","");
             }else{
-              pushNotification(notificationFor.device_token,"Follow Back you ","");
+              pushNotification(notificationFor.divice_token,"Follow Back you ","");
             }
             connection.query(
               " UPDATE users_requests SET " +
@@ -96,7 +96,7 @@ exports.followUser = function (req, res) {
               if (result) {
 
                 var notificationFor=  await findOne("users","id="+req.body.request_for);
-                pushNotification(notificationFor.device_token,"Follow you ","");
+                pushNotification(notificationFor.divice_token,"Follow you ","");
 
 
                 return res.json({
@@ -145,12 +145,12 @@ exports.requestForUser = function (req, res) {
            updateSql =
           " UPDATE users_requests SET is_request=1,request_by="+req.body.login_user_id+"  WHERE id= " +
           usersRequest[0].id;
-          pushNotification(notificationFor.device_token,"Frieds request for you","");
+          pushNotification(notificationFor.divice_token,"Frieds request for you","");
           }else{
             updateSql =
             " UPDATE users_requests SET is_request=1,request_by="+req.body.login_user_id+",user_id  ="+ req.body.login_user_id+", request_for=" + usersRequest[0].user_id +"  WHERE id= " +
             usersRequest[0].id;
-            pushNotification(notificationFor.device_token,"Frieds request for you","");
+            pushNotification(notificationFor.divice_token,"Frieds request for you","");
           }
           connection.query(updateSql, async function (err, result) {
             if (err) throw err;

@@ -54,8 +54,8 @@ exports.signup = function (req, res) {
                     password: password,
                     mobile_number: req.body.mobile_number,
                   };
-                  if(req.body.device_token && req.body.device_token!='undefined' && req.body.device_token!="null"){
-                    newUser.device_token=req.body.device_token
+                  if(req.body.divice_token && req.body.divice_token!='undefined' && req.body.divice_token!="null"){
+                    newUser.divice_token=req.body.divice_token
                   }
                   connection.query(
                     "INSERT INTO users SET ?",
@@ -136,9 +136,10 @@ exports.signin = async function (req, res) {
                 message: "Login successfully.",
               });
             } else {
-              if(req.body.device_token && req.body.device_token!='undefined' && req.body.device_token!="null"){
+              if(req.body.divice_token && req.body.divice_token!='undefined' && req.body.divice_token!="null"){
                 
-                findByIdAndUpdate("users",{divice_token:req.body.divice_token}," id="+users[0].id);
+               var j=await findByIdAndUpdate("users",{divice_token:req.body.divice_token}," id="+users[0].id);
+               console.log("   dddddddddddd update divice token==", j)
 
               }
               return res.json({
