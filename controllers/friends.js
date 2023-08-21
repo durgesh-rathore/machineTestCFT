@@ -304,10 +304,15 @@ exports.unFollowUser = function (req, res) {
 exports.rejectUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
     connection.query(
-      "SELECT * FROM users_requests WHERE  user_id=" +
-        req.body.login_user_id +
-        " AND request_for=" +
-        req.body.request_for,
+      "SELECT * FROM users_requests WHERE ( user_id=" +
+      req.body.login_user_id +
+      " AND request_for=" +
+      req.body.request_for +
+      ") OR ( request_for=" +
+      req.body.login_user_id +
+      " AND user_id=" +
+      req.body.request_for +
+      " )",
       function (err, usersRequest) {
         if (usersRequest.length > 0) {
           var updateSql =
@@ -344,6 +349,14 @@ exports.rejectUser = function (req, res) {
         }
       }
     );
+  }
+  else{
+
+    return res.json({
+      success: false,
+      message: "Please selected users.",
+    });
+
   }
 };
 exports.blockUser = function (req, res) {
