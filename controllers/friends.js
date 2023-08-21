@@ -4,6 +4,7 @@ var constants = require("../config/constants");
 var { encryptPassword, checkPassword } = require("../config/custom");
 var multer = require("multer");
 const path = require("path");
+var { pushNotification } = require("../helpers/helper");
 const fs = require("fs");
 const e = require("express");
 var a =
@@ -25,7 +26,7 @@ exports.followUser = function (req, res) {
         " AND user_id=" +
         req.body.request_for +
         " )",
-      function (err, usersRequest) {
+     async function (err, usersRequest) {
         if (usersRequest.length > 0) {
           if (usersRequest[0].is_both_follow == 1) {
             return res.json({
@@ -33,6 +34,9 @@ exports.followUser = function (req, res) {
               message: "Already following.",
             });
           } else {
+
+            var notificationFor=  await findOne("users","id="+req.body.request_for);
+            
             var forf = " is_both_follow=1  ";
             if (usersRequest[0].is_follow == 0) {
               if (req.body.login_user_id == usersRequest[0].request_for) {
@@ -42,9 +46,14 @@ exports.followUser = function (req, res) {
                   ",request_for=" +
                   usersRequest[0].user_id +
                   "  ";
+                  pushNotification(notificationFor.device_token,"Follow you ","");
               } else if (req.body.login_user_id == usersRequest[0].user_id) {
                 forf = " is_follow=1 ";
+                pushNotification(notificationFor.device_token,"Follow you ","");
               }
+              pushNotification(notificationFor.device_token,"Follow you ","");
+            }else{
+              pushNotification(notificationFor.device_token,"Follow Back you ","");
             }
             connection.query(
               " UPDATE users_requests SET " +
@@ -85,6 +94,11 @@ exports.followUser = function (req, res) {
               if (err) throw err;
               console.log("follow", err);
               if (result) {
+
+                var notificationFor=  await findOne("users","id="+req.body.request_for);
+                pushNotification(notificationFor.device_token,"Follow you ","");
+
+
                 return res.json({
                   success: true,
 
@@ -115,7 +129,7 @@ exports.requestForUser = function (req, res) {
         " AND user_id=" +
         req.body.request_for +
         " )",
-      function (err, usersRequest) {
+    async  function (err, usersRequest) {
         if (usersRequest.length > 0) {
           if(usersRequest[0].is_request==1){
           return res.json({
@@ -123,15 +137,20 @@ exports.requestForUser = function (req, res) {
             message: "Already requested.",
           });
         }else{
+          var notificationFor=  await findOne("users","id="+req.body.request_for);
+          
+
           var updateSql=" ";
           if(usersRequest[0].user_id==req.body.login_user_id){
            updateSql =
           " UPDATE users_requests SET is_request=1,request_by="+req.body.login_user_id+"  WHERE id= " +
           usersRequest[0].id;
+          pushNotification(notificationFor.device_token,"Frieds request for you","");
           }else{
             updateSql =
             " UPDATE users_requests SET is_request=1,request_by="+req.body.login_user_id+",user_id  ="+ req.body.login_user_id+", request_for=" + usersRequest[0].user_id +"  WHERE id= " +
             usersRequest[0].id;
+            pushNotification(notificationFor.device_token,"Frieds request for you","");
           }
           connection.query(updateSql, async function (err, result) {
             if (err) throw err;
@@ -177,6 +196,7 @@ exports.requestForUser = function (req, res) {
 };
 exports.unFollowUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
+    if(req.body.unfriend!=1){
     connection.query(
       "SELECT * FROM users_requests WHERE ( user_id=" +
         req.body.login_user_id +
@@ -224,9 +244,34 @@ exports.unFollowUser = function (req, res) {
               });
             }
           });
+        }else{
+          return res.json({
+            success: false,
+            message: "Something went wrong .",
+          });
         }
       }
     );
+    }else{
+      var updateSql =" UPDATE users_requests SET  is_both_follow=0,is_follow=0,is_request=0,is_accepted=0,request_by=0 WHERE ( user_id=" +
+      req.body.login_user_id +
+      " AND request_for=" +
+      req.body.request_for +
+      ") OR ( request_for=" +
+      req.body.login_user_id +
+      " AND user_id=" +
+      req.body.request_for +
+      " )";
+
+      connection.query(updateSql, async function (err, result) {
+        if (err) throw err;
+        if (result) {
+          return res.json({
+            success: true,
+            message: "UnFriend.",
+          });
+        }})
+    }
   }
 };
 
@@ -411,7 +456,7 @@ exports.friendsList = function (req, res) {
         a +
         ",users.name,users_requests.*,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") OR  (users_requests.user_id=users.id AND users_requests.request_for="+req.query.login_user_id+"))     WHERE   users.is_group=0   AND ( users_requests.user_id <>'" +
         req.query.login_user_id +
-        "'   AND users_requests.request_for<> "+req.query.login_user_id+" OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>"+req.query.login_user_id+" ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  )   AND (  case when (users_requests.request_for = users.id) THEN false ELSE true END  ) AND users.id<>"+req.query.login_user_id+" " +
+        "'   AND users_requests.request_for<> "+req.query.login_user_id+" OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>"+req.query.login_user_id+" ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  ) OR (  case when (users_requests.request_for = users.id) THEN false ELSE true END  ) )   AND users.id<>"+req.query.login_user_id+" " +
         condition +
         " GROUP BY users.id  ORDER BY users.id DESC  limit  " +
         page * 10 +
@@ -421,12 +466,12 @@ exports.friendsList = function (req, res) {
     //  AND ( users_requests.user_id!='" +
     // req.query.login_user_id +
     // "' OR  users_requests.user_id IS NULL)
-    connection.query(sql, async function (err, users) {
+    connection.query(sql, async function (err, users) { 
       // COUNT(users.id) AS total_count
       var sqlCount1 =
         "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id="+req.query.login_user_id+") OR  (users_requests.user_id=users.id AND users_requests.request_for="+req.query.login_user_id+"))    WHERE   users.is_group=0   AND ( users_requests.user_id <>'" +
         req.query.login_user_id +
-        "'   AND users_requests.request_for<> "+req.query.login_user_id+" OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>"+req.query.login_user_id+" ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  )   AND (  case when (users_requests.request_for = users.id) THEN false ELSE true END  ) AND users.id<>"+req.query.login_user_id+" " +
+        "'   AND users_requests.request_for<> "+req.query.login_user_id+" OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>"+req.query.login_user_id+" ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  ) OR (  case when (users_requests.request_for = users.id) THEN false ELSE true END  ) )   AND users.id<>"+req.query.login_user_id+" " +
         condition +
         " GROUP BY users.id";
 
