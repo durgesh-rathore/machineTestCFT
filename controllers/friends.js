@@ -35,7 +35,12 @@ exports.followUser = function (req, res) {
             });
           } else {
 
-            var notificationFor=  await findOne("users","id="+req.body.request_for);
+            
+             connection.query(
+      "SELECT * FROM users WHERE id ="+req.body.request_for +" ",
+     async function (err, notificationFor) {
+
+            console.log(notificationFor,"ddddddd notificationFor===")
             
             var forf = " is_both_follow=1  ";
             if (usersRequest[0].is_follow == 0) {
@@ -46,14 +51,14 @@ exports.followUser = function (req, res) {
                   ",request_for=" +
                   usersRequest[0].user_id +
                   "  ";
-                  pushNotification(notificationFor.divice_token,"Follow you ","");
+                  pushNotification(notificationFor[0].divice_token,"Follow you ","");
               } else if (req.body.login_user_id == usersRequest[0].user_id) {
                 forf = " is_follow=1 ";
-                pushNotification(notificationFor.divice_token,"Follow you ","");
+                pushNotification(notificationFor[0].divice_token,"Follow you ","");
               }
-              pushNotification(notificationFor.divice_token,"Follow you ","");
+              pushNotification(notificationFor[0].divice_token,"Follow you ","");
             }else{
-              pushNotification(notificationFor.divice_token,"Follow Back you ","");
+              pushNotification(notificationFor[0].divice_token,"Follow Back you ","");
             }
             connection.query(
               " UPDATE users_requests SET " +
@@ -79,7 +84,8 @@ exports.followUser = function (req, res) {
                 }
               }
             );
-          }
+           }) 
+           }
         } else {
           var users_request = {
             user_id: req.body.login_user_id,
@@ -95,8 +101,13 @@ exports.followUser = function (req, res) {
               console.log("follow", err);
               if (result) {
 
-                var notificationFor=  await findOne("users","id="+req.body.request_for);
-                pushNotification(notificationFor.divice_token,"Follow you ","");
+
+                
+                  connection.query(
+      "SELECT * FROM users WHERE id ="+req.body.request_for +" ",
+     async function (err, notificationFor) {
+                pushNotification(notificationFor[0].divice_token,"Follow you ","");
+              })
 
 
                 return res.json({
