@@ -486,7 +486,7 @@ exports.getPostOrEventById = function (req, res) {
       constants.BASE_URL +
       "','images/postImage/',events.image) AS post_image,events.*,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,TIME_FORMAT(events.end_time, '%H:%i') AS end_time FROM  events   WHERE events.id= " +
       req.query.post_id +
-      "  AND user_id=   "+req.query.login_user_id+ " ";
+      "   ";
       
     console.log("===", sql);
     connection.query(sql, function (err, postData) {

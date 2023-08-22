@@ -5,6 +5,7 @@ var { encryptPassword, checkPassword } = require("../config/custom");
 var multer = require("multer");
 const path = require("path");
 var { pushNotification, findOne } = require("../helpers/helper");
+const { db_sql, dbScript, queryAsync } = require("../helpers/db_scripts");
 const fs = require("fs");
 const e = require("express");
 var a =
@@ -32,24 +33,30 @@ exports.followUser = function (req, res) {
               message: "Already following.",
             });
           } else {
-            connection.query(
-              "SELECT * FROM users WHERE id =" + req.body.request_for + " ",
-              async function (err, notificationFor) {
+            
+              let s3 = await dbScript(db_sql["Q3"], { var1: req.body.request_for});
+          let notificationFor = await queryAsync(s3);
                 console.log(notificationFor, "ddddddd notificationFor===");
 
                 var forf = " is_both_follow=1  ";
                 if (usersRequest[0].is_follow == 0) {
-                  if (req.body.login_user_id == usersRequest[0].request_for) {
+                  if (req.body.login_user_id == usersRequest[0].request_for && usersRequest[0].is_request==0) {
                     forf =
                       "  is_follow=1,user_id=" +
                       usersRequest[0].request_for +
                       ",request_for=" +
                       usersRequest[0].user_id +
                       "  ";
+                      var render=2
+                      if(usersRequest[0].is_request==1){
+                        render=3
+                      }else{
+                        render=2
+                      }
                     pushNotification(
                       notificationFor[0].divice_token,
                       "Follow you ",
-                      ""
+                      render
                     );
                   } else if (
                     req.body.login_user_id == usersRequest[0].user_id
@@ -58,19 +65,19 @@ exports.followUser = function (req, res) {
                     pushNotification(
                       notificationFor[0].divice_token,
                       "Follow you ",
-                      ""
+                      "3"
                     );
                   }
                   pushNotification(
                     notificationFor[0].divice_token,
                     "Follow you ",
-                    ""
+                    "3"
                   );
                 } else {
                   pushNotification(
                     notificationFor[0].divice_token,
                     "Follow Back you ",
-                    ""
+                    "3"
                   );
                 }
                 connection.query(
@@ -97,15 +104,14 @@ exports.followUser = function (req, res) {
                     }
                   }
                 );
-              }
-            );
+            
           }
         } else {
           var users_request = {
             user_id: req.body.login_user_id,
             request_for: req.body.request_for,
             is_follow: 1,
-            //  suppose:55
+            
           };
           connection.query(
             "INSERT INTO users_requests SET ?",
@@ -119,8 +125,8 @@ exports.followUser = function (req, res) {
                   async function (err, notificationFor) {
                     pushNotification(
                       notificationFor[0].divice_token,
-                      "Follow you ",
-                      ""
+                      "Follow you please follow back or send request ",
+                      "2"
                     );
                   }
                 );
@@ -156,6 +162,14 @@ exports.requestForUser = function (req, res) {
         req.body.request_for +
         " )",
       async function (err, usersRequest) {
+        var render = 1;
+        // var notificationFor = await findOne(
+        //   "users",
+        //   "id=" + req.body.request_for
+        // );
+        let s3 = await dbScript(db_sql["Q3"], { var1: req.body.request_for});
+        let notificationFor = await queryAsync(s3);
+
         if (usersRequest.length > 0) {
           if (usersRequest[0].is_request == 1) {
             return res.json({
@@ -163,10 +177,8 @@ exports.requestForUser = function (req, res) {
               message: "Already requested.",
             });
           } else {
-            var notificationFor = await findOne(
-              "users",
-              "id=" + req.body.request_for
-            );
+            
+            
 
             var updateSql = " ";
             if (usersRequest[0].user_id == req.body.login_user_id) {
@@ -176,9 +188,9 @@ exports.requestForUser = function (req, res) {
                 "  WHERE id= " +
                 usersRequest[0].id;
               pushNotification(
-                notificationFor.divice_token,
+                notificationFor[0].divice_token,
                 "Frieds request for you",
-                ""
+                render
               );
             } else {
               updateSql =
@@ -191,9 +203,9 @@ exports.requestForUser = function (req, res) {
                 "  WHERE id= " +
                 usersRequest[0].id;
               pushNotification(
-                notificationFor.divice_token,
+                notificationFor[0].divice_token,
                 "Frieds request for you",
-                ""
+                render
               );
             }
             connection.query(updateSql, async function (err, result) {
@@ -222,6 +234,12 @@ exports.requestForUser = function (req, res) {
               if (err) throw err;
               console.log("Request button api", err);
               if (result) {
+
+                pushNotification(
+                  notificationFor[0].divice_token,
+                  "Frieds request for you",
+                  render
+                );
                 return res.json({
                   success: true,
                   message: "Request .",
@@ -241,78 +259,76 @@ exports.requestForUser = function (req, res) {
 };
 exports.unFollowUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
-          connection.query(
-        "SELECT * FROM users_requests WHERE ( user_id=" +
-          req.body.login_user_id +
-          " AND request_for=" +
-          req.body.request_for +
-          ") OR ( request_for=" +
-          req.body.login_user_id +
-          " AND user_id=" +
-          req.body.request_for +
-          " )",
-        function (err, usersRequest) {
-          if (usersRequest.length > 0) {
-            var updateSql = " ";
-            if (usersRequest[0].is_both_follow == 1) {
-              if (req.body.login_user_id == usersRequest[0].request_for) {
-                updateSql =
-                  " UPDATE users_requests SET is_both_follow=0  WHERE id= " +
-                  usersRequest[0].id;
-              } else if (req.body.login_user_id == usersRequest[0].user_id) {
-                updateSql =
-                  " UPDATE users_requests SET  user_id=" +
-                  usersRequest[0].request_for +
-                  ",request_for=" +
-                  usersRequest[0].user_id +
-                  ", is_both_follow=0  WHERE id= " +
-                  usersRequest[0].id;
-              }
-            } else {
+    connection.query(
+      "SELECT * FROM users_requests WHERE ( user_id=" +
+        req.body.login_user_id +
+        " AND request_for=" +
+        req.body.request_for +
+        ") OR ( request_for=" +
+        req.body.login_user_id +
+        " AND user_id=" +
+        req.body.request_for +
+        " )",
+      function (err, usersRequest) {
+        if (usersRequest.length > 0) {
+          var updateSql = " ";
+          if (usersRequest[0].is_both_follow == 1) {
+            if (req.body.login_user_id == usersRequest[0].request_for) {
               updateSql =
-                " UPDATE users_requests SET is_follow=0  WHERE id= " +
+                " UPDATE users_requests SET is_both_follow=0  WHERE id= " +
+                usersRequest[0].id;
+            } else if (req.body.login_user_id == usersRequest[0].user_id) {
+              updateSql =
+                " UPDATE users_requests SET  user_id=" +
+                usersRequest[0].request_for +
+                ",request_for=" +
+                usersRequest[0].user_id +
+                ", is_both_follow=0  WHERE id= " +
                 usersRequest[0].id;
             }
-            connection.query(updateSql, async function (err, result) {
-              if (err) throw err;
-              if (result) {
-                return res.json({
-                  success: true,
-                  response: result.insertId,
-                  message: "Unfollow .",
-                });
-              } else {
-                return res.json({
-                  success: false,
-                  message: "Something went wrong.",
-                });
-              }
-            });
           } else {
-            return res.json({
-              success: false,
-              message: "Something went wrong .",
-            });
+            updateSql =
+              " UPDATE users_requests SET is_follow=0  WHERE id= " +
+              usersRequest[0].id;
           }
+          connection.query(updateSql, async function (err, result) {
+            if (err) throw err;
+            if (result) {
+              return res.json({
+                success: true,
+                response: result.insertId,
+                message: "Unfollow .",
+              });
+            } else {
+              return res.json({
+                success: false,
+                message: "Something went wrong.",
+              });
+            }
+          });
+        } else {
+          return res.json({
+            success: false,
+            message: "Something went wrong .",
+          });
         }
-      );
-    
+      }
+    );
   }
 };
-
 
 exports.rejectUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
     connection.query(
       "SELECT * FROM users_requests WHERE ( user_id=" +
-      req.body.login_user_id +
-      " AND request_for=" +
-      req.body.request_for +
-      ") OR ( request_for=" +
-      req.body.login_user_id +
-      " AND user_id=" +
-      req.body.request_for +
-      " )",
+        req.body.login_user_id +
+        " AND request_for=" +
+        req.body.request_for +
+        ") OR ( request_for=" +
+        req.body.login_user_id +
+        " AND user_id=" +
+        req.body.request_for +
+        " )",
       function (err, usersRequest) {
         if (usersRequest.length > 0) {
           var updateSql =
@@ -339,24 +355,19 @@ exports.rejectUser = function (req, res) {
               });
             }
           });
-        }else{
-
+        } else {
           return res.json({
             success: false,
             message: "Something went wrong.",
           });
-
         }
       }
     );
-  }
-  else{
-
+  } else {
     return res.json({
       success: false,
       message: "Please selected users.",
     });
-
   }
 };
 exports.blockUser = function (req, res) {
