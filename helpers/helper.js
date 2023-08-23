@@ -7,7 +7,7 @@ const nodemailer = require("nodemailer");
 
 const gcm = require('node-gcm');
 
-async function pushNotification(device_token,message,status) {
+async function pushNotification(device_token,message,status=3) {
   title = 'ForgetMeNote'
   // Set up the sender with your GCM/FCM API key (declare this once for multiple messages) 
   var sender = new gcm.Sender(constants.FIREBASE_NOTIFICATION_KEY);
