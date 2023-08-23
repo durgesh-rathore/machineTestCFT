@@ -39,6 +39,7 @@ exports.followUser = function (req, res) {
                 console.log(notificationFor, "ddddddd notificationFor===");
 
                 var forf = " is_both_follow=1  ";
+                
                 if (usersRequest[0].is_follow == 0) {
                   if (req.body.login_user_id == usersRequest[0].request_for && usersRequest[0].is_request==0) {
                     forf =
@@ -55,7 +56,7 @@ exports.followUser = function (req, res) {
                       }
                     pushNotification(
                       notificationFor[0].divice_token,
-                      "Follow you ",
+                      "Followed you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
                       render
                     );
                   } else if (
@@ -64,19 +65,21 @@ exports.followUser = function (req, res) {
                     forf = " is_follow=1 ";
                     pushNotification(
                       notificationFor[0].divice_token,
-                      "Follow you ",
+                      "Followed you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
                       "3"
                     );
-                  }
+                  }else{
                   pushNotification(
                     notificationFor[0].divice_token,
-                    "Follow you ",
+                    "Followed you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
                     "3"
                   );
+                  }
                 } else {
                   pushNotification(
                     notificationFor[0].divice_token,
                     "Follow Back you ",
+                    "Followed Back  you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
                     "3"
                   );
                 }
@@ -125,8 +128,8 @@ exports.followUser = function (req, res) {
                   async function (err, notificationFor) {
                     pushNotification(
                       notificationFor[0].divice_token,
-                      "Follow you please follow back or send request ",
-                      "2"
+                      "Followed you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
+                        "2"
                     );
                   }
                 );
@@ -189,7 +192,7 @@ exports.requestForUser = function (req, res) {
                 usersRequest[0].id;
               pushNotification(
                 notificationFor[0].divice_token,
-                "Frieds request for you",
+                "Frieds request for you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
                 render
               );
             } else {
@@ -204,7 +207,7 @@ exports.requestForUser = function (req, res) {
                 usersRequest[0].id;
               pushNotification(
                 notificationFor[0].divice_token,
-                "Frieds request for you",
+                 "Frieds request for you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
                 render
               );
             }
@@ -237,7 +240,7 @@ exports.requestForUser = function (req, res) {
 
                 pushNotification(
                   notificationFor[0].divice_token,
-                  "Frieds request for you",
+                  "Frieds request for you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
                   render
                 );
                 return res.json({
