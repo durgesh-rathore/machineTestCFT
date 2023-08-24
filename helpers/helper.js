@@ -7,12 +7,31 @@ const nodemailer = require("nodemailer");
 
 const gcm = require('node-gcm');
 
-async function pushNotification(device_token,message,status=3) {
+async function pushNotification(device_token,message,status) {
+  var status=3;
+// async function pushNotification(device_token,message,) {
+  console.log("device_token,message,status",device_token,message,status)
   title = 'ForgetMeNote'
   // Set up the sender with your GCM/FCM API key (declare this once for multiple messages) 
   var sender = new gcm.Sender(constants.FIREBASE_NOTIFICATION_KEY);
      var message = new gcm.Message({
       data: { title: title, message: message, status : status},
+      notification: { title: title, body: message}
+  });
+  // Actually send the message
+  sender.send(message, { registrationTokens: [device_token] }, function (err, response) {
+      if (err) console.error(err);
+      if(response) console.log(response,"response======== of push notification ===")
+  });
+}
+
+
+async function pushNotification1(device_token,message,status,post_id,post_type) {
+  title = 'ForgetMeNote'
+  // Set up the sender with your GCM/FCM API key (declare this once for multiple messages) 
+  var sender = new gcm.Sender(constants.FIREBASE_NOTIFICATION_KEY);
+     var message = new gcm.Message({
+      data: { title: title, message: message, status : status,post_id:post_id,post_type:post_type},
       notification: { title: title, body: message}
   });
   // Actually send the message
@@ -105,5 +124,6 @@ async function save(tbl,data) {
   findOne,
   findByIdAndUpdate,
   sendMail,
-  pushNotification
+  pushNotification,
+  pushNotification1
   }

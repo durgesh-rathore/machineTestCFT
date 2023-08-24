@@ -78,7 +78,7 @@ exports.followUser = function (req, res) {
                 } else {
                   pushNotification(
                     notificationFor[0].divice_token,
-                    "Follow Back you ",
+                    // "Follow Back you ",
                     "Followed Back  you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
                     "3"
                   );

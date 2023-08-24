@@ -2,7 +2,8 @@ var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
 
-var { save, findByIdAndUpdate,findOne } = require("../helpers/helper");
+var { save, findByIdAndUpdate,findOne ,pushNotification1} = require("../helpers/helper");
+
 var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -47,6 +48,29 @@ if(req.body.visibilitySelectUsers && req.body.visibilitySelectUsers!="undefined"
     }else{
        c = await save("events", userPost);
        console.log("c==== when are we creating", c );
+
+       var sql1="SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE divice_token Is not null";
+       
+       connection.query(sql1, function (err, device_tokens) {
+        console.log(err, device_tokens);
+        if (device_tokens.length > 0) {
+
+const originalTokenString = device_tokens[0].divice_token; 
+const tokenArray = originalTokenString.split(', ');
+// const newArray = [{ divice_token: tokenArray }];
+
+console.log(tokenArray);
+
+  
+          pushNotification1(
+            tokenArray,
+            "Followed you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
+            4,
+            c,
+            1
+          );
+        }})
+     
     }
     console.log("c==== perfection ", c ); 
     

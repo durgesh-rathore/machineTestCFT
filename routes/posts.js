@@ -6,7 +6,7 @@ var router = express.Router();
 
 router.post(
   "/new",
-  checkUserStatus.userStatus,
+  // checkUserStatus.userStatus,
   uploadFiles("public/images/postImage").single("image"),
   postController.new
 );
