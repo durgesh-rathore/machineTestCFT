@@ -35,7 +35,7 @@ async function pushNotification1(device_token,message,status,post_id,post_type) 
       notification: { title: title, body: message}
   });
   // Actually send the message
-  sender.send(message, { registrationTokens: [device_token] }, function (err, response) {
+  sender.send(message, { registrationTokens: [device_token[0]] }, function (err, response) {
       if (err) console.error(err);
   });
 }

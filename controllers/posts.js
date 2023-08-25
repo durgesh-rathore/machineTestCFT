@@ -51,7 +51,7 @@ if(req.body.visibilitySelectUsers && req.body.visibilitySelectUsers!="undefined"
 
        var sql1="SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE divice_token Is not null";
        
-       connection.query(sql1, function (err, device_tokens) {
+       connection.query(sql1, async function (err, device_tokens) {
         console.log(err, device_tokens);
         if (device_tokens.length > 0) {
 
@@ -62,9 +62,9 @@ const tokenArray = originalTokenString.split(', ');
 console.log(tokenArray);
 
   
-          pushNotification1(
+       await   pushNotification1(
             tokenArray,
-            "Followed you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
+            "Post Created By "+(req.body.login_user_name?req.body.login_user_name:'')+"",
             4,
             c,
             1
@@ -148,6 +148,27 @@ exports.postEvent = async function (req, res) {
   }else{
      c = await save("events", userPost);
      console.log("c==== when are we creating", c );
+     var sql1="SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE divice_token Is not null";
+       
+       connection.query(sql1, async function (err, device_tokens) {
+        console.log(err, device_tokens);
+        if (device_tokens.length > 0) {
+
+const originalTokenString = device_tokens[0].divice_token; 
+const tokenArray = originalTokenString.split(', ');
+// const newArray = [{ divice_token: tokenArray }];
+
+console.log(tokenArray);
+
+  
+       await   pushNotification1(
+            tokenArray,
+            "Event Created By "+(req.body.login_user_name?req.body.login_user_name:'')+"",
+            4,
+            c,
+            0
+          );
+        }})
   }
   console.log("c====", c);
   if (c) {
@@ -226,12 +247,12 @@ exports.getPostsAndEventsList = function (req, res) {
 
 	
     
-
+  // OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )      )
 
   var condition =
     " ((events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +    req.query.login_user_id +
     " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 OR users_requests.is_request=1)  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (ur2.request_for=" +    req.query.login_user_id +
-    " AND (ur2.is_accepted=1 OR ur2.is_both_follow=1 OR ur2.is_request=1)   AND ur2.is_reject=0  AND ur2.is_block=0  )     OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )      )  OR visibility.user_id=" +    req.query.login_user_id +
+    " AND (ur2.is_accepted=1 OR ur2.is_both_follow=1 OR ur2.is_request=1)   AND ur2.is_reject=0  AND ur2.is_block=0  )      OR visibility.user_id=" +    req.query.login_user_id +
     " OR groups_users.group_id=" +
     req.query.login_user_id +
     " ) AND (visibility.not_visible=0 OR visibility.not_visible IS NULL) ";
