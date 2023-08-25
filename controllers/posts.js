@@ -65,9 +65,9 @@ console.log(tokenArray);
        await   pushNotification1(
             tokenArray,
             "Post Created By "+(req.body.login_user_name?req.body.login_user_name:'')+"",
-            4,
-            c,
-            1
+            "4",
+            c+"",
+            "1"
           );
         }})
      
@@ -164,9 +164,9 @@ console.log(tokenArray);
        await   pushNotification1(
             tokenArray,
             "Event Created By "+(req.body.login_user_name?req.body.login_user_name:'')+"",
-            4,
-            c,
-            0
+            "4",
+            c+"",
+            "0"
           );
         }})
   }
