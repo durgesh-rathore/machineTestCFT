@@ -153,13 +153,14 @@ async function pushNotification1(
 
   const notificationPayload = {
     notification: {
-      title: "Notification Title",
-      body: "Notification Body",
+      title: "ForgetMeNote",
+      body: message
     },
     // Add any additional data you want to send
     data: {
-      key1: "value1",
-      key2: "value2",
+      status: status,
+      post_id:post_id,
+      post_type:post_type
       // ...
     },
   };
