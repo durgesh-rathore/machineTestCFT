@@ -217,29 +217,44 @@ exports.postEvent = async function (req, res) {
   } else {
     c = await save("events", data);
     console.log("c==== when are we creating", c);
-    var sql1 =
-      "SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE divice_token Is not null";
 
-    connection.query(sql1, async function (err, device_tokens) {
-      console.log(err, device_tokens);
-      if (device_tokens.length > 0) {
-        const originalTokenString = device_tokens[0].divice_token;
-        const tokenArray = originalTokenString.split(", ");
-        // const newArray = [{ divice_token: tokenArray }];
 
-        console.log(tokenArray);
+    var PNF = {
+      post_id: c,
+      message:
+        "Event Created By  " +
+        (req.body.login_user_name ? req.body.login_user_name : "") +
+        "",
+      post_type: "0",
+      login_user_id: req.body.login_user_id+"",
+      user_id: req.body.user_id+"",
+      visibilitySelectUsers: req.body.visibilitySelectUsers
+    };
 
-        await pushNotification1(
-          tokenArray,
-          "Event Created By " +
-            (req.body.login_user_name ? req.body.login_user_name : "") +
-            "",
-          "4",
-          c + "",
-          "0"
-        );
-      }
-    });
+    pushNotificationForMultipleUser(PNF);
+    // var sql1 =
+    //   "SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE divice_token Is not null";
+
+    // connection.query(sql1, async function (err, device_tokens) {
+    //   console.log(err, device_tokens);
+    //   if (device_tokens.length > 0) {
+    //     const originalTokenString = device_tokens[0].divice_token;
+    //     const tokenArray = originalTokenString.split(", ");
+    //     // const newArray = [{ divice_token: tokenArray }];
+
+    //     console.log(tokenArray);
+
+    //     await pushNotification1(
+    //       tokenArray,
+    //       "Event Created By " +
+    //         (req.body.login_user_name ? req.body.login_user_name : "") +
+    //         "",
+    //       "4",
+    //       c + "",
+    //       "0"
+    //     );
+    //   }
+    // });
   }
   console.log("c====", c);
   if (c) {
