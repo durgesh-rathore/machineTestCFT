@@ -247,12 +247,12 @@ exports.getPostsAndEventsList = function (req, res) {
 
 	
     
-
+// OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )  
 
   var condition =
-    " ((events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +    req.query.login_user_id +
+    " (events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +    req.query.login_user_id +
     " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 OR users_requests.is_request=1)  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (ur2.request_for=" +    req.query.login_user_id +
-    " AND (ur2.is_accepted=1 OR ur2.is_both_follow=1 OR ur2.is_request=1)   AND ur2.is_reject=0  AND ur2.is_block=0  )     OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )      )  OR visibility.user_id=" +    req.query.login_user_id +
+    " AND (ur2.is_accepted=1 OR ur2.is_both_follow=1 OR ur2.is_request=1)   AND ur2.is_reject=0  AND ur2.is_block=0  )         )  OR visibility.user_id=" +    req.query.login_user_id +
     " OR groups_users.group_id=" +
     req.query.login_user_id +
     " ) AND (visibility.not_visible=0 OR visibility.not_visible IS NULL) ";
