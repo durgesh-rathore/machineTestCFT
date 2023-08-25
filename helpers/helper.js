@@ -2,42 +2,70 @@ var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 var connection = require("../config/db");
+
 var constants = require("../config/constants");
 const nodemailer = require("nodemailer");
 
-const gcm = require('node-gcm');
+const gcm = require("node-gcm");
 
-async function pushNotification(device_token,message,status) {
-  var status=3;
-// async function pushNotification(device_token,message,) {
-  console.log("device_token,message,status",device_token,message,status)
-  title = 'ForgetMeNote'
-  // Set up the sender with your GCM/FCM API key (declare this once for multiple messages) 
+var admin = require("firebase-admin");
+const serviceAccount = require("../config/forgetme-note-beta-firebase-adminsdk-jodor-ab73605fd4.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+async function pushNotification(device_token, message, status) {
+  var status = 3;
+  // async function pushNotification(device_token,message,) {
+  console.log("device_token,message,status", device_token, message, status);
+  title = "ForgetMeNote";
+  // Set up the sender with your GCM/FCM API key (declare this once for multiple messages)
   var sender = new gcm.Sender(constants.FIREBASE_NOTIFICATION_KEY);
-     var message = new gcm.Message({
-      data: { title: title, message: message, status : status},
-      notification: { title: title, body: message}
+  var message = new gcm.Message({
+    data: { title: title, message: message, status: status },
+    notification: { title: title, body: message },
   });
   // Actually send the message
-  sender.send(message, { registrationTokens: [device_token] }, function (err, response) {
+  sender.send(
+    message,
+    { registrationTokens: [device_token] },
+    function (err, response) {
       if (err) console.error(err);
-      if(response) console.log(response,"response======== of push notification ===")
-  });
+      if (response)
+        console.log(response, "response======== of push notification ===");
+    }
+  );
 }
 
-
-async function pushNotification1(device_token,message,status,post_id,post_type) {
-  title = 'ForgetMeNote'
-  // Set up the sender with your GCM/FCM API key (declare this once for multiple messages) 
+async function pushNotification12(
+  device_token,
+  message,
+  status,
+  post_id,
+  post_type
+) {
+  title = "ForgetMeNote";
+  // Set up the sender with your GCM/FCM API key (declare this once for multiple messages)
   var sender = new gcm.Sender(constants.FIREBASE_NOTIFICATION_KEY);
-     var message = new gcm.Message({
-      data: { title: title, message: message, status : status,post_id:post_id,post_type:post_type},
-      notification: { title: title, body: message}
+  var message = new gcm.Message({
+    data: {
+      title: title,
+      message: message,
+      status: status,
+      post_id: post_id,
+      post_type: post_type,
+    },
+    notification: { title: title, body: message },
   });
   // Actually send the message
-  sender.send(message, { registrationTokens: [device_token[0]] }, function (err, response) {
+  sender.send(
+    message,
+    { registrationTokens: [device_token[0]] },
+    function (err, response) {
       if (err) console.error(err);
-  });
+    }
+  );
 }
 
 const transporter = nodemailer.createTransport({
@@ -56,74 +84,109 @@ async function sendMail(data) {
       from: "vastram823@gmail.com",
       to: data.email,
       subject: "Reset you password",
-      html: "<h1>Your  dummy password is :</h2>"+data.password,
+      html: "<h1>Your  dummy password is :</h2>" + data.password,
     };
-       var info = await transporter.sendMail(option);
+    var info = await transporter.sendMail(option);
+  } catch (err) {
+    console.log("err===", err);
+  }
+}
 
-     } catch (err) {
-      console.log("err===",err);
-     }
+async function save(tbl, data) {
+  var sql = "INSERT INTO " + tbl + " SET ?";
+  console.log("ddddddddddd==========", data);
+  return new Promise((resolve, reject) => {
+    connection.query(sql, data, function (err, data1) {
+      if (err) {
+        console.log(err);
+        return reject(err);
+      }
+
+      resolve(data1.insertId);
+    });
+  });
+}
+
+async function findByIdAndUpdate(tbl, data, con) {
+  var sql = "UPDATE " + tbl + " SET  ? WHERE  " + con;
+  return new Promise((resolve, reject) => {
+    connection.query(sql, data, function (err, data) {
+      if (err) {
+        console.log(err, "");
+        return reject(err);
+      }
+
+      resolve(data);
+    });
+  });
+}
+
+async function findOne(tbl, con) {
+  var sql = "SELECT * FROM " + tbl + "  WHERE ? ";
+  return new Promise((resolve, reject) => {
+    connection.query(sql, con, function (err, data) {
+      if (err) {
+        return reject(err);
+      }
+      if (data.length > 0) {
+        resolve(data[0]);
+      } else {
+        resolve("");
+      }
+    });
+  });
+}
+
+// Initialize the Firebase Admin SDK
+// admin.initializeApp({
+//   credential: admin.credential.applicationDefault(),
+//   // Add other configuration options as needed
+// });
+async function pushNotification1(
+  device_token,
+  message,
+  status,
+  post_id,
+  post_type
+) {
+  const registrationTokens = device_token
+
+  const notificationPayload = {
+    notification: {
+      title: "Notification Title",
+      body: "Notification Body",
+    },
+    // Add any additional data you want to send
+    data: {
+      key1: "value1",
+      key2: "value2",
+      // ...
+    },
+  };
+
+  // Send multicast message
+  admin
+    .messaging()
+    .sendMulticast({
+      tokens: registrationTokens,
+      notification: notificationPayload.notification,
+      data: notificationPayload.data,
+    })
+    .then((response) => {
+      console.log("Successfully sent message:", response);
+    })
+    .catch((error) => {
+      console.error("Error sending message:", error);
+    });
 }
 
 
-
-
-async function save(tbl,data) {
-    
-    var sql = 'INSERT INTO '+tbl+' SET ?';
-    console.log("ddddddddddd==========",data);
-    return new Promise((resolve, reject)=> {
-      connection.query(sql,data, function(err,data1){
-            if(err) {
-              console.log(err)
-              return reject(err);
-            }
-            
-            resolve(data1.insertId);
-            
-        });
-    })   
-  }
-  
-  
-  async function findByIdAndUpdate(tbl,data,con) {
-    
-    var sql = 'UPDATE '+tbl+' SET  ? WHERE  '+con;
-    return new Promise((resolve, reject)=> {
-      connection.query(sql,data, function(err,data){
-           if(err) {
-                console.log(err,"")
-              return reject(err);
-            }
-            
-            resolve(data);
-            
-        });
-    })   
-  }
-  
-  
-  async function findOne(tbl,con) {
-    var sql = 'SELECT * FROM '+tbl+'  WHERE ? '
-    return new Promise((resolve, reject)=> {
-      connection.query(sql,con, function(err,data){
-            if(err) {
-              return reject(err);
-            }
-            if(data.length > 0) {
-            resolve(data[0]);
-            }else{
-              resolve("");
-            }
-        });
-    })  
-  
-  }
-  module.exports={
+module.exports = {
   save,
   findOne,
   findByIdAndUpdate,
   sendMail,
   pushNotification,
-  pushNotification1
-  }
+  pushNotification1,
+  pushNotification12
+};
