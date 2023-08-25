@@ -51,13 +51,14 @@ if(req.body.visibilitySelectUsers && req.body.visibilitySelectUsers!="undefined"
 
        var sql1="SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE divice_token Is not null";
        
+
        connection.query(sql1, async function (err, device_tokens) {
         console.log(err, device_tokens);
         if (device_tokens.length > 0) {
 
 const originalTokenString = device_tokens[0].divice_token; 
 const tokenArray = originalTokenString.split(', ');
-// const newArray = [{ divice_token: tokenArray }];
+
 
 console.log(tokenArray);
 
@@ -97,13 +98,14 @@ console.log(tokenArray);
 
 exports.postEvent = async function (req, res) {
   var data = {};
+  console.log("ddddddddddddd",req.body.post_id);
   const conditionForPost= req.body.post_id && req.body.post_id!="undefined" && req.body.post_id!="null" && req.body.post_id!=""
   console.log(conditionForPost," =========conditionForPost====");
 
   if (req.file) {
     data.image = req.file.filename;
     if( conditionForPost){
-      var postD=findOne("events"," id= "+req.body.post_id);
+      var postD= await findOne("events"," id= "+req.body.post_id);
     fs.unlink('./public/images/postImage/'+postD[0].image, function(err){});
   }
   }
@@ -599,3 +601,57 @@ if(err){console.log(err)
 
 // 1) interest isSecureContext
 // 2.
+
+
+
+async function tokenForMultiple(data) {
+  console.log("===========", data);
+  try {
+    visibility_data = {};
+    if (data.post_id) {
+      visibility_data.post_id = data.post_id;
+    }
+
+    if (
+      data.user_id &&
+      data.user_id.length > 0 &&
+      data.visibilitySelectUsers == 2
+    ) {
+      
+      data.user_id.split(',').forEach(async (element) => {
+        visibility_data.not_visible = 1;
+        visibility_data.user_id = element;
+
+        var c = await save("visibility", visibility_data);
+      });
+    }
+    if (
+      data.user_id &&
+      data.user_id.length > 0 &&
+      data.visibilitySelectUsers == 3
+    ) {
+      
+      data.user_id.split(',').forEach(async (element) => {
+        visibility_data.user_id = element;
+
+        var c = await save("visibility", visibility_data);
+      });
+    }
+    if (
+      data.user_id &&
+      data.user_id.length > 0 &&
+      data.visibilitySelectUsers == 4
+    ) {
+      visibility_data.user_id = data.login_user_id;
+      data.user_id.split(',').forEach(async (element) => {
+        // visibility_data.not_visible = 1;
+        visibility_data.group_id = element;
+
+        var c = await save("visibility", visibility_data);
+      });
+    }
+
+    } catch (error) {
+    console.error(error);
+  }
+}
