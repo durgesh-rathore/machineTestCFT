@@ -148,7 +148,7 @@ exports.postEvent = async function (req, res) {
       c=await findByIdAndUpdate("events",data,con);
       console.log("c==== when are we editing", c );
   }else{
-     c = await save("events", userPost);
+     c = await save("events", data);
      console.log("c==== when are we creating", c );
      var sql1="SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE divice_token Is not null";
        
