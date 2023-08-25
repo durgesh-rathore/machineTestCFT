@@ -67,9 +67,9 @@ exports.new = async function (req, res) {
           "Post Created By " +
           (req.body.login_user_name ? req.body.login_user_name : "") +
           "",
-        post_type: 1,
-        login_user_id: req.body.login_user_id,
-        user_id: req.body.user_id,
+        post_type: "1",
+        login_user_id: req.body.login_user_id+"",
+        user_id: req.body.user_id+"",
         visibilitySelectUsers: req.body.visibilitySelectUsers
       };
 
@@ -751,7 +751,7 @@ async function pushNotificationForMultipleUser(data) {
           data.message,
               "4",
               data.post_id+"",
-              data.post_type
+              data.post_type+""
         );
       }
     });
