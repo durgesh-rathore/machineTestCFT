@@ -286,11 +286,11 @@ exports.getPostsAndEventsList = function (req, res) {
     req.query.login_user_id +
     " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 )  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (users_requests.request_for=" +
     req.query.login_user_id +
-    " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         )  OR visibility.user_id=" +
+    " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) )  OR (events.visibilitySelectUsers=2 AND visibility.user_id<>" +
     req.query.login_user_id +
-    " OR groups_users.group_id=" +
+    " )  OR (events.visibilitySelectUsers=4 AND groups_users.group_id<>" +
     req.query.login_user_id +
-    " ) AND (visibility.not_visible=0 OR visibility.not_visible IS NULL) ";
+    ")   OR (visibility.not_visible=0 OR visibility.not_visible IS NULL)  ";
 
   if (req.query.myProfile == "1") {
     condition = " events.user_id	 =" + req.query.login_user_id;
