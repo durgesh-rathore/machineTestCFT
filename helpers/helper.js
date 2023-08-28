@@ -76,12 +76,16 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: "vastram823@gmail.com",
     pass: "zydrbnnikwjzwkgt",
+    // user: "nebor.global@gmail.com",
+    // pass: "yclngaunzovlucah",
   },
 });
 async function sendMail(data) {
+  console.log("in mail")
   try {
     var option = {
       from: "vastram823@gmail.com",
+      // from: "nebor.global@gmail.com",
       to: data.email,
       subject: "Reset you password",
       html: "<h1>Your  dummy password is :</h2>" + data.password,
@@ -91,6 +95,7 @@ async function sendMail(data) {
     console.log("err===", err);
   }
 }
+// sendMail({email:"durgeshrathore060@gmail.com"});
 
 async function save(tbl, data) {
   var sql = "INSERT INTO " + tbl + " SET ?";

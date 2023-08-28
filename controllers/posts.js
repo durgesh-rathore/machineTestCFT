@@ -330,9 +330,9 @@ exports.getPostsAndEventsList = function (req, res) {
   var condition =
     " (events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +
     req.query.login_user_id +
-    " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 OR users_requests.is_request=1)  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (ur2.request_for=" +
+    " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 )  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (ur2.request_for=" +
     req.query.login_user_id +
-    " AND (ur2.is_accepted=1 OR ur2.is_both_follow=1 OR ur2.is_request=1)   AND ur2.is_reject=0  AND ur2.is_block=0  )         )  OR visibility.user_id=" +
+    " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         )  OR visibility.user_id=" +
     req.query.login_user_id +
     " OR groups_users.group_id=" +
     req.query.login_user_id +
@@ -395,7 +395,7 @@ exports.getPostsAndEventsList = function (req, res) {
     req.query.login_user_id +
     "  AND likes.post_id=events.id  LIMIT 1) AS is_liked,(SELECT comments.comment FROM comments  WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments,(SELECT users.name FROM comments LEFT JOIN users ON users.id=comments.comment_by WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments_by,TIMESTAMPDIFF(MINUTE, events.updated_datetime , CURRENT_TIMESTAMP) AS create_minute_ago,events.*,CONCAT(DAY(events.start_date), ' ',MONTHNAME(events.start_date)) AS start_date,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,users.name,CONCAT('" +
     constants.BASE_URL +
-    "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON users_requests.request_for=users.id  LEFT JOIN users_requests ur2 ON ur2.user_id=users.id WHERE " +
+    "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=users.id OR users_requests.user_id=users.id)   WHERE " +
     condition +
     " GROUP BY events.id  ORDER BY events.id DESC  Limit " +
     page * 8 +
@@ -405,7 +405,7 @@ exports.getPostsAndEventsList = function (req, res) {
     console.log(err, post_list);
     if (post_list.length > 0) {
       var sqlCounts =
-        "SELECT events.id FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON users_requests.request_for=users.id        LEFT JOIN users_requests ur2 ON ur2.user_id=users.id WHERE " +
+        "SELECT events.id FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=users.id OR users_requests.user_id=users.id)     WHERE " +
         condition +
         " GROUP BY events.id";
       connection.query(sqlCounts, function (err, counts) {
@@ -754,7 +754,7 @@ async function pushNotificationForMultipleUser(data) {
     console.log("739====",sql);
     connection.query(sql, async function (err, device_tokens) {
       console.log(err, device_tokens);
-      if (device_tokens.length > 0) {
+      if (device_tokens[0].divice_token && device_tokens.length > 0) {
         const originalTokenString = device_tokens[0].divice_token;
         const tokenArray = originalTokenString.split(", ");
         // const newArray = [{ divice_token: tokenArray }];
