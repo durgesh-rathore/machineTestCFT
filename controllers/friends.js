@@ -436,7 +436,7 @@ exports.acceptRequest = function (req, res) {
           pushNotification(
             notificationFor[0].divice_token,
             "Your request is accepted by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
-            render
+            "5"
           );
 
           return res.json({

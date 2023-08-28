@@ -359,7 +359,7 @@ exports.getPostsAndEventsList = function (req, res) {
     ",8";
   console.log("===", sql);
   connection.query(sql, function (err, post_list) {
-    console.log(err, post_list);
+    // console.log(err, post_list);
     if (post_list.length > 0) {
       var sqlCounts =
         "SELECT events.id FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=users.id OR users_requests.user_id=users.id)     WHERE " +
