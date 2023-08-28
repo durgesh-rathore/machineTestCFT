@@ -278,7 +278,7 @@ exports.unFollowUser = function (req, res) {
           if (usersRequest[0].is_both_follow == 1) {
             if (req.body.login_user_id == usersRequest[0].request_for) {
               updateSql =
-                " UPDATE users_requests SET is_both_follow=0  WHERE id= " +
+                " UPDATE users_requests SET is_both_follow=0,is_follow_by_request_for=0  WHERE id= " +
                 usersRequest[0].id;
             } else if (req.body.login_user_id == usersRequest[0].user_id) {
               updateSql =
@@ -431,6 +431,14 @@ exports.acceptRequest = function (req, res) {
       async function (err, result) {
         if (err) throw err;
         if (result) {
+          let s3 = await dbScript(db_sql["Q3"], { var1: req.body.request_for});
+          let notificationFor = await queryAsync(s3);
+          pushNotification(
+            notificationFor[0].divice_token,
+            "Your request is accepted by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
+            render
+          );
+
           return res.json({
             success: true,
 
