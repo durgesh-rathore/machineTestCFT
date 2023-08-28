@@ -475,7 +475,7 @@ exports.friendsList = function (req, res) {
         req.query.login_user_id +
         "' AND  users_requests.is_request=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 " +
         condition +
-        " ORDER BY users.id DESC limit  " +
+        " ORDER BY users_requests.update_datetime DESC limit  " +
         page * 10 +
         ", 10";
       console.log("request ===", sql);
@@ -494,7 +494,7 @@ exports.friendsList = function (req, res) {
         req.query.login_user_id +
         " ' OR users_requests.is_both_follow=1 ))   )   " +
         condition +
-        "  ORDER BY users.id DESC  limit  " +
+        "  ORDER BY users_requests.update_datetime DESC  limit  " +
         page * 10 +
         ", 10";
       console.log("allFriends ===", sql);

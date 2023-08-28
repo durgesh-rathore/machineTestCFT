@@ -335,11 +335,7 @@ exports.getPostsAndEventsList = function (req, res) {
       '%") ';
   }
 
-  // (SELECT  GROUP_CONCAT(users.profile_picture)  FROM attending LEFT JOIN users ON users.id=attending.user_id  WHERE attending.post_id=events.id  AND attending.user_id!=" +
-  //   req.query.login_user_id +
-  //   "  AND attending.attending_type=1 ) AS attending_users_image,
-
-  sql =
+    sql =
     "SELECT events.description,CONCAT('" +
     constants.BASE_URL +
     "','images/postImage/',events.image) AS post_image,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id) AS liked_by,(SELECT attending.attending_type FROM attending  WHERE attending.post_id=events.id AND attending.user_id=" +
@@ -651,8 +647,6 @@ exports.deletePostOrEventById = function (req, res) {
   });
 };
 
-// 1) interest isSecureContext
-// 2.
 
 async function pushNotificationForMultipleUser(data) {
   console.log("===========", data);
@@ -686,6 +680,8 @@ async function pushNotificationForMultipleUser(data) {
       data.user_id.length > 0 &&
       data.visibilitySelectUsers == 4
     ) {
+      
+      sql="SELECT GROUP_CONCAT(users.divice_token SEPARATOR ', ') AS divice_token FROM groups_users LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id IN ( "+data.group_id+")  AND users.id<>"+data.login_user_id+" "
       // visibility_data.user_id = data.login_user_id;
       // data.user_id.split(",").forEach(async (element) => {
       //   // visibility_data.not_visible = 1;
