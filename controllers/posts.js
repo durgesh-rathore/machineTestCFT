@@ -70,7 +70,8 @@ exports.new = async function (req, res) {
         post_type: "1",
         login_user_id: req.body.login_user_id+"",
         user_id: req.body.user_id+"",
-        visibilitySelectUsers: req.body.visibilitySelectUsers
+        visibilitySelectUsers: req.body.visibilitySelectUsers,
+        group_id:req.body.group_id
       };
 
       pushNotificationForMultipleUser(PNF);
@@ -207,7 +208,8 @@ exports.postEvent = async function (req, res) {
       post_type: "0",
       login_user_id: req.body.login_user_id+"",
       user_id: req.body.user_id+"",
-      visibilitySelectUsers: req.body.visibilitySelectUsers
+      visibilitySelectUsers: req.body.visibilitySelectUsers,
+      group_id:req.body.group_id
     };
 
     pushNotificationForMultipleUser(PNF);
