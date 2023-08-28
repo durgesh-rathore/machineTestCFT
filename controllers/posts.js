@@ -74,28 +74,7 @@ exports.new = async function (req, res) {
       };
 
       pushNotificationForMultipleUser(PNF);
-      // var sql1 =
-      //   "SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE divice_token Is not null";
-
-      // connection.query(sql1, async function (err, device_tokens) {
-      //   console.log(err, device_tokens);
-      //   if (device_tokens.length > 0) {
-      //     const originalTokenString = device_tokens[0].divice_token;
-      //     const tokenArray = originalTokenString.split(", ");
-
-      //     console.log(tokenArray);
-
-      //     await pushNotification1(
-      //       tokenArray,
-      //       "Post Created By " +
-      //         (req.body.login_user_name ? req.body.login_user_name : "") +
-      //         "",
-      //       "4",
-      //       c + "",
-      //       "1"
-      //     );
-      //   }
-      // });
+      
     }
     console.log("c==== perfection ", c);
 
@@ -232,29 +211,7 @@ exports.postEvent = async function (req, res) {
     };
 
     pushNotificationForMultipleUser(PNF);
-    // var sql1 =
-    //   "SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE divice_token Is not null";
-
-    // connection.query(sql1, async function (err, device_tokens) {
-    //   console.log(err, device_tokens);
-    //   if (device_tokens.length > 0) {
-    //     const originalTokenString = device_tokens[0].divice_token;
-    //     const tokenArray = originalTokenString.split(", ");
-    //     // const newArray = [{ divice_token: tokenArray }];
-
-    //     console.log(tokenArray);
-
-    //     await pushNotification1(
-    //       tokenArray,
-    //       "Event Created By " +
-    //         (req.body.login_user_name ? req.body.login_user_name : "") +
-    //         "",
-    //       "4",
-    //       c + "",
-    //       "0"
-    //     );
-    //   }
-    // });
+    
   }
   console.log("c====", c);
   if (c) {
@@ -330,7 +287,7 @@ exports.getPostsAndEventsList = function (req, res) {
   var condition =
     " (events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +
     req.query.login_user_id +
-    " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 )  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (ur2.request_for=" +
+    " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 )  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (users_requests.request_for=" +
     req.query.login_user_id +
     " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         )  OR visibility.user_id=" +
     req.query.login_user_id +
