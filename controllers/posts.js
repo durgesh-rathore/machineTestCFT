@@ -68,14 +68,12 @@ exports.new = async function (req, res) {
           (req.body.login_user_name ? req.body.login_user_name : "") +
           "",
         post_type: "1",
-        login_user_id: req.body.login_user_id+"",
-        user_id: req.body.user_id+"",
+        login_user_id: req.body.login_user_id + "",
+        user_id: req.body.user_id + "",
         visibilitySelectUsers: req.body.visibilitySelectUsers,
-        group_id:req.body.group_id
       };
 
       pushNotificationForMultipleUser(PNF);
-      
     }
     console.log("c==== perfection ", c);
 
@@ -198,7 +196,6 @@ exports.postEvent = async function (req, res) {
     c = await save("events", data);
     console.log("c==== when are we creating", c);
 
-
     var PNF = {
       post_id: c,
       message:
@@ -206,14 +203,12 @@ exports.postEvent = async function (req, res) {
         (req.body.login_user_name ? req.body.login_user_name : "") +
         "",
       post_type: "0",
-      login_user_id: req.body.login_user_id+"",
-      user_id: req.body.user_id+"",
+      login_user_id: req.body.login_user_id + "",
+      user_id: req.body.user_id + "",
       visibilitySelectUsers: req.body.visibilitySelectUsers,
-      group_id:req.body.group_id
     };
 
     pushNotificationForMultipleUser(PNF);
-    
   }
   console.log("c====", c);
   if (c) {
@@ -337,7 +332,7 @@ exports.getPostsAndEventsList = function (req, res) {
       '%") ';
   }
 
-    sql =
+  sql =
     "SELECT events.description,CONCAT('" +
     constants.BASE_URL +
     "','images/postImage/',events.image) AS post_image,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id) AS liked_by,(SELECT attending.attending_type FROM attending  WHERE attending.post_id=events.id AND attending.user_id=" +
@@ -649,12 +644,11 @@ exports.deletePostOrEventById = function (req, res) {
   });
 };
 
-
 async function pushNotificationForMultipleUser(data) {
   console.log("===========", data);
-  var sql =" ";
+  var sql = " ";
   try {
-        if (
+    if (
       data.user_id &&
       data.user_id.length > 0 &&
       data.visibilitySelectUsers == 2
@@ -668,22 +662,30 @@ async function pushNotificationForMultipleUser(data) {
         data.login_user_id +
         "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1    AND ( users.id <>'" +
         data.login_user_id +
-        " '  OR users.id NOT IN ('"+data.user_id+"') )  ";
-    } else  if (
+        " '  OR users.id NOT IN ('" +
+        data.user_id +
+        "') )  ";
+    } else if (
       data.user_id &&
       data.user_id.length > 0 &&
       data.visibilitySelectUsers == 3
     ) {
-      console.log("dddd for 2==",data.user_id);
-         sql =
-      "SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE users.id IN ("+data.user_id+")";
-    } else  if (
+      console.log("dddd for 2==", data.user_id);
+      sql =
+        "SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE users.id IN (" +
+        data.user_id +
+        ")";
+    } else if (
       data.user_id &&
       data.user_id.length > 0 &&
       data.visibilitySelectUsers == 4
     ) {
-      
-      sql="SELECT GROUP_CONCAT(users.divice_token SEPARATOR ', ') AS divice_token FROM groups_users LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id IN ( "+data.group_id+")  AND users.id<>"+data.login_user_id+" "
+      sql =
+        "SELECT GROUP_CONCAT(users.divice_token SEPARATOR ', ') AS divice_token FROM groups_users LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id IN ( " +
+        data.user_id +
+        ")  AND users.id<>" +
+        data.login_user_id +
+        " ";
       // visibility_data.user_id = data.login_user_id;
       // data.user_id.split(",").forEach(async (element) => {
       //   // visibility_data.not_visible = 1;
@@ -692,7 +694,7 @@ async function pushNotificationForMultipleUser(data) {
     } else {
       //  everyOne
 
-       sql =
+      sql =
         "SELECT GROUP_CONCAT(users.divice_token SEPARATOR ', ') AS divice_token  FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id<>" +
         data.login_user_id +
         " Then users_requests.user_id ELSE users_requests.request_for END)  WHERE  ( users_requests.user_id='" +
@@ -703,10 +705,8 @@ async function pushNotificationForMultipleUser(data) {
         data.login_user_id +
         " '   ";
       console.log("friendsListForVisibitly ===", sql);
-
-     
     }
-    console.log("739====",sql);
+    console.log("739====", sql);
     connection.query(sql, async function (err, device_tokens) {
       console.log(err, device_tokens);
       if (device_tokens[0].divice_token && device_tokens.length > 0) {
@@ -719,9 +719,9 @@ async function pushNotificationForMultipleUser(data) {
         await pushNotification1(
           tokenArray,
           data.message,
-              "4",
-              data.post_id+"",
-              data.post_type+""
+          "4",
+          data.post_id + "",
+          data.post_type + ""
         );
       }
     });
@@ -729,6 +729,3 @@ async function pushNotificationForMultipleUser(data) {
     console.error(error);
   }
 }
-
-
-
