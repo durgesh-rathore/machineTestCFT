@@ -78,9 +78,25 @@ exports.new = async function (req, res) {
     console.log("c==== perfection ", c);
 
     if (c) {
-      if (req.body.visibilitySelectUsers != 1) {
+      if (req.body.visibilitySelectUsers != 1 &&  !conditionForPost) {
         var visibility_data = {};
         visibility_data.post_id = c;
+        visibility_data.user_id = req.body.user_id;
+        visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
+        await visibility(visibility_data);
+      }
+      else if(req.body.visibilitySelectUsers != 1){
+        connection.query("DELETE FROM visibility  WHERE post_id= "+req.body.post_id+"",(err,result)=>{
+          if(err){
+            console.log("error in DELETE FROM visibility==",err)
+          }else{
+            console.log("result from DELETE ==",result)
+          }
+        })
+        var visibility_data = {};
+
+
+        visibility_data.post_id = req.body.post_id;
         visibility_data.user_id = req.body.user_id;
         visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
         await visibility(visibility_data);
