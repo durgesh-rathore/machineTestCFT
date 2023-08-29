@@ -36,9 +36,9 @@ exports.followUser = function (req, res) {
             
               let s3 = await dbScript(db_sql["Q3"], { var1: req.body.request_for});
           let notificationFor = await queryAsync(s3);
-                console.log(notificationFor, "ddddddd notificationFor===");
+                // console.log(notificationFor, "ddddddd notificationFor===");
 
-                var forf = " is_both_follow=1  ";
+                var forf = " is_both_follow=1,is_follow_by_request_for=1  ";
                 
                 if (usersRequest[0].is_follow == 0) {
                   if (req.body.login_user_id == usersRequest[0].request_for && usersRequest[0].is_request==0) {
@@ -63,6 +63,9 @@ exports.followUser = function (req, res) {
                     req.body.login_user_id == usersRequest[0].user_id
                   ) {
                     forf = " is_follow=1 ";
+                    if(usersRequest[0].is_follow_by_request_for==1){
+                      forf = " is_follow=1,is_both_follow=1 ";
+                    }
                     pushNotification(
                       notificationFor[0].divice_token,
                       "Followed you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
@@ -195,7 +198,8 @@ exports.requestForUser = function (req, res) {
                 "Frieds request for you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
                 render
               );
-            } else {
+            } else  {
+
               updateSql =
                 " UPDATE users_requests SET is_request=1,request_by=" +
                 req.body.login_user_id +
@@ -203,8 +207,9 @@ exports.requestForUser = function (req, res) {
                 req.body.login_user_id +
                 ", request_for=" +
                 usersRequest[0].user_id +
-                "  WHERE id= " +
+                ",is_follow_by_request_for="+usersRequest[0].is_follow+", is_follow= "+usersRequest[0].is_follow_by_request_for+"  WHERE id= " +
                 usersRequest[0].id;
+                
               pushNotification(
                 notificationFor[0].divice_token,
                  "Frieds request for you by "+(req.body.login_user_name?req.body.login_user_name:'')+"",
