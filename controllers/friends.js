@@ -291,13 +291,17 @@ exports.unFollowUser = function (req, res) {
                 usersRequest[0].request_for +
                 ",request_for=" +
                 usersRequest[0].user_id +
-                ", is_both_follow=0  WHERE id= " +
+                ", is_both_follow=0 ,is_follow_by_request_for=0,is_follow=1 WHERE id= " +
                 usersRequest[0].id;
             }
-          } else {
+          } else if (req.body.login_user_id == usersRequest[0].request_for)  {
             updateSql =
-              " UPDATE users_requests SET is_follow=0  WHERE id= " +
+              " UPDATE users_requests SET is_follow_by_request_for=0  WHERE id= " +
               usersRequest[0].id;
+          }else{
+            updateSql =
+            " UPDATE users_requests SET is_follow=0  WHERE id= " +
+            usersRequest[0].id;
           }
           connection.query(updateSql, async function (err, result) {
             if (err) throw err;
