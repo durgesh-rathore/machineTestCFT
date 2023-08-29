@@ -276,13 +276,15 @@ async function visibility(data) {
   }
 }
 
+
 exports.getPostsAndEventsList = function (req, res) {
+  // Focuse on Bracess
   var page = req.query.page ? req.query.page : 0;
 
   // OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )
 
   var condition =
-    " (events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +
+    " ( (events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +
     req.query.login_user_id +
     " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 )  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (users_requests.request_for=" +
     req.query.login_user_id +
@@ -293,23 +295,19 @@ exports.getPostsAndEventsList = function (req, res) {
     ")     ";
 
   if (req.query.myProfile == "1") {
-    condition = " events.user_id	 =" + req.query.login_user_id;
+    condition = " ( events.user_id	 =" + req.query.login_user_id;
   }
   if (req.query.type == "feed") {
-    condition += "  AND events.post_type=1 ";
-    condition +=
-      " OR (events.user_id =" +
+    condition += "  AND ( events.post_type=1  OR (events.user_id =" +
       req.query.login_user_id +
-      " AND events.post_type=1  )";
+      " AND events.post_type=1  ) ) )";
   } else {
     if (req.query.type == "event") {
-      condition += "  AND events.post_type=0   ";
-      condition +=
-        " OR (events.user_id =" +
+      condition += "  AND ( events.post_type=0  OR (events.user_id =" +
         req.query.login_user_id +
-        " AND events.post_type=0  )";
+        " AND events.post_type=0 ) ) )";
     } else {
-      condition += " OR events.user_id =" + req.query.login_user_id + " ";
+      condition += " OR events.user_id =" + req.query.login_user_id + " )";
     }
   }
 
