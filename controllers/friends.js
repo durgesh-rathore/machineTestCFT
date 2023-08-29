@@ -524,7 +524,7 @@ exports.friendsList = function (req, res) {
         req.query.login_user_id +
         " OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>" +
         req.query.login_user_id +
-        " ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.request_for <> users.id AND users_requests.is_follow_by_request_for=1) THEN false ELSE true END   )  AND users.id<>" +
+        " ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.user_id = " + req.query.login_user_id + " AND users_requests.is_follow=1) THEN false ELSE true END   ) AND (  case when (users_requests.request_for = " + req.query.login_user_id + " AND users_requests.is_follow_by_request_for=1) THEN false ELSE true END   )  AND users.id<>" +
         req.query.login_user_id +
         " " +
         condition +
@@ -549,7 +549,7 @@ exports.friendsList = function (req, res) {
         req.query.login_user_id +
         " OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>" +
         req.query.login_user_id +
-        " ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.request_for <> users.id AND users_requests.is_follow_by_request_for=1) THEN false ELSE true END   )   AND users.id<>" +
+        " ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.user_id = " + req.query.login_user_id + " AND users_requests.is_follow=1) THEN false ELSE true END   ) AND (  case when (users_requests.request_for = " + req.query.login_user_id + " AND users_requests.is_follow_by_request_for=1) THEN false ELSE true END   )   AND users.id<>" +
         req.query.login_user_id +
         " " +
         condition +
