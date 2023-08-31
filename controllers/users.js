@@ -2,12 +2,11 @@ var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
 var { encryptPassword, checkPassword } = require("../config/custom");
-var {sendMail,save,findByIdAndUpdate} = require('../helpers/helper');
+var { sendMail, save, findByIdAndUpdate } = require("../helpers/helper");
 var multer = require("multer");
 const path = require("path");
 const { db_sql, dbScript, queryAsync } = require("../helpers/db_scripts");
 const fs = require("fs");
-
 
 exports.signup = function (req, res) {
   try {
@@ -54,8 +53,12 @@ exports.signup = function (req, res) {
                     password: password,
                     mobile_number: req.body.mobile_number,
                   };
-                  if(req.body.divice_token && req.body.divice_token!='undefined' && req.body.divice_token!="null"){
-                    newUser.divice_token=req.body.divice_token
+                  if (
+                    req.body.divice_token &&
+                    req.body.divice_token != "undefined" &&
+                    req.body.divice_token != "null"
+                  ) {
+                    newUser.divice_token = req.body.divice_token;
                   }
                   connection.query(
                     "INSERT INTO users SET ?",
@@ -136,11 +139,17 @@ exports.signin = async function (req, res) {
                 message: "Login successfully.",
               });
             } else {
-              if(req.body.divice_token && req.body.divice_token!='undefined' && req.body.divice_token!="null"){
-                
-               var j=await findByIdAndUpdate("users",{divice_token:req.body.divice_token}," id="+users[0].id);
-               console.log("   dddddddddddd update divice token==", j)
-
+              if (
+                req.body.divice_token &&
+                req.body.divice_token != "undefined" &&
+                req.body.divice_token != "null"
+              ) {
+                var j = await findByIdAndUpdate(
+                  "users",
+                  { divice_token: req.body.divice_token },
+                  " id=" + users[0].id
+                );
+                console.log("   dddddddddddd update divice token==", j);
               }
               return res.json({
                 success: true,
@@ -161,6 +170,7 @@ exports.signin = async function (req, res) {
 };
 
 exports.socialLogin = async function (req, res) {
+  console.log("socialLogin==========",req.body);
   if (!req.body.email) {
     res.json({ success: false, message: "Email id is required." });
   } else {
@@ -172,37 +182,77 @@ exports.socialLogin = async function (req, res) {
         "'",
       async function (err, users) {
         if (users.length > 0) {
-          //auth_token
-          if (
-            req.body.auth_token != "" ||
-            req.body.auth_token != null ||
-            req.body.auth_token != undefined
-          ) {
-            connection.query(
-              "UPDATE users SET auth_token='" +
-                req.body.auth_token +
-                "' WHERE id=" +
-                users[0].id +
-                " ",
-              async function (err, user) {
-                if (err) throw err;
-                if (user) {
+          if ((users[0].is_gogle_login = 0)) {
+            return res.json({
+              success: false,
+              message: "User Already exist.",
+            });
+          } else {
+            if (
+              req.body.auth_token != "" ||
+              req.body.auth_token != null ||
+              req.body.auth_token != undefined
+            ) {
+              connection.query(
+                "UPDATE users SET auth_token='" +
+                  req.body.auth_token +
+                  "' WHERE id=" +
+                  users[0].id +
+                  " ",
+                async function (err, user) {
+                  if (err) throw err;
+                  if (user) {
+                  }
                 }
-              }
-            );
-          }
+              );
+            }
 
-          var token = jwt.sign({ id: users[0].id }, constants.SECRET, {
-            expiresIn: "7d", // expires in 24 hours
-          });
-          return res.json({
-            success: true,
-            token: "JWT " + token,
-            response: users[0],
-            message: "Login successfully.",
-          });
+            var token = jwt.sign({ id: users[0].id }, constants.SECRET, {
+              expiresIn: "7d", // expires in 24 hours
+            });
+            return res.json({
+              success: true,
+              token: "JWT " + token,
+              response: users[0],
+              message: "Login successfully.",
+            });
+          }
         } else {
-          return res.json({ success: false, message: "Email id not match." });
+          let password = await encryptPassword(req.body.password);
+          var newUser = {
+            name: req.body.name,
+            email: req.body.email.toLowerCase(),
+            is_gogle_login: 1,
+             };
+          if (
+            req.body.divice_token &&
+            req.body.divice_token != "undefined" &&
+            req.body.divice_token != "null"
+          ) {
+            newUser.divice_token = req.body.divice_token;
+          }
+          connection.query(
+            "INSERT INTO users SET ?",
+            newUser,
+            async function (err, user) {
+              if (err) throw err;
+              if (user) {
+                var token = jwt.sign({ id: user.insertId }, constants.SECRET, {
+                  expiresIn: "7d", // expires in 24 hours
+                });
+                return res.json({
+                  success: true,
+                  token: "JWT " + token,
+                  response:{  id: user.insertId,
+                               name: req.body.name,
+                               profile_picture: null,
+                               profie_step:0
+                  },
+                  message: "Signup successfully.",
+                });
+              }
+            }
+          );
         }
       }
     );
@@ -249,22 +299,21 @@ exports.userInterest = function (req, res) {
             message: "Please enter required  detail.",
           });
         } else {
-                   
-          JSON.parse(req.body.interest_fields).forEach(element => {
-              var obj={
-                user_id:req.body.user_id,
-                interest_id:element
-              }
-  
-              save("users_interest", obj);
-              obj={};
-            });
-                        return res.json({
-                success: true,
-                message: "Interest fields save succesful.",
-              });
-            }
-                }
+          JSON.parse(req.body.interest_fields).forEach((element) => {
+            var obj = {
+              user_id: req.body.user_id,
+              interest_id: element,
+            };
+
+            save("users_interest", obj);
+            obj = {};
+          });
+          return res.json({
+            success: true,
+            message: "Interest fields save succesful.",
+          });
+        }
+      }
     );
   }
 };
@@ -335,12 +384,12 @@ exports.forgotPassword = async function (req, res) {
             console.log(err, "err");
             if (!err) {
               // send email of this email id
-              var data={
-                email:req.body.email,
-                password:otp,
-              }
+              var data = {
+                email: req.body.email,
+                password: otp,
+              };
 
-              sendMail(data)
+              sendMail(data);
               return res.json({
                 success: true,
                 message: "Password  sent on your email id",
@@ -396,7 +445,6 @@ exports.changePassword = async function (req, res) {
     req.body.user_id == "" ||
     req.body.old_password == "" ||
     req.body.new_password == ""
-
   ) {
     return res.json({ success: false, message: "Please Enter Valid" });
   } else {
@@ -415,38 +463,38 @@ exports.changePassword = async function (req, res) {
         if (users.length > 0) {
           var is_Password = "";
           is_Password = await checkPassword(
-              req.body.old_password,
-              users[0].password
-            );
-          }
-    
-          if (is_Password) {
+            req.body.old_password,
+            users[0].password
+          );
+        }
 
-    let password = await encryptPassword(req.body.new_password);
+        if (is_Password) {
+          let password = await encryptPassword(req.body.new_password);
 
+          sql =
+            "UPDATE users SET password = '" +
+            password +
+            "'  WHERE id = '" +
+            req.body.user_id +
+            "'";
 
-    sql =
-      "UPDATE users SET password = '" +
-      password +
-      "'  WHERE id = '" +
-      req.body.user_id +
-      "'";
-
-    connection.query(sql, function (err, result) {
-      if (err) {
-        console.log("error-=======", err);
-      } else {
-        return res.json({ success: true, message: "Password reset." });
+          connection.query(sql, function (err, result) {
+            if (err) {
+              console.log("error-=======", err);
+            } else {
+              return res.json({ success: true, message: "Password reset." });
+            }
+          });
+        } else {
+          return res.json({
+            success: false,
+            message: "Old password is wrong.",
+          });
+        }
       }
-    });
+    );
   }
-  else {
-    return res.json({ success: false, message: "Old password is wrong." });
-  }
-})
 };
-}
-
 
 exports.getProfile = function (req, res) {
   if (!req.query.login_user_id) {
@@ -482,93 +530,92 @@ exports.updateUserProfile = function (req, res) {
       req.body.name == undefined ||
       req.body.login_user_id == undefined ||
       req.body.login_user_id == null ||
-      req.body.login_user_id == ''
-      
-
+      req.body.login_user_id == ""
     ) {
       return res.json({ success: false, message: "All fields are required." });
     } else {
-                 connection.query(
-              "SELECT id FROM users WHERE mobile_number = ? AND id!=" +
-                req.body.login_user_id,
-              req.body.mobile_number,
-              async function (err, users) {
-                if (users.length > 0) {
+      connection.query(
+        "SELECT id FROM users WHERE mobile_number = ? AND id!=" +
+          req.body.login_user_id,
+        req.body.mobile_number,
+        async function (err, users) {
+          if (users.length > 0) {
+            return res.json({
+              success: false,
+              message: "Mobile number already exists.",
+            });
+          } else {
+            var newUser = {
+              name: req.body.name,
+              mobile_number: req.body.mobile_number,
+            };
+            if (
+              req.body.dob != "" &&
+              req.body.dob != undefined &&
+              req.body.dob != null
+            ) {
+              newUser.dob = req.body.dob;
+            }
+
+            if (
+              req.body.last_name != "" &&
+              req.body.last_name != undefined &&
+              req.body.last_name != null
+            ) {
+              newUser.last_name = last_name;
+            }
+            if (
+              req.file &&
+              req.file.filename != "" &&
+              req.file.filename != undefined
+            ) {
+              newUser.profile_picture = req.file.filename;
+              let s2 = await dbScript(db_sql["Q2"], {
+                var1: req.body.login_user_id,
+              });
+              let user = await queryAsync(s2);
+
+              fs.unlink(
+                "./public/images/profiles/" + user[0].profile_picture,
+                function (err) {}
+              );
+            }
+            connection.query(
+              "UPDATE users SET ? WHERE id=" + req.body.login_user_id + " ",
+              newUser,
+              async function (err, user) {
+                console.log("err===", err);
+                if (err) throw err;
+                if (user) {
                   return res.json({
-                    success: false,
-                    message: "Mobile number already exists.",
+                    success: true,
+                    user_id: user.insertId,
+                    message: "Update profile successful.",
                   });
                 } else {
-                  var newUser = {
-                    name: req.body.name,
-                    mobile_number: req.body.mobile_number,
-                      };
-                   if (
-                    req.body.dob != "" &&
-                    req.body.dob != undefined && req.body.dob != null
-                    
-                  ) {
-                    newUser.dob=req.body.dob
-                  }
-
-                  
-                  if (
-                    req.body.last_name != "" &&
-                    req.body.last_name != undefined && req.body.last_name != null
-                    
-                  ) {newUser.last_name=last_name}
-                 if (
-                    req.file &&
-                    req.file.filename != "" &&
-                    req.file.filename != undefined
-                  ) {
-
-                    newUser.profile_picture = req.file.filename;
-                    let s2 = await dbScript(db_sql["Q2"], { var1: req.body.login_user_id});
-                    let user = await queryAsync(s2);
-
-                    fs.unlink('./public/images/profiles/'+user[0].profile_picture, function(err){});
-
-                  }
-                  connection.query(
-                    "UPDATE users SET ? WHERE id=" +
-                      req.body.login_user_id +
-                      " ",
-                    newUser,
-                    async function (err, user) {
-
-                      console.log("err===",err)
-                      if (err) throw err;
-                      if (user) {
-                        return res.json({
-                          success: true,
-                          user_id: user.insertId,
-                          message: "Update profile successful.",
-                        });
-                      } else {
-                        return res.json({
-                          success: false,
-                          message: "Something went wrong.",
-                        });
-                      }
-                    }
-                  );
+                  return res.json({
+                    success: false,
+                    message: "Something went wrong.",
+                  });
                 }
               }
             );
-        
+          }
+        }
+      );
     }
   } catch (error) {
     console.error(error);
   }
 };
 
-async function x(){
+async function x() {
   console.log("in x method ====");
   // /home/user/Desktop/durgesh/ForgetMeNote/forgetmenote/public/images/profiles/Rectangle21png-1681901239083.png
-fs.unlink('./public/images/profiles/'+"Rectangle21png-1681901239083.png", function(err){
-
-  console.log(err);
-})
-
+  fs.unlink(
+    "./public/images/profiles/" + "Rectangle21png-1681901239083.png",
+    function (err) {
+      console.log(err);
+    }
+  );
 }
