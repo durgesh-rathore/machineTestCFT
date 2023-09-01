@@ -224,7 +224,7 @@ exports.socialLogin = async function (req, res) {
             });
           }
         } else {
-          let password = await encryptPassword(req.body.password);
+          // let password = await encryptPassword(req.body.password);
           var newUser = {
             name: req.body.name,
             email: req.body.email.toLowerCase(),
