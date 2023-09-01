@@ -52,6 +52,7 @@ exports.signup = function (req, res) {
                     email: req.body.email.toLowerCase(),
                     password: password,
                     mobile_number: req.body.mobile_number,
+                    profie_step:1
                   };
                   if (
                     req.body.divice_token &&
@@ -593,6 +594,7 @@ exports.updateUserProfile = function (req, res) {
                 function (err) {}
               );
             }
+            newUser.profie_step=1;
             connection.query(
               "UPDATE users SET ? WHERE id=" + req.body.login_user_id + " ",
               newUser,
