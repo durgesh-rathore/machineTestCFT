@@ -304,7 +304,7 @@ exports.getPostsAndEventsList = function (req, res) {
     req.query.login_user_id +
     " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 )  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (users_requests.request_for=" +
     req.query.login_user_id +
-    " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) )  OR (events.visibilitySelectUsers=2 AND vCASE WHEN visibility.user_id=" +
+    " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) )  OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=" +
     req.query.login_user_id +
     " THEN false END )  OR (events.visibilitySelectUsers=4 AND groups_users.user_id=" +
     req.query.login_user_id +
