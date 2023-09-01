@@ -566,6 +566,7 @@ exports.friendsList = function (req, res) {
         req.query.login_user_id +
         " ' AND users_requests.is_follow_by_request_for=1 )  )     " ;
 
+
     if (req.query.type == "request") {
       var sql =
         "SELECT " +
@@ -582,25 +583,7 @@ exports.friendsList = function (req, res) {
       var sqlCountrequest =
       "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
       req.query.login_user_id +
-      "' AND  users_requests.is_request=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 " +
-      condition2 +
-      "";
-
-    var sqlCountAll =
-      "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
-      req.query.login_user_id +
-      " Then users_requests.user_id ELSE users_requests.request_for END)   WHERE  ( users_requests.user_id='" +
-      req.query.login_user_id +
-      " ' OR users_requests.request_for='" +
-      req.query.login_user_id +
-      "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND (users_requests.is_accepted=1   OR ((users_requests.is_request=1 OR users_requests.is_follow=1) AND ( users_requests.user_id ='" +
-      req.query.login_user_id +
-      " ' OR users_requests.is_both_follow=1 ) )  OR (users_requests.request_for='" +
-      req.query.login_user_id +
-      " ' AND users_requests.is_follow_by_request_for=1 )  )     " +
-      condition +
-      "";
-
+      "' AND  users_requests.is_request=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 "+ condition+" ";
 
     }
     if (req.query.type == "allFriends") {
