@@ -304,9 +304,9 @@ exports.getPostsAndEventsList = function (req, res) {
     req.query.login_user_id +
     " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 )  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (users_requests.request_for=" +
     req.query.login_user_id +
-    " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) )  OR (events.visibilitySelectUsers=2 AND visibility.user_id<>" +
+    " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) )  OR (events.visibilitySelectUsers=2 AND vCASE WHEN visibility.user_id" +
     req.query.login_user_id +
-    " )  OR (events.visibilitySelectUsers=4 AND groups_users.user_id=" +
+    " THEN false END )  OR (events.visibilitySelectUsers=4 AND groups_users.user_id=" +
     req.query.login_user_id +
     ")     ";
 
@@ -359,7 +359,7 @@ exports.getPostsAndEventsList = function (req, res) {
     req.query.login_user_id +
     "  AND likes.post_id=events.id  LIMIT 1) AS is_liked,(SELECT comments.comment FROM comments  WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments,(SELECT users.name FROM comments LEFT JOIN users ON users.id=comments.comment_by WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments_by,TIMESTAMPDIFF(MINUTE, events.updated_datetime , CURRENT_TIMESTAMP) AS create_minute_ago,events.*,CONCAT(DAY(events.start_date), ' ',MONTHNAME(events.start_date)) AS start_date,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,users.name,CONCAT('" +
     constants.BASE_URL +
-    "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=users.id OR users_requests.user_id=users.id)   WHERE " +
+    "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)   WHERE " +
     condition +
     " GROUP BY events.id  ORDER BY events.id DESC  Limit " +
     page * 8 +
@@ -369,7 +369,7 @@ exports.getPostsAndEventsList = function (req, res) {
     // console.log(err, post_list);
     if (post_list.length > 0) {
       var sqlCounts =
-        "SELECT events.id FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=users.id OR users_requests.user_id=users.id)     WHERE " +
+        "SELECT events.id FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)     WHERE " +
         condition +
         " GROUP BY events.id";
       connection.query(sqlCounts, function (err, counts) {
