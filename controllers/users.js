@@ -237,6 +237,7 @@ exports.socialLogin = async function (req, res) {
           ) {
             newUser.divice_token = req.body.divice_token;
           }
+          if(req.body.is_signup==1){
           connection.query(
             "INSERT INTO users SET ?",
             newUser,
@@ -259,6 +260,12 @@ exports.socialLogin = async function (req, res) {
               }
             }
           );
+          }else{
+            return res.json({
+              success: false,
+              message: "User dosen't exits Please signup .",
+            });
+          }
         }
       }
     );
