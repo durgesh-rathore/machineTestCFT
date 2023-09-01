@@ -182,7 +182,13 @@ exports.socialLogin = async function (req, res) {
         "'",
       async function (err, users) {
         if (users.length > 0) {
-          if ((users[0].is_gogle_login = 0)) {
+          if(req.body.is_signup==1){
+            return res.json({
+              success: false,
+              message: "User Already exist.",
+            });
+          }else
+          if ((users[0].is_gogle_login = 0) && false) {
             return res.json({
               success: false,
               message: "User Already exist.",
