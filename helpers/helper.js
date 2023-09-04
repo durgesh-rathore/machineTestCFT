@@ -16,17 +16,14 @@ admin.initializeApp({
 });
 
 async function pushNotification(device_token, message, status) {
-  var status = 3;
-  // async function pushNotification(device_token,message,) {
-  console.log("device_token,message,status", device_token, message, status);
   title = "ForgetMeNote";
-  // Set up the sender with your GCM/FCM API key (declare this once for multiple messages)
+
   var sender = new gcm.Sender(constants.FIREBASE_NOTIFICATION_KEY);
   var message = new gcm.Message({
     data: { title: title, message: message, status: status },
     notification: { title: title, body: message },
   });
-  // Actually send the message
+
   sender.send(
     message,
     { registrationTokens: [device_token] },
@@ -34,36 +31,6 @@ async function pushNotification(device_token, message, status) {
       if (err) console.error(err);
       if (response)
         console.log(response, "response======== of push notification ===");
-    }
-  );
-}
-
-async function pushNotification12(
-  device_token,
-  message,
-  status,
-  post_id,
-  post_type
-) {
-  title = "ForgetMeNote";
-  // Set up the sender with your GCM/FCM API key (declare this once for multiple messages)
-  var sender = new gcm.Sender(constants.FIREBASE_NOTIFICATION_KEY);
-  var message = new gcm.Message({
-    data: {
-      title: title,
-      message: message,
-      status: status,
-      post_id: post_id,
-      post_type: post_type,
-    },
-    notification: { title: title, body: message },
-  });
-  // Actually send the message
-  sender.send(
-    message,
-    { registrationTokens: [device_token[0]] },
-    function (err, response) {
-      if (err) console.error(err);
     }
   );
 }
@@ -81,7 +48,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 async function sendMail(data) {
-  console.log("in mail")
+  console.log("in mail");
   try {
     var option = {
       from: "vastram823@gmail.com",
@@ -142,11 +109,7 @@ async function findOne(tbl, con) {
   });
 }
 
-// Initialize the Firebase Admin SDK
-// admin.initializeApp({
-//   credential: admin.credential.applicationDefault(),
-//   // Add other configuration options as needed
-// });
+
 async function pushNotification1(
   device_token,
   message,
@@ -154,18 +117,18 @@ async function pushNotification1(
   post_id,
   post_type
 ) {
-  const registrationTokens = device_token
+  const registrationTokens = device_token;
 
   const notificationPayload = {
     notification: {
       title: "ForgetMeNote",
-      body: message
+      body: message,
     },
     // Add any additional data you want to send
     data: {
       status: status,
-      post_id:post_id,
-      post_type:post_type
+      post_id: post_id,
+      post_type: post_type,
       // ...
     },
   };
@@ -186,7 +149,6 @@ async function pushNotification1(
     });
 }
 
-
 module.exports = {
   save,
   findOne,
@@ -194,5 +156,5 @@ module.exports = {
   sendMail,
   pushNotification,
   pushNotification1,
-  pushNotification12
+  
 };

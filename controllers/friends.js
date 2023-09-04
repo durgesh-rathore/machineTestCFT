@@ -52,20 +52,31 @@ exports.followUser = function (req, res) {
                   ",request_for=" +
                   usersRequest[0].user_id +
                   "  ";
-                var render = 2;
+                
+                
                 pushNotification(
                   notificationFor[0].divice_token,
                   "Followed you by " +
                     (req.body.login_user_name ? req.body.login_user_name : "") +
                     "",
-                  render
+                  "2"
                 );
               } else {
                 if (req.body.login_user_id == usersRequest[0].user_id) {
                   forf = " is_follow=1 ";
                   if (usersRequest[0].is_follow_by_request_for == 1) {
                     forf = " is_follow=1,is_both_follow=1 ";
-                  }
+                        pushNotification(
+                      notificationFor[0].divice_token,
+                      "Followed you by " +
+                        (req.body.login_user_name
+                          ? req.body.login_user_name
+                          : "") +
+                        "",
+                      "3"
+                    );
+                  }else{
+                    
                   pushNotification(
                     notificationFor[0].divice_token,
                     "Followed you by " +
@@ -73,26 +84,38 @@ exports.followUser = function (req, res) {
                         ? req.body.login_user_name
                         : "") +
                       "",
-                    "3"
+                    "2"
                   );
+                 }
                 } else {
                   forf = "is_follow_by_request_for=1  ";
                   if (usersRequest[0].is_follow == 1) {
                     forf = " is_follow_by_request_for=1,is_both_follow=1 ";
+                        pushNotification(
+                      notificationFor[0].divice_token,
+                      "Followed you by " +
+                        (req.body.login_user_name
+                          ? req.body.login_user_name
+                          : "") +
+                        "",
+                      "3"
+                    );
+                  }else{
+                      pushNotification(
+                      notificationFor[0].divice_token,
+                      "Followed you by " +
+                        (req.body.login_user_name
+                          ? req.body.login_user_name
+                          : "") +
+                        "",
+                      "2"
+                    );
                   }
-                  pushNotification(
-                    notificationFor[0].divice_token,
-                    "Followed you by " +
-                      (req.body.login_user_name
-                        ? req.body.login_user_name
-                        : "") +
-                      "",
-                    "3"
-                  );
+                 
                 }
               }
             } else {
-              pushNotification(
+                  pushNotification(
                 notificationFor[0].divice_token,
                 // "Follow Back you ",
                 "Followed Back  you by " +
@@ -142,7 +165,7 @@ exports.followUser = function (req, res) {
                 connection.query(
                   "SELECT * FROM users WHERE id =" + req.body.request_for + " ",
                   async function (err, notificationFor) {
-                    pushNotification(
+                          pushNotification(
                       notificationFor[0].divice_token,
                       "Followed you by " +
                         (req.body.login_user_name
