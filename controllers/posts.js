@@ -78,23 +78,24 @@ exports.new = async function (req, res) {
     console.log("c==== perfection ", c);
 
     if (c) {
-      if (req.body.visibilitySelectUsers != 1 &&  !conditionForPost) {
+      if (req.body.visibilitySelectUsers != 1 && !conditionForPost) {
         var visibility_data = {};
         visibility_data.post_id = c;
         visibility_data.user_id = req.body.user_id;
         visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
         await visibility(visibility_data);
-      }
-      else if(req.body.visibilitySelectUsers != 1 && false){
-        connection.query("DELETE FROM visibility  WHERE post_id= "+req.body.post_id+"",(err,result)=>{
-          if(err){
-            console.log("error in DELETE FROM visibility==",err)
-          }else{
-            console.log("result from DELETE ==",result)
+      } else if (req.body.visibilitySelectUsers != 1 && false) {
+        connection.query(
+          "DELETE FROM visibility  WHERE post_id= " + req.body.post_id + "",
+          (err, result) => {
+            if (err) {
+              console.log("error in DELETE FROM visibility==", err);
+            } else {
+              console.log("result from DELETE ==", result);
+            }
           }
-        })
+        );
         var visibility_data = {};
-
 
         visibility_data.post_id = req.body.post_id;
         visibility_data.user_id = req.body.user_id;
@@ -292,7 +293,6 @@ async function visibility(data) {
   }
 }
 
-
 exports.getPostsAndEventsList = function (req, res) {
   // Focuse on Bracess
   var page = req.query.page ? req.query.page : 0;
@@ -322,19 +322,19 @@ exports.getPostsAndEventsList = function (req, res) {
         condition += "  )";
       }
     }
-
-
   }
   if (req.query.type == "feed" && req.query.myProfile != "1") {
-    condition += "  AND ( events.post_type=1  OR (events.user_id =" +
+    condition +=
+      "  AND ( events.post_type=1  OR (events.user_id =" +
       req.query.login_user_id +
       " AND events.post_type=1  ) ) ";
   } else {
-    if (req.query.type == "event"  && req.query.myProfile != "1" ) {
-      condition += "  AND ( events.post_type=0  OR (events.user_id =" +
+    if (req.query.type == "event" && req.query.myProfile != "1") {
+      condition +=
+        "  AND ( events.post_type=0  OR (events.user_id =" +
         req.query.login_user_id +
         " AND events.post_type=0 ) ) ";
-    } else if(req.query.myProfile != "1") {
+    } else if (req.query.myProfile != "1") {
       condition += " OR events.user_id =" + req.query.login_user_id + " ";
     }
   }
@@ -549,6 +549,50 @@ exports.attending = async function (req, res) {
       user_id: req.body.login_user_id,
       post_id: req.body.post_id,
     };
+
+    connection.query(
+      "SELECT users.divice_token FROM `users`  LEFT JOIN events  ON events.user_id=users.id WHERE events.id=" +
+        req.body.post_id +
+        " ",
+      async function (err, notificationFor) {
+        if (notificationFor.length > 0) {
+          if (req.body.attending_type == 1) {
+            var message =
+              "Frieds request for you by " +
+              (req.body.login_user_name ? req.body.login_user_name : " ") +
+              " ";
+
+            switch (req.body.attending_type) {
+              case "1":
+                console.log("It's 1 case !");
+                message =
+                  " "+
+                  (req.body.login_user_name ? req.body.login_user_name : " ") +
+                  "  will  attend the  event ";
+                break;
+              case "2":
+                console.log("It's Tuesday!");
+                message =
+                " "+
+                (req.body.login_user_name ? req.body.login_user_name : " ") +
+                "  may be  attend the  event ";
+                break;
+              case "3":
+                console.log("It's Tuesday!");
+                message =
+                " "+
+                (req.body.login_user_name ? req.body.login_user_name : " ") +
+                "  will not attend the  event ";
+                break;
+              default:
+                console.log("It's the weekend!");
+            }
+          }
+
+          pushNotification(notificationFor[0].divice_token, message, "5");
+        }
+      }
+    );
 
     var c = await save("attending", data);
     console.log("c====", c);

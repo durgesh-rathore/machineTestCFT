@@ -37,7 +37,7 @@ router.get(
   checkUserStatus.userStatus,
   postController.getLikedListOnPosts
 );
-router.post("/attending", checkUserStatus.userStatus, postController.attending);
+router.post("/attending", postController.attending);
 router.post(
   "/likedOnComment",
   checkUserStatus.userStatus,
