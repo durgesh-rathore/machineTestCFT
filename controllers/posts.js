@@ -7,6 +7,7 @@ var {
   findByIdAndUpdate,
   findOne,
   pushNotification1,
+  addWatermarkToImage
 } = require("../helpers/helper");
 
 var multer = require("multer");
@@ -41,8 +42,30 @@ exports.new = async function (req, res) {
     ) {
       userPost.visibilitySelectUsers = req.body.visibilitySelectUsers;
     }
-    if (req.file && req.file.filename != "" && req.file.filename != undefined) {
-      userPost.image = req.file.filename;
+    if (req.file && req.file != "" && req.file != undefined) {
+      const uploadedImageBuffer = req.file.buffer;
+      const watermarkText = "ForgetMeNote";
+      const fileName1 =
+        req.file.originalname.replace(/[-&\/\\#.,+()$~%'":*?<>{} ]/g, "") + "";
+      const fileName = `${fileName1}-${Date.now()}${path.extname(
+        req.file.originalname
+      )}`;
+      const watermarkedImageBuffer = await addWatermarkToImage(
+        uploadedImageBuffer,
+        watermarkText
+      );
+      try {
+        const outputImagePath = path.join(
+          "public/images/postImage/",
+          "" + fileName + ""
+        ); // Define your output file path
+        await fs.writeFileSync(outputImagePath, watermarkedImageBuffer);
+
+        userPost.image = fileName;
+      } catch (err) {
+        console.log(err);
+      }
+
       if (conditionForPost) {
         var postD = findOne("events", " id= " + req.body.post_id);
         console.log(postD, "====dddddddd");
@@ -115,6 +138,106 @@ exports.new = async function (req, res) {
     console.error(error);
   }
 };
+
+// Add watermark to the image buffer
+
+
+// exports.new = async function (req, res) {
+//   console.log("dddd", req);
+//   const conditionForPost =
+//     req.body.post_id &&
+//     req.body.post_id != "undefined" &&
+//     req.body.post_id != "null" &&
+//     req.body.post_id != "";
+//   console.log("condition for post == ", conditionForPost);
+
+//   try {
+//     userPost = {
+//       user_id: req.body.login_user_id,
+//       post_type: 1,
+//       description: req.body.description,
+//     };
+//     if (
+//       req.body.visibilitySelectUsers &&
+//       req.body.visibilitySelectUsers != "undefined" &&
+//       req.body.visibilitySelectUsers != "null"
+//     ) {
+//       userPost.visibilitySelectUsers = req.body.visibilitySelectUsers;
+//     }
+//     if (req.file && req.file.filename != "" && req.file.filename != undefined) {
+//       userPost.image = req.file.filename;
+//       if (conditionForPost) {
+//         var postD = findOne("events", " id= " + req.body.post_id);
+//         console.log(postD, "====dddddddd");
+//         fs.unlink(
+//           "./public/images/postImage/" + postD.image,
+//           function (err) {}
+//         );
+//       }
+//     }
+
+//     var c;
+//     if (conditionForPost) {
+//       var con = ` events.id=${req.body.post_id} AND events.user_id=${req.body.login_user_id} `;
+//       c = await findByIdAndUpdate("events", userPost, con);
+//       console.log("c==== when are we editing", c);
+//     } else {
+//       c = await save("events", userPost);
+//       console.log("c==== when are we creating", c);
+//       var PNF = {
+//         post_id: c,
+//         message:
+//           "Post Created By " +
+//           (req.body.login_user_name ? req.body.login_user_name : "") +
+//           "",
+//         post_type: "1",
+//         login_user_id: req.body.login_user_id + "",
+//         user_id: req.body.user_id + "",
+//         visibilitySelectUsers: req.body.visibilitySelectUsers,
+//       };
+
+//       pushNotificationForMultipleUser(PNF);
+//     }
+//     console.log("c==== perfection ", c);
+
+//     if (c) {
+//       if (req.body.visibilitySelectUsers != 1 && !conditionForPost) {
+//         var visibility_data = {};
+//         visibility_data.post_id = c;
+//         visibility_data.user_id = req.body.user_id;
+//         visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
+//         await visibility(visibility_data);
+//       } else if (req.body.visibilitySelectUsers != 1 && false) {
+//         connection.query(
+//           "DELETE FROM visibility  WHERE post_id= " + req.body.post_id + "",
+//           (err, result) => {
+//             if (err) {
+//               console.log("error in DELETE FROM visibility==", err);
+//             } else {
+//               console.log("result from DELETE ==", result);
+//             }
+//           }
+//         );
+//         var visibility_data = {};
+
+//         visibility_data.post_id = req.body.post_id;
+//         visibility_data.user_id = req.body.user_id;
+//         visibility_data.visibilitySelectUsers = req.body.visibilitySelectUsers;
+//         await visibility(visibility_data);
+//       }
+//       if (conditionForPost) {
+//         return res.json({
+//           success: true,
+//           message: "Feed updated successfully.",
+//         });
+//       } else {
+//         return res.json({ success: true, message: "Feed created." });
+//       }
+//     }
+//   } catch (error) {
+//     console.error(error);
+//   }
+// };
 
 exports.postEvent = async function (req, res) {
   var data = {};
@@ -566,23 +689,23 @@ exports.attending = async function (req, res) {
               case "1":
                 console.log("It's 1 case !");
                 message =
-                  " "+
+                  " " +
                   (req.body.login_user_name ? req.body.login_user_name : " ") +
                   "  will  attend the  event ";
                 break;
               case "2":
                 console.log("It's Tuesday!");
                 message =
-                " "+
-                (req.body.login_user_name ? req.body.login_user_name : " ") +
-                "  may be  attend the  event ";
+                  " " +
+                  (req.body.login_user_name ? req.body.login_user_name : " ") +
+                  "  may be  attend the  event ";
                 break;
               case "3":
                 console.log("It's Tuesday!");
                 message =
-                " "+
-                (req.body.login_user_name ? req.body.login_user_name : " ") +
-                "  will not attend the  event ";
+                  " " +
+                  (req.body.login_user_name ? req.body.login_user_name : " ") +
+                  "  will not attend the  event ";
                 break;
               default:
                 console.log("It's the weekend!");
@@ -799,3 +922,4 @@ async function pushNotificationForMultipleUser(data) {
     console.error(error);
   }
 }
+

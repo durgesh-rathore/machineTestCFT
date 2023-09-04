@@ -149,6 +149,40 @@ async function pushNotification1(
     });
 }
 
+
+async function addWatermarkToImage(imageBuffer, watermarkText) {
+  const sharp = require("sharp");
+  const { createCanvas, loadImage, registerFont } = require("canvas");
+
+  // Load your custom font (optional, for watermark text)
+  // registerFont('path/to/your/font.ttf', { family: 'CustomFont' });
+  // Create a canvas with the same dimensions as the image
+  const image = await sharp(imageBuffer);
+  const metadata = await image.metadata();
+  const canvas = createCanvas(metadata.width, metadata.height);
+  const ctx = canvas.getContext("2d");
+  const textSize = ctx.measureText(watermarkText);
+  const textX = metadata.width - textSize.width - 160; // Center horizontally
+  const textY = metadata.height - 20;
+  // Load the image onto the canvas
+  const img = await loadImage(imageBuffer);
+  console.log(img, "image===");
+  ctx.drawImage(img, 0, 0, metadata.width, metadata.height);
+
+  // Add watermark text
+  // ctx.font = '30px CustomFont'; // Use your custom font here
+  ctx.font = '30px "Open Sans", sans-serif';
+
+  // ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+  // Watermark text color and opacity
+  ctx.fillText(watermarkText, textX, textY); // Adjust the position of the watermark
+
+  // Convert the canvas to a Buffer
+  return canvas.toBuffer("image/jpeg");
+}
+
+
 module.exports = {
   save,
   findOne,
@@ -156,5 +190,5 @@ module.exports = {
   sendMail,
   pushNotification,
   pushNotification1,
-  
+  addWatermarkToImage,
 };
