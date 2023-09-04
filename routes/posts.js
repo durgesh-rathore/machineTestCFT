@@ -3,6 +3,7 @@ var { uploadFiles } = require("../config/custom");
 var checkUserStatus = require("../config/checkUserStatus");
 var postController = require("../controllers/posts");
 var router = express.Router();
+var multer = require("multer");
 const storage = multer.memoryStorage(); // Use memory storage for the uploaded files
 const upload = multer({ storage: storage });
 // router.post(
