@@ -69,20 +69,21 @@ if(clients[sent_to]!=undefined && is_group==0){
   sql =
   "SELECT users.id,users.divice_token  FROM users  LEFT JOIN groups_users ON groups_users.user_id=users.id     WHERE  groups_users.group_id=" +
   sent_to +     
-  " GROUP BY users.id ";
+  " AND users.id<>"+ send_by +" GROUP BY users.id ";
 console.log(sql);
 connection.query(sql, async function (err, roomNames) {
   console.log(err);
   // console.log("uid for ",uid,clients[uid.uid])
-  var array=[]
+  var array1=[]
   roomNames.forEach((roomName) => {
     if(clients[roomName.id]==undefined || clients[roomName.id]=='undefined' ){
-      array.push(roomName.divice_token);
+      console.log(roomName.id,clients[roomName.id],"dddddddd");
+      array1.push(roomName.divice_token);
     }
   });
-
-  await pushNotification2(array,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""})
-  
+if(array1.length>0){
+  await pushNotification2(array1,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""})
+}
 
 });
 
