@@ -1,5 +1,5 @@
 var connection = require("./config/db");
-var { save, findByIdAndUpdate } = require("./helpers/helper");
+var { save, findByIdAndUpdate,pushNotification2} = require("./helpers/helper");
 var clients=[];
 module.exports = io => {
   io.on('connection', socket => {
@@ -65,6 +65,27 @@ if(clients[sent_to]!=undefined && is_group==0){
   .emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture});
 }else if(is_group==1){
   console.log("send into group========")
+
+  sql =
+  "SELECT users.id,users.divice_token  FROM users  LEFT JOIN groups_users ON groups_users.user_id=users.id     WHERE  groups_users.group_id=" +
+  sent_to +     
+  " GROUP BY users.id ";
+console.log(sql);
+connection.query(sql, async function (err, roomNames) {
+  console.log(err);
+  // console.log("uid for ",uid,clients[uid.uid])
+  var array=[]
+  roomNames.forEach((roomName) => {
+    if(clients[roomName.id]==undefined || clients[roomName.id]=='undefined' ){
+      array.push(roomName.divice_token);
+    }
+  });
+
+  await pushNotification2(array,{ send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture})
+  
+
+});
+
 socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture});
 // io.to(room).emit('notification', { message: 'New notification!' });
 

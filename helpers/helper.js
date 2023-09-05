@@ -259,6 +259,38 @@ async function addWatermarkToImage(imageBuffer, watermarkText) {
 }
 
 
+async function pushNotification2(
+  device_token,
+  chatd
+) {
+  chatd.status="7";
+  const registrationTokens = device_token;
+
+  const notificationPayload = {
+    notification: {
+      title: " "+chatd.name + "",
+      body: ""+chatd.newMessage+" ",
+    },
+    // Add any additional data you want to send
+    data: chatd,
+  };
+
+  // Send multicast message
+  admin
+    .messaging()
+    .sendMulticast({
+      tokens: registrationTokens,
+      notification: notificationPayload.notification,
+      data: notificationPayload.data,
+    })
+    .then((response) => {
+      console.log("Successfully sent message:", response);
+    })
+    .catch((error) => {
+      console.error("Error sending message:", error);
+    });
+}
+
 module.exports = {
   save,
   findOne,
@@ -266,5 +298,6 @@ module.exports = {
   sendMail,
   pushNotification,
   pushNotification1,
+  pushNotification2,
   addWatermarkToImage,
 };
