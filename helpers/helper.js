@@ -150,36 +150,112 @@ async function pushNotification1(
 }
 
 
+// async function addWatermarkToImage(imageBuffer, watermarkText) {
+//   const sharp = require("sharp");
+//   const { createCanvas, loadImage, registerFont } = require("canvas");
+
+//   // Load your custom font (optional, for watermark text)
+//   // registerFont('path/to/your/font.ttf', { family: 'CustomFont' });
+//   // Create a canvas with the same dimensions as the image
+//   const image = await sharp(imageBuffer);
+//   const metadata = await image.metadata();
+//   const canvas = createCanvas(metadata.width, metadata.height);
+//   const ctx = canvas.getContext("2d");
+//   const textSize = ctx.measureText(watermarkText);
+
+
+// const watermarkWidthPercentage = 20; // Adjust as needed (e.g., 20% of the image width)
+// const watermarkHeightPercentage = 5; // Adjust as needed (e.g., 5% of the image height)
+
+// const watermarkWidth = (metadata.width * watermarkWidthPercentage) / 100;
+// const watermarkHeight = (metadata.height * watermarkHeightPercentage) / 100;
+
+// // Calculate the position of the watermark (e.g., bottom-right corner with a margin)
+// const textX = metadata.width - watermarkWidth - 60; // Adjust the margin as needed
+// const textY = metadata.height - watermarkHeight - 15; //
+
+
+//   // const textX = metadata.width - textSize.width - 860; // Center horizontally
+//   // const textY = metadata.height - 30;
+//   // Load the image onto the canvas
+//   const img = await loadImage(imageBuffer);
+//   console.log(img, "image===");
+//   ctx.drawImage(img, 0, 0, metadata.width, metadata.height);
+
+//   // Add watermark text
+//   // ctx.font = '30px CustomFont'; // Use your custom font here
+//   ctx.font = '100px "Open Sans", sans-serif';
+
+//   // ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+//   ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+//   // Watermark text color and opacity
+//   ctx.fillText(watermarkText, textX, textY); // Adjust the position of the watermark
+
+//   // Convert the canvas to a Buffer
+//   return canvas.toBuffer("image/jpeg");
+// }
+
+
 async function addWatermarkToImage(imageBuffer, watermarkText) {
-  const sharp = require("sharp");
-  const { createCanvas, loadImage, registerFont } = require("canvas");
+  const sharp = require('sharp');
+  const { createCanvas, loadImage, registerFont } = require('canvas');
 
   // Load your custom font (optional, for watermark text)
   // registerFont('path/to/your/font.ttf', { family: 'CustomFont' });
+
   // Create a canvas with the same dimensions as the image
   const image = await sharp(imageBuffer);
   const metadata = await image.metadata();
   const canvas = createCanvas(metadata.width, metadata.height);
-  const ctx = canvas.getContext("2d");
-  const textSize = ctx.measureText(watermarkText);
-  const textX = metadata.width - textSize.width - 160; // Center horizontally
-  const textY = metadata.height - 20;
+  const ctx = canvas.getContext('2d');
+
+  console.log("==============",metadata.height,metadata.width,);
+
+
+
+
+  const maxWidth = metadata.width * 0.8; // Adjust the maximum width as needed
+  const maxHeight = metadata.height * 0.2; // Adjust the maximum height as needed
+
+  // Calculate the font size based on the maximum dimensions and the watermark text
+  let fontSize = 30; // Initial font size (adjust as needed)
+  ctx.font = `${fontSize}px Open Sans, sans-serif`; // Use your custom font here
+  var textWidth = ctx.measureText(watermarkText).width;
+  console.log(textWidth,"textWidth original")
+  console.log(maxWidth,"maxWidth original")
+  console.log(maxHeight,"maxHeight original")
+    while (textWidth > maxWidth || fontSize > maxHeight) {
+    
+    // Reduce the font size until it fits within the maximum dimensions
+    fontSize--;
+    ctx.font = `${fontSize}px Open Sans, sans-serif`;
+    
+
+    textWidth = ctx.measureText(watermarkText).width;
+    console.log("in while loop =====",fontSize,textWidth);
+  }
+  // ctx.drawImage(img, 0, 0, metadata.width, metadata.height);
+
+  const textSize =ctx.measureText(watermarkText);
+  console.log("==============",metadata.height,metadata.width,textSize);
+  const textX = (metadata.width - textWidth-20); // Center horizontally
+  const textY = (metadata.height - 20);
   // Load the image onto the canvas
   const img = await loadImage(imageBuffer);
-  console.log(img, "image===");
+  console.log(img,"image===")
   ctx.drawImage(img, 0, 0, metadata.width, metadata.height);
 
   // Add watermark text
   // ctx.font = '30px CustomFont'; // Use your custom font here
-  ctx.font = '30px "Open Sans", sans-serif';
+  ctx.font = '30px "Open Sans", sans-serif'
 
   // ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-  ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-  // Watermark text color and opacity
+  ctx.fillStyle ='rgba(255, 0, 0, 0.5)'
+   // Watermark text color and opacity
   ctx.fillText(watermarkText, textX, textY); // Adjust the position of the watermark
 
   // Convert the canvas to a Buffer
-  return canvas.toBuffer("image/jpeg");
+  return canvas.toBuffer('image/jpeg');
 }
 
 

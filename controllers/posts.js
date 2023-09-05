@@ -421,7 +421,8 @@ exports.getPostsAndEventsList = function (req, res) {
   var page = req.query.page ? req.query.page : 0;
 
   // OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )
-
+  var condition1 =' ';
+  
   var condition =
     " ( (events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +
     req.query.login_user_id +
@@ -467,7 +468,7 @@ exports.getPostsAndEventsList = function (req, res) {
     req.query.search != undefined &&
     req.query.search != null
   ) {
-    condition +=
+    condition1 =
       '  AND (events.title LIKE "%' +
       req.query.search +
       '%" OR events.venue LIKE "%' +
@@ -494,9 +495,9 @@ exports.getPostsAndEventsList = function (req, res) {
     req.query.login_user_id +
     "  AND likes.post_id=events.id  LIMIT 1) AS is_liked,(SELECT comments.comment FROM comments  WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments,(SELECT users.name FROM comments LEFT JOIN users ON users.id=comments.comment_by WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments_by,TIMESTAMPDIFF(MINUTE, events.updated_datetime , CURRENT_TIMESTAMP) AS create_minute_ago,events.*,CONCAT(DAY(events.start_date), ' ',MONTHNAME(events.start_date)) AS start_date,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,users.name,CONCAT('" +
     constants.BASE_URL +
-    "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)   WHERE " +
+    "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)   WHERE (" +
     condition +
-    " GROUP BY events.id  ORDER BY events.id DESC  Limit " +
+    ") " +condition1+" GROUP BY events.id  ORDER BY events.id DESC  Limit " +
     page * 8 +
     ",8";
   console.log("===", sql);

@@ -13,9 +13,22 @@ module.exports = io => {
     socket.on('user-login', uid => {
       console.log('user-login : ', uid);
       clients[uid.uid]=socket
-      console.log("uid for ",uid,clients[uid.uid])
+      sql =
+      "SELECT users.id  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id     WHERE users.is_group<>0 AND groups_users.user_id=" +
+      uid.uid +     
+      " GROUP BY users.id ";
+    console.log(sql);
+    connection.query(sql, function (err, roomNames) {
+      console.log(err);
+      // console.log("uid for ",uid,clients[uid.uid])
+      roomNames.forEach((roomName) => {
+        socket.join(`chat-${roomName.id}`);
+      });
+
+      
 
     });
+  })
 
     socket.on('user-setOffline', uid => {
       console.log('user-offline : ', uid);
@@ -23,7 +36,7 @@ module.exports = io => {
     });
 
     socket.on('user-join-room', ({ roomId }) => {
-      console.log(`A user joined chat-${roomId}`);
+      // console.log(`A user joined chat-${roomId}`);
       socket.join(`chat-${roomId}`);
     });
     // {'send_by': userId,'sent_to' :'2', 'newMessage': message, 'name': login_userName,'group_id':''    ,'image': ''};
