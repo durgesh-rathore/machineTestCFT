@@ -81,7 +81,7 @@ connection.query(sql, async function (err, roomNames) {
     }
   });
 
-  await pushNotification2(array,{ send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture})
+  await pushNotification2(array,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""})
   
 
 });
