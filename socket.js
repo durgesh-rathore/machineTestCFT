@@ -6,7 +6,7 @@ module.exports = io => {
     console.log('User has connect55');
     socket.on('disconnect', _ => {
 
-      const userId = Object.keys(users).find((key) => users[key] === socket);
+      const userId = Object.keys(clients).find((key) => users[key] === socket);
   if (userId) {
     console.log("when disconted to the user from === ",userId)
     delete clients[userId];
