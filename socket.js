@@ -110,8 +110,9 @@ socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_t
 console.log("for sigle chat===",sql);
 connection.query(sql, async function (err, users) {  
   var array1=[];
-  array1.push(users[0].divice_token);
-  if(users.length>0 && users.divice_token!=null && users.divice_token!='null' && users.divice_token!='undefined'){
+  
+  if(users.length>0 && users[0].divice_token!=null && users[0].divice_token!='null' && users[0].divice_token!='undefined'){
+    array1.push(users[0].divice_token);
 
 await pushNotification2(array1,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""});
 
