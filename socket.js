@@ -5,8 +5,16 @@ module.exports = io => {
   io.on('connection', socket => {
     console.log('User has connect55');
     socket.on('disconnect', _ => {
+
+      const userId = Object.keys(users).find((key) => users[key] === socket);
+  if (userId) {
+    console.log("when disconted to the user from === ",userId)
+    delete clients[userId];
+  }
+
       console.log('User disconnected');
-      socket.emit('user-disconnect');
+
+      // socket.emit('user-disconnect');
       socket.disconnect();
     });
 
@@ -22,6 +30,7 @@ module.exports = io => {
       console.log(err);
       // console.log("uid for ",uid,clients[uid.uid])
       roomNames.forEach((roomName) => {
+        console.log(" join room when login_event fire ===",roomName);
         socket.join(`chat-${roomName.id}`);
       });
 
@@ -63,7 +72,7 @@ if(clients[sent_to]!=undefined && is_group==0){
        clients[sent_to]
   // socket
   .emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture});
-}else if(is_group==1){
+}else if(is_group==1 || is_group==2){
   console.log("send into group========")
 
   sql =
@@ -82,13 +91,33 @@ connection.query(sql, async function (err, roomNames) {
     }
   });
 if(array1.length>0){
-  await pushNotification2(array1,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""})
+  await pushNotification2(array1,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""});
+  array1=[];
 }
 
 });
 
 socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture});
 // io.to(room).emit('notification', { message: 'New notification!' });
+
+}else{
+
+ var sql =
+  "SELECT users.id,users.divice_token  FROM users WHERE users.id=" +
+  sent_to +     
+  " ";
+console.log("for sigle chat===",sql);
+connection.query(sql, async function (err, users) {  
+  var array1=[];
+  array1.push(users.divice_token);
+  if(users.length>0 && users.divice_token!=null && users.divice_token!='null' && users.divice_token!='undefined'){
+
+await pushNotification2(array1,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""});
+
+  }
+  array1=[];
+
+})
 
 }
     })    ;
