@@ -361,8 +361,8 @@ exports.leftGroup = function (req, res) {
     req.body.login_user_id == null
   ) {
     return res.json({
-      success: true,
-      message: "Added.",
+      success: false,
+      message: "Something went wrong.",
     });
   } else {
     let sql =
