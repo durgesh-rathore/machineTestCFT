@@ -86,11 +86,12 @@ connection.query(sql, async function (err, roomNames) {
   var array1=[]
   roomNames.forEach((roomName) => {
     if(clients[roomName.id]==undefined || clients[roomName.id]=='undefined' ){
-      console.log(roomName.id,clients[roomName.id],"dddddddd");
+      console.log(roomName.id,clients[roomName.id],"dddddddd",roomName.divice_token);
       array1.push(roomName.divice_token);
     }
   });
 if(array1.length>0){
+  console.log("array1 for push notification ===",array1);
   await pushNotification2(array1,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""});
   array1=[];
 }
