@@ -176,7 +176,7 @@ exports.socialLogin = async function (req, res) {
     res.json({ success: false, message: "Email id is required." });
   } else {
     connection.query(
-      "SELECT users.*, profile.is_google_login,profile.is_apple_login CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
+      "SELECT users.*, profile.is_google_login,profile.is_apple_login ,CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
         constants.BASE_URL +
         "','images/profiles/',users.profile_picture) ELSE '' END AS profile_picture FROM users LEFT JOIN profile ON profile.user_id=users.id WHERE users.email = '" +
         req.body.email +
