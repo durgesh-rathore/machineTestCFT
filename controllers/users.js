@@ -176,9 +176,9 @@ exports.socialLogin = async function (req, res) {
     res.json({ success: false, message: "Email id is required." });
   } else {
     connection.query(
-      "SELECT users.*, CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
+      "SELECT users.*, profile.is_google_login,profile.is_apple_login CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
         constants.BASE_URL +
-        "','images/profiles/',users.profile_picture) ELSE '' END AS profile_picture FROM users WHERE users.email = '" +
+        "','images/profiles/',users.profile_picture) ELSE '' END AS profile_picture FROM users LEFT JOIN profile ON profile.user_id=users.id WHERE users.email = '" +
         req.body.email +
         "'",
       async function (err, users) {
@@ -214,6 +214,28 @@ exports.socialLogin = async function (req, res) {
               );
             }
 
+
+
+            var profile ={ };
+            if(req.body.is_gogle_login==1 && users[0].is_google_login!=1 ){
+             profile.is_gogle_login=1;
+            }
+            
+            if(req.body.is_apple_login==1 && users[0].is_apple_login!=1){
+              profile.is_apple_login=1;
+             }
+
+             if(profile.is_google_login==1 || profile.is_apple_login==1 ){
+             connection.query(
+              "UPDATE profile SET ? WHERE user_id="+users[0].id,
+              profile,
+              async function (err, user_profile) {
+                if (err) throw err;
+                if (user) {
+
+                }})
+              }
+
             var token = jwt.sign({ id: users[0].id }, constants.SECRET, {
               expiresIn: "7d", // expires in 24 hours
             });
@@ -229,8 +251,7 @@ exports.socialLogin = async function (req, res) {
           var newUser = {
             name: req.body.name,
             email: req.body.email.toLowerCase(),
-            is_gogle_login: 1,
-             };
+               };
           if (
             req.body.divice_token &&
             req.body.divice_token != "undefined" &&
@@ -248,6 +269,27 @@ exports.socialLogin = async function (req, res) {
                 var token = jwt.sign({ id: user.insertId }, constants.SECRET, {
                   expiresIn: "7d", // expires in 24 hours
                 });
+
+                var profile ={
+                  user_id:user.insertId
+                };
+                if(req.body.is_gogle_login==1){
+                 profile.is_gogle_login=1;
+                }
+                
+                if(req.body.is_apple_login==1){
+                  profile.is_apple_login=1;
+                 }
+
+                 connection.query(
+                  "INSERT INTO profile SET ?",
+                  profile,
+                  async function (err, user_profile) {
+                    if (err) throw err;
+                    if (user) {
+
+                    }})
+
                 return res.json({
                   success: true,
                   token: "JWT " + token,
