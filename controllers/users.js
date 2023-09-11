@@ -176,7 +176,7 @@ exports.socialLogin = async function (req, res) {
     res.json({ success: false, message: "Email id is required." });
   } else {
     connection.query(
-      "SELECT users.*, profile.is_google_login,profile.is_apple_login ,CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
+      "SELECT users.*, profile.is_gogle_login,profile.is_apple_login ,CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
         constants.BASE_URL +
         "','images/profiles/',users.profile_picture) ELSE '' END AS profile_picture FROM users LEFT JOIN profile ON profile.user_id=users.id WHERE users.email = '" +
         req.body.email +
@@ -217,7 +217,7 @@ exports.socialLogin = async function (req, res) {
 
 
             var profile ={ };
-            if(req.body.is_gogle_login==1 && users[0].is_google_login!=1 ){
+            if(req.body.is_gogle_login==1 && users[0].is_gogle_login!=1 ){
              profile.is_gogle_login=1;
             }
             
@@ -225,7 +225,7 @@ exports.socialLogin = async function (req, res) {
               profile.is_apple_login=1;
              }
 
-             if(profile.is_google_login==1 || profile.is_apple_login==1 ){
+             if(profile.is_gogle_login==1 || profile.is_apple_login==1 ){
              connection.query(
               "UPDATE profile SET ? WHERE user_id="+users[0].id,
               profile,
