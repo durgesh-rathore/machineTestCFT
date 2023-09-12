@@ -231,7 +231,7 @@ exports.socialLogin = async function (req, res) {
               profile,
               async function (err, user_profile) {
                 if (err) throw err;
-                if (user) {
+                if (user_profile) {
 
                 }})
               }
