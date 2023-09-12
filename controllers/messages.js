@@ -19,6 +19,15 @@ exports.getChats = async (req, res) => {
   console.log("req.query===", req.query);
   var sql = "";
   var page = req.query.page ? req.query.page : 0;
+  var condition=" ";
+
+  if (
+    req.query.search != "" &&
+    req.query.search != undefined &&
+    req.query.search != null
+  ) {
+    condition = '  AND (chats.message LIKE "%' + req.query.search + '%") ';
+  }
   if (
     req.query.user_id != "" &&
     req.query.user_id != undefined &&
@@ -36,7 +45,7 @@ exports.getChats = async (req, res) => {
       req.query.login_user_id +
       "," +
       req.query.user_id +
-      ") ORDER BY chats.id DESC Limit " +
+      ") "+ condition+" ORDER BY chats.id DESC Limit " +
       page * 30 +
       ",30";
   }

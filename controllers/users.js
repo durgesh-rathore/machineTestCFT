@@ -235,7 +235,18 @@ exports.socialLogin = async function (req, res) {
 
                 }})
               }
-
+              if (
+                req.body.divice_token &&
+                req.body.divice_token != "undefined" &&
+                req.body.divice_token != "null"
+              ) {
+                var j = await findByIdAndUpdate(
+                  "users",
+                  { divice_token: req.body.divice_token },
+                  " id=" + users[0].id
+                );
+                console.log("   dddddddddddd update divice token==", j);
+              }
             var token = jwt.sign({ id: users[0].id }, constants.SECRET, {
               expiresIn: "7d", // expires in 24 hours
             });
