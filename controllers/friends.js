@@ -1,4 +1,4 @@
-var jwt = require("jsonwebtoken");
+// var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
 var { encryptPassword, checkPassword } = require("../config/custom");

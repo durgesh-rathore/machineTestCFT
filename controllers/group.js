@@ -282,18 +282,17 @@ exports.getSplitGroupList = function (req, res) {
   console.log(sql);
   connection.query(sql, function (err, groupUsers) {
     var sqlCountsDM =
-      "SELECT n1.id  FROM chats AS n1    LEFT JOIN chats n2 ON n2.group_id=n1.group_id     LEFT JOIN groups_users ON groups_users.group_id=n1.group_id       LEFT JOIN users ON users.id=n1.group_id      LEFT JOIN users ON users.id=n1.send_by     WHERE ( n1.sent_to=" +
+      "SELECT  COUNT(*) AS counts  FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id<>" +
       req.query.login_user_id +
-      " ) OR (groups_users.user_id=" +
-      req.query.login_user_id +
-      ") AND n1.id!=n2.id AND (n1.id>n2.id OR n2.id is null   )  GROUP BY n1.send_by,n1.sent_to ";
+      " Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')  )  AND users.id <> '"+req.query.login_user_id +"'  GROUP BY users.id  ";
 
     console.log("sqlCountsDM============>>", sqlCountsDM);
 
     var sqlCountsSplit =
-      "SELECT COUNT(*) AS counts FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users2.is_group=2 AND user1.id=" +
+      "SELECT COUNT(*) AS counts FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users2.is_group=2 AND billing_group_users.user_id=" +
       req.query.login_user_id +
-      condition;
+      condition +
+      " AND YEAR(billing_group.event_date) = YEAR(CURDATE()) AND MONTH(billing_group.event_date) = MONTH(CURDATE())   AND   billing_group.event_date>= CURDATE()"
 
     connection.query(sqlCountsSplit, async function (err, sqlCountsSplitResult) {
       if (err) {
@@ -332,7 +331,7 @@ if( element.WMTag =="This week"){
           // response: groupUsers,
           response: {weekEvents:week,
           monthEvents:month},
-          // DMCounts: sqlCountsDMResult.length,
+          DMCounts: sqlCountsDMResult.length,
           splitCount: sqlCountsSplitResult[0].counts,
           success: true,
           message: "Direct message list",
@@ -340,7 +339,7 @@ if( element.WMTag =="This week"){
       } else {
         return res.json({
           response: [],
-          // DMCounts: sqlCountsDMResult.length,
+          DMCounts: sqlCountsDMResult.length,
           splitCount: sqlCountsSplitResult[0].counts,
           success: true,
           message: "No More post",
