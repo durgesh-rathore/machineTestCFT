@@ -299,14 +299,14 @@ exports.getSplitGroupList = function (req, res) {
         console.log(err);
       }
 
-      // connection.query(sqlCountsDM, function (err, sqlCountsDMResult) {
-      //   if (err) {
-      //     console.log(err);
-      //   }
-      //   console.log(sqlCountsDMResult,"==========sqlCountsDMResult")
-      //   if(sqlCountsDMResult.length){
+      connection.query(sqlCountsDM, async function (err, sqlCountsDMResult) {
+        if (err) {
+          console.log(err);
+        }
+        console.log(sqlCountsDMResult,"==========sqlCountsDMResult")
+        if(sqlCountsDMResult.length){
 
-      //   }
+        }
 
       if (groupUsers.length > 0) {
 
@@ -345,7 +345,7 @@ if( element.WMTag =="This week"){
           message: "No More post",
         });
       }
-      // });
+      });
     });
   });
 };
