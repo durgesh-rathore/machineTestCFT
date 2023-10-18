@@ -188,6 +188,9 @@ exports.addSplitGroup = function (req, res) {
                   group_id: users.insertId,
                   currency:req.body.currency,
                 };
+                if(req.body.payment_method){
+                  groupData.payment_method=req.body.payment_method
+                }
 
                 connection.query(
                   "INSERT INTO billing_group SET ?",

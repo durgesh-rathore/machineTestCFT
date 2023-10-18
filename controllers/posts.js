@@ -252,11 +252,15 @@ exports.postEvent = async function (req, res) {
   if (req.file) {
     data.image = req.file.filename;
     if (conditionForPost) {
-      var postD = await findOne("events", " id= " + req.body.post_id);
-      fs.unlink(
-        "./public/images/postImage/" + postD[0].image,
-        function (err) {}
-      );
+      connection.query(`SELECT * FROM events WHERE id=${req.body.post_id}`,function (err,postD){
+        console.log(postD,"ddddddd");
+        if(postD && postD.length>0){
+              fs.unlink(
+                "./public/images/postImage/" + postD[0].image,
+                function (err) {}
+              );
+            }
+              })
     }
   }
   data.user_id = req.body.login_user_id;
