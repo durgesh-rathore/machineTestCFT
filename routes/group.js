@@ -49,4 +49,10 @@ router.get(
   groupController.informationOfGroup
 );
 
+router.get(
+  "/getPaymentMethod",
+//   checkUserStatus.userStatus,
+  groupController.getPaymentMethod
+);
+
 module.exports = router;

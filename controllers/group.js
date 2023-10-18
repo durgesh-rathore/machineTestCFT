@@ -504,3 +504,34 @@ exports.informationOfGroup = function (req, res) {
     });
   });
 };
+exports.getPaymentMethod = function (req, res) {
+  
+  var sql =
+    "SELECT billing_group.payment_method  FROM billing_group    WHERE billing_group.group_id=" +
+    req.query.group_id;
+
+ connection.query(sql, function (err, paymentMethod) {
+    if (err) {
+      console.log("somthing went wrong",err);
+      return res.json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }else{
+      if(paymentMethod.length==0){
+        return res.json({
+          success: false,
+          message: "Payment method not found.",
+        });
+      }else{
+        return res.json({
+          success: true,
+          message: "Payment Method",
+          res:paymentMethod
+        });
+      }
+    }
+
+    
+  });
+};
