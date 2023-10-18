@@ -535,3 +535,68 @@ exports.getPaymentMethod = function (req, res) {
     
   });
 };
+
+exports.contributorsList = function (req, res) {
+  const {group_id}=req.query;
+  
+  var sql =
+    `SELECT users.name, ${ a} ,bgu.* FROM billing_group_users AS bgu LEFT JOIN users ON users.id=bgu.user_id WHERE bgu.group_id=${group_id}`
+   
+ connection.query(sql, function (err, paymentMethod) {
+    if (err) {
+      console.log("somthing went wrong",err);
+      return res.json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }else{
+      if(paymentMethod.length==0){
+        return res.json({
+          success: false,
+          message: "Payment method not found.",
+        });
+      }else{
+        return res.json({
+          success: true,
+          message: "Payment Method",
+          res:paymentMethod
+        });
+      }
+    }
+
+    
+  });
+};
+
+exports.paymentStatus = function (req, res) {
+  const {group_id,user_id}=req.body;
+  let status=1;
+  console.log(" in ffdd")
+  var sql =
+    `UPDATE billing_group_users AS bgu SET  bgu.status=${status}  WHERE bgu.group_id=${group_id} AND bgu.user_id=${user_id}` 
+   
+ connection.query(sql, function (err, paymentMethod) {
+    if (err) {
+      console.log("somthing went wrong",err);
+      return res.json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }else{
+      if(paymentMethod.length==0){
+        return res.json({
+          success: false,
+          message: "Payment method not found.",
+        });
+      }else{
+        return res.json({
+          success: true,
+          message: "Payment status updated successfully",
+          
+        });
+      }
+    }
+
+    
+  });
+};

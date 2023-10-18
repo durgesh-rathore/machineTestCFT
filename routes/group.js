@@ -55,4 +55,18 @@ router.get(
   groupController.getPaymentMethod
 );
 
+
+router.get(
+  "/contributorsList",
+//   checkUserStatus.userStatus,
+  groupController.contributorsList
+);
+
+router.put(
+  "/paymentStatus",
+//   checkUserStatus.userStatus,
+  groupController.paymentStatus
+);
+
+
 module.exports = router;
