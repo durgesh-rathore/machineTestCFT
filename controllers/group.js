@@ -504,6 +504,7 @@ exports.informationOfGroup = function (req, res) {
     });
   });
 };
+
 exports.getPaymentMethod = function (req, res) {
   
   var sql =
