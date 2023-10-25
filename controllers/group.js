@@ -179,6 +179,8 @@ exports.addSplitGroup = function (req, res) {
             "INSERT INTO users SET ?",
             group,
             async function (err, users) {
+                 var group_members = req.body.group_members.split(",");
+                      group_members.push(req.body.group_admin_id);
               if (err) console.log(err);
               if (group) {
                 var groupData = {
@@ -187,6 +189,7 @@ exports.addSplitGroup = function (req, res) {
                   due_date: req.body.due_date,
                   group_id: users.insertId,
                   currency:req.body.currency,
+                  each_split:req.body.spliting_amount/group_members.length,
                 };
                 if(req.body.payment_method){
                   groupData.payment_method=req.body.payment_method
@@ -200,11 +203,7 @@ exports.addSplitGroup = function (req, res) {
                     if (group) {
                       console.log(req.body.group_members, "group_members ");
                       // var group_members=[1,2,3,4];
-                      var group_members = req.body.group_members.split(",");
-
-                      // var group_users = {};
-                      // group.group_id = users.insertId;
-                      group_members.push(req.body.group_admin_id);
+                   
                       group_members.forEach((element) => {
                         var group_users = {
                           group_id: users.insertId,
@@ -279,7 +278,7 @@ exports.getSplitGroupList = function (req, res) {
     " AND  billing_group_users.group_id=users2.id ) AS group_users_image,  (select (sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/billing_group.spliting_amount) *100  from billing_group_users  WHERE billing_group_users.group_id=users2.id ) AS percentage , MONTH(billing_group.event_date) AS event_month,    YEARWEEK(billing_group.event_date) AS event_week,     YEARWEEK(CURRENT_DATE()) AS current_week ,    CASE             WHEN YEARWEEK(billing_group.event_date) = YEARWEEK(CURDATE()) THEN 'This week'             ELSE 'This Month'         END AS WMTag     FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users2.is_group=2 AND billing_group_users.user_id=" +
     req.query.login_user_id +
     condition +
-    " AND YEAR(billing_group.event_date) = YEAR(CURDATE()) AND MONTH(billing_group.event_date) = MONTH(CURDATE())   AND   billing_group.event_date>= CURDATE()  Limit " +
+    " AND YEAR(billing_group.event_date) = YEAR(CURDATE()) AND MONTH(billing_group.event_date) = MONTH(CURDATE())   AND   billing_group.event_date>= CURDATE()  ORDER BY users2.id DESC  Limit " +
     page * 10 +
     ",10";
   console.log(sql);
@@ -537,8 +536,42 @@ exports.getPaymentMethod = function (req, res) {
   });
 };
 
+// exports.contributorsList = function (req, res) {
+//   const {group_id}=req.query;
+  
+//   var sql =
+//     `SELECT users.name, ${ a} ,bgu.* FROM billing_group_users AS bgu LEFT JOIN users ON users.id=bgu.user_id WHERE bgu.group_id=${group_id}`
+   
+//  connection.query(sql, function (err, paymentMethod) {
+//     if (err) {
+//       console.log("somthing went wrong",err);
+//       return res.json({
+//         success: false,
+//         message: "Something went wrong",
+//       });
+//     }else{
+//       if(paymentMethod.length==0){
+//         return res.json({
+//           success: false,
+//           message: "Payment method not found.",
+//         });
+//       }else{
+//         return res.json({
+//           success: true,
+//           message: "Payment Method",
+//           res:paymentMethod
+//         });
+//       }
+//     }
+
+    
+//   });
+// };
+
+
 exports.contributorsList = function (req, res) {
   const {group_id}=req.query;
+  console.log(req.query," in the fight ")
   
   var sql =
     `SELECT users.name, ${ a} ,bgu.* FROM billing_group_users AS bgu LEFT JOIN users ON users.id=bgu.user_id WHERE bgu.group_id=${group_id}`
@@ -557,26 +590,74 @@ exports.contributorsList = function (req, res) {
           message: "Payment method not found.",
         });
       }else{
+        var sql1=`SELECT CASE WHEN bgu.payment_amount IS NULL THEN 0 ELSE SUM(bgu.payment_amount) END AS total_contributed_payment FROM billing_group_users AS bgu  WHERE bgu.group_id=${group_id}`
+        console.log(sql1)
+        connection.query(sql1, function (err, totalContributedAmount) {
+          if (err) {
+            console.log("somthing went wrong",err);
+            return res.json({
+              success: false,
+              message: "Something went wrong",
+            });
+          }else{
+console.log(" dddd ===",totalContributedAmount,totalContributedAmount[0].total_contributed_payment)
+            
         return res.json({
           success: true,
           message: "Payment Method",
-          res:paymentMethod
+          res:paymentMethod,
+          total_contributed_payment:totalContributedAmount[0].total_contributed_payment
         });
       }
+    })
     }
+  }
 
     
   });
 };
+// exports.paymentStatus = function (req, res) {
+//   const {group_id,user_id}=req.body;
+//   let status=1;
+//   console.log(" in ffdd")
+//   var sql =
+//     `UPDATE billing_group_users AS bgu SET  bgu.status=${status}  WHERE bgu.group_id=${group_id} AND bgu.user_id=${user_id}` 
+   
+//  connection.query(sql, function (err, paymentMethod) {
+//     if (err) {
+//       console.log("somthing went wrong",err);
+//       return res.json({
+//         success: false,
+//         message: "Something went wrong",
+//       });
+//     }else{
+//       if(paymentMethod.length==0){
+//         return res.json({
+//           success: false,
+//           message: "Payment method not found.",
+//         });
+//       }else{
+//         return res.json({
+//           success: true,
+//           message: "Payment status updated successfully",
+          
+//         });
+//       }
+//     }
+
+    
+//   });
+// };
 
 exports.paymentStatus = function (req, res) {
   const {group_id,user_id}=req.body;
   let status=1;
   console.log(" in ffdd")
-  var sql =
-    `UPDATE billing_group_users AS bgu SET  bgu.status=${status}  WHERE bgu.group_id=${group_id} AND bgu.user_id=${user_id}` 
+
+  var sql1 =
+    `SELECT each_split FROM billing_group WHERE group_id=${group_id}`
    
- connection.query(sql, function (err, paymentMethod) {
+ connection.query(sql1, function (err, splitAmount) {
     if (err) {
       console.log("somthing went wrong",err);
       return res.json({
@@ -584,20 +665,35 @@ exports.paymentStatus = function (req, res) {
         message: "Something went wrong",
       });
     }else{
-      if(paymentMethod.length==0){
+
+      var sql =
+      `UPDATE billing_group_users AS bgu SET  bgu.status=${status},payment_amount=${splitAmount[0].each_split}  WHERE bgu.group_id=${group_id} AND bgu.user_id=${user_id}` 
+     
+   connection.query(sql, function (err, paymentMethod) {
+      if (err) {
+        console.log("somthing went wrong",err);
         return res.json({
           success: false,
-          message: "Payment method not found.",
+          message: "Something went wrong",
         });
       }else{
-        return res.json({
-          success: true,
-          message: "Payment status updated successfully",
-          
-        });
+        if(paymentMethod.length==0){
+          return res.json({
+            success: false,
+            message: "Payment method not found.",
+          });
+        }else{
+          return res.json({
+            success: true,
+            message: "Payment status updated successfully",
+            
+          });
+        }
       }
-    }
+  
+      
+    });
+    }})
 
-    
-  });
+ 
 };
