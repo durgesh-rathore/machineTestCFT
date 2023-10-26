@@ -162,19 +162,19 @@ exports.addSplitGroup = function (req, res) {
       is_group: 2,
     };
 
-    connection.query(
-      "SELECT * FROM users WHERE users.is_group=2 AND users.name='" +
-        req.body.name +
-        "' ",
-      async function (err, presentgroup) {
-        if (err) console.log(err);
-        if (presentgroup.length > 0) {
-          return res.json({
-            success: true,
-            response: { group_id: group.insertId },
-            message: "Group already exist.",
-          });
-        } else {
+    // connection.query(
+    //   "SELECT * FROM users WHERE users.is_group=2 AND users.name='" +
+    //     req.body.name +
+    //     "' ",
+    //   async function (err, presentgroup) {
+    //     if (err) console.log(err);
+    //     if (presentgroup.length > 0) {
+    //       return res.json({
+    //         success: true,
+    //         // response: { group_id: group.insertId },
+    //         message: "Group already exist.",
+    //       });
+    //     } else {
           connection.query(
             "INSERT INTO users SET ?",
             group,
@@ -234,9 +234,9 @@ exports.addSplitGroup = function (req, res) {
               }
             }
           );
-        }
-      }
-    );
+        // }
+      // }
+    // );
   } catch (error) {
     console.error(error);
   }
