@@ -499,11 +499,7 @@ if(req.query.start_date!='' && req.query.start_date && req.query.start_date!='un
     constants.BASE_URL +
     "','images/postImage/',events.image) AS post_image,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT attending.attending_type FROM attending  WHERE attending.post_id=events.id AND attending.user_id=" +
     req.query.login_user_id +
-    " LIMIT 1) AS attending_type,(SELECT COUNT(*) FROM attending  WHERE attending.post_id=events.id AND attending.attending_type=1 AND attending.user_id!=" +
-    req.query.login_user_id +
-    "  )   AS attending_users_count,  (SELECT  GROUP_CONCAT(users.profile_picture)  FROM attending LEFT JOIN users ON users.id=attending.user_id  WHERE attending.post_id=events.id  AND attending.user_id!=" +
-    req.query.login_user_id +
-    "  AND attending.attending_type=1 ) AS attending_users_image,   (SELECT likes.is_likes FROM likes  WHERE likes.liked_by=" +
+    " LIMIT 1) AS attending_type,(SELECT COUNT(*) FROM attending  WHERE attending.post_id=events.id AND attending.attending_type=1 )   AS attending_users_count,  (SELECT  GROUP_CONCAT(users.profile_picture)  FROM attending LEFT JOIN users ON users.id=attending.user_id  WHERE attending.post_id=events.id AND attending.attending_type=1 ) AS attending_users_image,   (SELECT likes.is_likes FROM likes  WHERE likes.liked_by=" +
     req.query.login_user_id +
     "  AND likes.post_id=events.id  LIMIT 1) AS is_liked,(SELECT comments.comment FROM comments  WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments,(SELECT users.name FROM comments LEFT JOIN users ON users.id=comments.comment_by WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments_by,TIMESTAMPDIFF(MINUTE, events.updated_datetime , CURRENT_TIMESTAMP) AS create_minute_ago,events.*,CONCAT(DAY(events.start_date), ' ',MONTHNAME(events.start_date)) AS start_date,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,users.name,CONCAT('" +
     constants.BASE_URL +
