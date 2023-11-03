@@ -468,7 +468,7 @@ exports.getPostsAndEventsList = function (req, res) {
   }
 if(req.query.start_date!='' && req.query.start_date && req.query.start_date!='undefined' && req.query.start_date!='null'){
 
-  condition+=" AND events.start_date="+req.query.start_date+"";
+  condition+="  AND  events.post_type=0   AND events.start_date="+req.query.start_date+"";
 }
 
 
