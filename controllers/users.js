@@ -641,12 +641,13 @@ exports.updateUserProfile = function (req, res) {
                 var1: req.body.login_user_id,
               });
               let user = await queryAsync(s2);
-
+              if(user[0].profile_picture!="images.png"){
               fs.unlink(
                 "./public/images/profiles/" + user[0].profile_picture,
                 function (err) {}
               );
             }
+          }
             newUser.profie_step=1;
             connection.query(
               "UPDATE users SET ? WHERE id=" + req.body.login_user_id + " ",

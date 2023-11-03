@@ -114,7 +114,7 @@ exports.getGroupList = function (req, res) {
 
   var sql = " ";
   sql =
-    "SELECT users.id,users.type,users.name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN groups_users ON groups_users.user_id=u1.id WHERE groups_users.group_id=users.id AND groups_users.user_id!=" +
+    "SELECT users.id,users.type,users.name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN groups_users ON groups_users.user_id=u1.id WHERE groups_users.group_id=users.id AND groups_users.user_id<>" +
     req.query.login_user_id +
     "  ) AS group_users_image  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id     WHERE users.is_group=1 AND groups_users.user_id=" +
     req.query.login_user_id +
