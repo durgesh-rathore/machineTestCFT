@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "amazon-paapi": "^1.0.7",
     "apac": "^3.0.2",
     "axios": "^1.4.0",
     "bcrypt": "^5.1.0",

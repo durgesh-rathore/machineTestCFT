@@ -715,6 +715,13 @@ exports.getCommentListOnPosts = function (req, res) {
           message: "Comments list .",
         });
       });
+    }else{
+      return res.json({
+        response: [],
+        total_comment: 0,
+        success: false,
+        message: "Comments list .",
+      });
     }
   });
 };
@@ -1104,7 +1111,7 @@ exports.calenderSelect = function (req, res) {
 
 // // /////////////////////////////////////////////////////////////////
 
-
+const amazonPaapi = require('amazon-paapi');
 // accessKey = 'AKIAJBCOXCXX6YAQD7PA';
 // secretKey = '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';
 
