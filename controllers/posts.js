@@ -43,6 +43,15 @@ exports.new = async function (req, res) {
     ) {
       userPost.visibilitySelectUsers = req.body.visibilitySelectUsers;
     }
+
+    if (conditionForPost) {
+      var postD = findOne("events", " id= " + req.body.post_id);
+      console.log(postD, "====dddddddd");
+      fs.unlink(
+        "./public/images/postImage/" + postD.image,
+        function (err) {}
+      );
+    }
     if (req.file && req.file != "" && req.file != undefined) {
       const uploadedImageBuffer = req.file.buffer;
       const watermarkText = "ForgetMeNote";
@@ -67,14 +76,9 @@ exports.new = async function (req, res) {
         console.log(err);
       }
 
-      if (conditionForPost) {
-        var postD = findOne("events", " id= " + req.body.post_id);
-        console.log(postD, "====dddddddd");
-        fs.unlink(
-          "./public/images/postImage/" + postD.image,
-          function (err) {}
-        );
-      }
+      
+    }else{
+      userPost.image = ''
     }
 
     var c;
@@ -249,25 +253,27 @@ exports.postEvent = async function (req, res) {
     req.body.post_id != "";
   console.log(conditionForPost, " =========conditionForPost====");
 
-  if (req.file) {
-    data.image = req.file.filename
-  }
-  
-    if (conditionForPost) {
-      connection.query(
-        `SELECT * FROM events WHERE id=${req.body.post_id}`,
-        function (err, postD) {
-          console.log(postD, "ddddddd");
-          if (postD && postD.length > 0) {
-            fs.unlink(
-              "./public/images/postImage/" + postD[0].image,
-              function (err) {}
-            );
-          }
+
+  if (conditionForPost) {
+    connection.query(
+      `SELECT * FROM events WHERE id=${req.body.post_id}`,
+      function (err, postD) {
+        console.log(postD, "ddddddd");
+        if (postD && postD.length > 0) {
+          fs.unlink(
+            "./public/images/postImage/" + postD[0].image,
+            function (err) {}
+          );
         }
-      );
-    }
-  
+      }
+    );
+  }
+  if (req.file) {
+    data.image = req.file.filename;
+    
+  }else{
+    data.image = '';
+  }
   data.user_id = req.body.login_user_id;
   if (
     req.body.title &&
@@ -708,13 +714,6 @@ exports.getCommentListOnPosts = function (req, res) {
           success: true,
           message: "Comments list .",
         });
-      });
-    }else{
-      return res.json({
-        response: [],
-        total_comment:0,
-        success: false,
-        message: "Comments list .",
       });
     }
   });
