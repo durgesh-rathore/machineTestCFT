@@ -616,9 +616,9 @@ exports.getPostsAndEventsList = function (req, res) {
   }
 
   sql =
-    "SELECT events.description,CONCAT('" +
+    "SELECT events.description,  ( CASE WHEN (events.image IS NOT NULL AND  events.image<>'' ) THEN CONCAT('" +
     constants.BASE_URL +
-    "','images/postImage/',events.image) AS post_image,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT attending.attending_type FROM attending  WHERE attending.post_id=events.id AND attending.user_id=" +
+    "','images/postImage/',events.image) ELSE '' END ) AS post_image,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT attending.attending_type FROM attending  WHERE attending.post_id=events.id AND attending.user_id=" +
     req.query.login_user_id +
     " LIMIT 1) AS attending_type,(SELECT COUNT(*) FROM attending  WHERE attending.post_id=events.id AND attending.attending_type=1 )   AS attending_users_count,  (SELECT  GROUP_CONCAT(users.profile_picture)  FROM attending LEFT JOIN users ON users.id=attending.user_id  WHERE attending.post_id=events.id AND attending.attending_type=1 ) AS attending_users_image,   (SELECT likes.is_likes FROM likes  WHERE likes.liked_by=" +
     req.query.login_user_id +
@@ -1118,3 +1118,36 @@ const amazonPaapi = require('amazon-paapi');
 // defaultClient.host = 'webservices.amazon.com';
 // defaultClient.region = 'us-east-1';
 
+
+const commonParameters = {
+  AccessKey: 'AKIAJBCOXCXX6YAQD7PA',
+  SecretKey: '/F0OphnfTSLKtrF6IQSf3UR97eHCM5m6rz5LSiaL',
+  PartnerTag: 'forgetmenote-20', // yourtag-20
+  PartnerType: 'Associates', // Default value is Associates.
+  Marketplace: 'www.amazon.com', // Default value is US. Note: Host and Region are predetermined based on the marketplace value. There is no need for you to add Host and Region as soon as you specify the correct Marketplace value. If your region is not US or .com, please make sure you add the correct Marketplace value.
+};
+const requestParameters = {
+  Keywords: 'Harry Potter',
+  SearchIndex: 'Books',
+  ItemCount: 2,
+  Resources: [
+    'Images.Primary.Medium',
+    'ItemInfo.Title',
+    'Offers.Listings.Price',
+  ],
+};
+
+/** Promise */
+async function dur(){
+amazonPaapi
+  .SearchItems(commonParameters, requestParameters)
+  .then((data) => {
+    // do something with the success response.
+    JSON.stringify(data)
+    console.log(" dddddddddd======",JSON.stringify(data),"===========",data);
+  })
+  .catch((error) => {
+    // catch an error.
+    console.log(error);
+  });
+}
