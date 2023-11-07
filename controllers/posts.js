@@ -1151,3 +1151,4 @@ amazonPaapi
     console.log(error);
   });
 }
+// dur();

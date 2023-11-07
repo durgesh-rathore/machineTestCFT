@@ -590,7 +590,7 @@ exports.contributorsList = function (req, res) {
           message: "Payment method not found.",
         });
       }else{
-        var sql1=`SELECT CASE WHEN bgu.payment_amount IS NULL THEN 0 ELSE SUM(bgu.payment_amount) END AS total_contributed_payment FROM billing_group_users AS bgu  WHERE bgu.group_id=${group_id}`
+        var sql1=`SELECT CASE WHEN bgu.payment_amount IS NULL THEN 0 ELSE SUM(bgu.payment_amount) END AS total_contributed_payment FROM billing_group_users AS bgu  WHERE  bgu.status=1 AND bgu.group_id=${group_id}`
         console.log(sql1)
         connection.query(sql1, function (err, totalContributedAmount) {
           if (err) {
