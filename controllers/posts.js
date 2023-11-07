@@ -7,7 +7,8 @@ var {
   findByIdAndUpdate,
   findOne,
   pushNotification1,
-  addWatermarkToImage
+  pushNotification,
+  addWatermarkToImage,
 } = require("../helpers/helper");
 
 var multer = require("multer");
@@ -141,7 +142,6 @@ exports.new = async function (req, res) {
 
 // Add watermark to the image buffer
 
-
 // exports.new = async function (req, res) {
 //   console.log("dddd", req);
 //   const conditionForPost =
@@ -250,19 +250,24 @@ exports.postEvent = async function (req, res) {
   console.log(conditionForPost, " =========conditionForPost====");
 
   if (req.file) {
-    data.image = req.file.filename;
-    if (conditionForPost) {
-      connection.query(`SELECT * FROM events WHERE id=${req.body.post_id}`,function (err,postD){
-        console.log(postD,"ddddddd");
-        if(postD && postD.length>0){
-              fs.unlink(
-                "./public/images/postImage/" + postD[0].image,
-                function (err) {}
-              );
-            }
-              })
-    }
+    data.image = req.file.filename
   }
+  
+    if (conditionForPost) {
+      connection.query(
+        `SELECT * FROM events WHERE id=${req.body.post_id}`,
+        function (err, postD) {
+          console.log(postD, "ddddddd");
+          if (postD && postD.length > 0) {
+            fs.unlink(
+              "./public/images/postImage/" + postD[0].image,
+              function (err) {}
+            );
+          }
+        }
+      );
+    }
+  
   data.user_id = req.body.login_user_id;
   if (
     req.body.title &&
@@ -373,8 +378,9 @@ exports.postEvent = async function (req, res) {
 
 async function visibility(data) {
   console.log("===========", data);
+  let c;
   try {
-    visibility_data = {};
+    let visibility_data = {};
     if (data.post_id) {
       visibility_data.post_id = data.post_id;
     }
@@ -384,23 +390,91 @@ async function visibility(data) {
       data.user_id.length > 0 &&
       data.visibilitySelectUsers == 2
     ) {
-      data.user_id.split(",").forEach(async (element) => {
-        visibility_data.not_visible = 1;
-        visibility_data.user_id = element;
+      visibility_data.not_visible = 1;
+      visibility_data.post_id = data.post_id;
 
-        var c = await save("visibility", visibility_data);
-      });
+      async function insertData(element) {
+        return new Promise((resolve, reject) => {
+          const visibility_data_copy = { ...visibility_data };
+          visibility_data_copy.user_id = element;
+
+          connection.query(
+            "INSERT INTO visibility SET ?",
+            visibility_data_copy,
+            function (err, data1) {
+              if (err) {
+                console.log(err, "====err");
+                reject(err);
+              } else {
+                console.log(data1);
+                resolve();
+              }
+            }
+          );
+        });
+      }
+
+      async function processElements() {
+        for (const element of data.user_id.split(",")) {
+          console.log(element);
+          await insertData(element);
+        }
+      }
+
+      processElements()
+        .then(() => {
+          console.log("All insertions completed.");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
     }
     if (
       data.user_id &&
       data.user_id.length > 0 &&
       data.visibilitySelectUsers == 3
     ) {
-      data.user_id.split(",").forEach(async (element) => {
-        visibility_data.user_id = element;
+      // data.user_id.split(",").forEach(async (element) => {
+      //   visibility_data.user_id = element;
 
-        var c = await save("visibility", visibility_data);
-      });
+      //   var c = await save("visibility", visibility_data);
+      // });
+
+       async function insertData(element) {
+        return new Promise((resolve, reject) => {
+          const visibility_data_copy = { ...visibility_data };
+          visibility_data_copy.user_id = element;
+
+          connection.query(
+            "INSERT INTO visibility SET ?",
+            visibility_data_copy,
+            function (err, data1) {
+              if (err) {
+                console.log(err, "====err");
+                reject(err);
+              } else {
+                console.log(data1);
+                resolve();
+              }
+            }
+          );
+        });
+      }
+
+      async function processElements() {
+        for (const element of data.user_id.split(",")) {
+          console.log(element);
+          await insertData(element);
+        }
+      }
+
+      processElements()
+        .then(() => {
+          console.log("All insertions completed.");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
     }
     if (
       data.user_id &&
@@ -408,12 +482,48 @@ async function visibility(data) {
       data.visibilitySelectUsers == 4
     ) {
       visibility_data.user_id = data.login_user_id;
-      data.user_id.split(",").forEach(async (element) => {
-        // visibility_data.not_visible = 1;
-        visibility_data.group_id = element;
 
-        var c = await save("visibility", visibility_data);
-      });
+     async function insertData(element) {
+        return new Promise((resolve, reject) => {
+          const visibility_data_copy = { ...visibility_data };
+          visibility_data_copy.group_id = element;
+
+          connection.query(
+            "INSERT INTO visibility SET ?",
+            visibility_data_copy,
+            function (err, data1) {
+              if (err) {
+                console.log(err, "====err");
+                reject(err);
+              } else {
+                console.log(data1);
+                resolve();
+              }
+            }
+          );
+        });
+      }
+
+      async function processElements() {
+        for (const element of data.user_id.split(",")) {
+          console.log(element);
+          await insertData(element);
+        }
+      }
+
+      processElements()
+        .then(() => {
+          console.log("All insertions completed.");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+      // data.user_id.split(",").forEach(async (element) => {
+      //   // visibility_data.not_visible = 1;
+      //   visibility_data.group_id = element;
+
+      //   var c = await save("visibility", visibility_data);
+      // });
     }
   } catch (error) {
     console.error(error);
@@ -425,8 +535,8 @@ exports.getPostsAndEventsList = function (req, res) {
   var page = req.query.page ? req.query.page : 0;
 
   // OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )
-  var condition1 =' ';
-  
+  var condition1 = " ";
+
   var condition =
     " ( (events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +
     req.query.login_user_id +
@@ -434,14 +544,14 @@ exports.getPostsAndEventsList = function (req, res) {
     req.query.login_user_id +
     " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) )  OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=" +
     req.query.login_user_id +
-    " THEN false END ) OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=" +
+    " THEN false ELSE true END  ) OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=" +
     req.query.login_user_id +
     " THEN true END )  OR (events.visibilitySelectUsers=4 AND groups_users.user_id=" +
     req.query.login_user_id +
     ")   )  ";
 
   if (req.query.myProfile == "1") {
-    condition = " ( events.user_id	 =" + req.query.login_user_id;
+    condition = " ( events.user_id   =" + req.query.login_user_id;
 
     if (req.query.type == "feed") {
       condition += "  AND  events.post_type=1  )";
@@ -468,12 +578,17 @@ exports.getPostsAndEventsList = function (req, res) {
       condition += " OR events.user_id =" + req.query.login_user_id + " ";
     }
   }
-if(req.query.start_date!='' && req.query.start_date && req.query.start_date!='undefined' && req.query.start_date!='null'){
-
-  condition+="  AND  events.post_type=0   AND events.start_date="+req.query.start_date+"";
-}
-
-
+  if (
+    req.query.start_date != "" &&
+    req.query.start_date &&
+    req.query.start_date != "undefined" &&
+    req.query.start_date != "null"
+  ) {
+    condition +=
+      "  AND  events.post_type=0   AND events.start_date='" +
+      req.query.start_date +
+      "' ";
+  }
 
   if (
     req.query.search != "" &&
@@ -503,9 +618,13 @@ if(req.query.start_date!='' && req.query.start_date && req.query.start_date!='un
     req.query.login_user_id +
     "  AND likes.post_id=events.id  LIMIT 1) AS is_liked,(SELECT comments.comment FROM comments  WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments,(SELECT users.name FROM comments LEFT JOIN users ON users.id=comments.comment_by WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments_by,TIMESTAMPDIFF(MINUTE, events.updated_datetime , CURRENT_TIMESTAMP) AS create_minute_ago,events.*,CONCAT(DAY(events.start_date), ' ',MONTHNAME(events.start_date)) AS start_date,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,users.name,CONCAT('" +
     constants.BASE_URL +
-    "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)   WHERE (" +
+    "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON (visibility.post_id=events.id AND  CASE WHEN events.visibilitySelectUsers<>4 THEN  visibility.user_id=" +
+    req.query.login_user_id +
+    "  ELSE true  END )    LEFT JOIN groups_users ON (groups_users.group_id=visibility.group_id AND groups_users.user_id=" +  req.query.login_user_id + " ) LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)   WHERE (" +
     condition +
-    ") " +condition1+" GROUP BY events.id  ORDER BY events.id DESC  Limit " +
+    ") " +
+    condition1 +
+    " GROUP BY events.id  ORDER BY events.id DESC  Limit " +
     page * 8 +
     ",8";
   console.log("===", sql);
@@ -589,6 +708,13 @@ exports.getCommentListOnPosts = function (req, res) {
           success: true,
           message: "Comments list .",
         });
+      });
+    }else{
+      return res.json({
+        response: [],
+        total_comment:0,
+        success: false,
+        message: "Comments list .",
       });
     }
   });
@@ -931,4 +1057,58 @@ async function pushNotificationForMultipleUser(data) {
     console.error(error);
   }
 }
+
+exports.calenderSelect = function (req, res) {
+  var condition =
+    " ( (events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +
+    req.query.login_user_id +
+    " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 )  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (users_requests.request_for=" +
+    req.query.login_user_id +
+    " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) )  OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=" +
+    req.query.login_user_id +
+    " THEN false END ) OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=" +
+    req.query.login_user_id +
+    " THEN true END )  OR (events.visibilitySelectUsers=4 AND groups_users.user_id=" +
+    req.query.login_user_id +
+    ")   )  ";
+
+  // DATE_FORMAT(your_timestamp_column, '%Y-%m-%d')
+  sql =
+    "SELECT events.*,DATE_FORMAT(events.start_date, '%Y-%m-%d') AS start_date FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)     WHERE start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY) AND  (" +
+    condition +
+    ")  GROUP BY events.id ORDER BY events.start_date ASC  ";
+  console.log("===", sql);
+  connection.query(sql, function (err, post_list) {
+    if (post_list.length > 0) {
+      var postList=[];
+      for (let i = 0; i < post_list.length; i++) {
+        post_list[i].eventCount = 1;
+        // if()
+      }
+
+      return res.json({
+        response: post_list,
+        success: true,
+        message: "post list",
+      });
+    } else {
+      return res.json({
+        response: [],
+        totalPost: 0,
+        success: false,
+        message: "No More post",
+      });
+    }
+  });
+};
+
+
+// // /////////////////////////////////////////////////////////////////
+
+
+// accessKey = 'AKIAJBCOXCXX6YAQD7PA';
+// secretKey = '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';
+
+// defaultClient.host = 'webservices.amazon.com';
+// defaultClient.region = 'us-east-1';
 

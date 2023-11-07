@@ -69,4 +69,10 @@ router.delete(
 );
 
 
+router.get(
+  "/calenderSelect",
+//   checkUserStatus.userStatus,
+  postController.calenderSelect
+);
+
 module.exports = router;
