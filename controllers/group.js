@@ -1,7 +1,7 @@
 var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
-require("./gifingcall");
+require("./gift");
 var { encryptPassword, checkPassword } = require("../config/custom");
 var { save } = require("../helpers/helper");
 var multer = require("multer");
@@ -119,7 +119,7 @@ exports.getGroupList = function (req, res) {
     "  ) AS group_users_image  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id     WHERE users.is_group=1 AND groups_users.user_id=" +
     req.query.login_user_id +
     condition +
-    " GROUP BY users.id Limit " +
+    " GROUP BY users.id  ORDER BY users.id DESC Limit " +
     page * 10 +
     ",10";
   console.log(sql);
@@ -161,21 +161,7 @@ exports.addSplitGroup = function (req, res) {
       group_admin_id: req.body.group_admin_id,
       is_group: 2,
     };
-
-    // connection.query(
-    //   "SELECT * FROM users WHERE users.is_group=2 AND users.name='" +
-    //     req.body.name +
-    //     "' ",
-    //   async function (err, presentgroup) {
-    //     if (err) console.log(err);
-    //     if (presentgroup.length > 0) {
-    //       return res.json({
-    //         success: true,
-    //         // response: { group_id: group.insertId },
-    //         message: "Group already exist.",
-    //       });
-    //     } else {
-          connection.query(
+            connection.query(
             "INSERT INTO users SET ?",
             group,
             async function (err, users) {
@@ -234,9 +220,7 @@ exports.addSplitGroup = function (req, res) {
               }
             }
           );
-        // }
-      // }
-    // );
+       
   } catch (error) {
     console.error(error);
   }
@@ -536,37 +520,6 @@ exports.getPaymentMethod = function (req, res) {
   });
 };
 
-// exports.contributorsList = function (req, res) {
-//   const {group_id}=req.query;
-  
-//   var sql =
-//     `SELECT users.name, ${ a} ,bgu.* FROM billing_group_users AS bgu LEFT JOIN users ON users.id=bgu.user_id WHERE bgu.group_id=${group_id}`
-   
-//  connection.query(sql, function (err, paymentMethod) {
-//     if (err) {
-//       console.log("somthing went wrong",err);
-//       return res.json({
-//         success: false,
-//         message: "Something went wrong",
-//       });
-//     }else{
-//       if(paymentMethod.length==0){
-//         return res.json({
-//           success: false,
-//           message: "Payment method not found.",
-//         });
-//       }else{
-//         return res.json({
-//           success: true,
-//           message: "Payment Method",
-//           res:paymentMethod
-//         });
-//       }
-//     }
-
-    
-//   });
-// };
 
 
 exports.contributorsList = function (req, res) {
@@ -616,38 +569,6 @@ console.log(" dddd ===",totalContributedAmount,totalContributedAmount[0].total_c
     
   });
 };
-// exports.paymentStatus = function (req, res) {
-//   const {group_id,user_id}=req.body;
-//   let status=1;
-//   console.log(" in ffdd")
-//   var sql =
-//     `UPDATE billing_group_users AS bgu SET  bgu.status=${status}  WHERE bgu.group_id=${group_id} AND bgu.user_id=${user_id}` 
-   
-//  connection.query(sql, function (err, paymentMethod) {
-//     if (err) {
-//       console.log("somthing went wrong",err);
-//       return res.json({
-//         success: false,
-//         message: "Something went wrong",
-//       });
-//     }else{
-//       if(paymentMethod.length==0){
-//         return res.json({
-//           success: false,
-//           message: "Payment method not found.",
-//         });
-//       }else{
-//         return res.json({
-//           success: true,
-//           message: "Payment status updated successfully",
-          
-//         });
-//       }
-//     }
-
-    
-//   });
-// };
 
 exports.paymentStatus = function (req, res) {
   const {group_id,user_id}=req.body;
