@@ -303,9 +303,9 @@ exports.getSpiltChats = async (req, res) => {
       
 if (splitDetails.length > 0) {    
 
-    let s1 = await dbScript(db_sql["Q1"], { var1: req.query.group_id,var2:'IS  NOT NULL' });
+    let s1 = await dbScript(db_sql["Q1"], { var1: req.query.group_id,var2:'1' });
       let user1 = await queryAsync(s1);
-    let s2 = await dbScript(db_sql["Q1"], { var1: req.query.group_id,var2:'IS  NULL' });
+    let s2 = await dbScript(db_sql["Q1"], { var1: req.query.group_id,var2:'0' });
     let user2 = await queryAsync(s2);
 
     splitDetails[0].notPaidUsers=user2
