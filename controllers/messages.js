@@ -285,9 +285,9 @@ exports.getSpiltChats = async (req, res) => {
     // " 
     sql1 =
       `SELECT users.name,users.group_admin_id,(  SELECT  CASE WHEN billing_group_users.status=1 THEN 1 ELSE 0 END FROM  billing_group_users WHERE billing_group_users.group_id= ${req.query.group_id} AND billing_group_users.user_id=${
-      req.query.login_user_id } AS is_paid, 
+      req.query.login_user_id } ) AS is_paid, 
       billing_group.group_id,billing_group.spliting_amount,
-      ( SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id WHERE billing_group_users.group_id=billing_group.group_id  AND users.id <> ${req.query.login_user_id} AS group_users_image,COUNT(*) AS contributors,
+      ( SELECT GROUP_CONCAT(users.profile_picture) FROM users LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id WHERE billing_group_users.group_id=billing_group.group_id  AND users.id <> ${req.query.login_user_id} ) AS group_users_image,COUNT(*) AS contributors,
       (select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.status=1) AS paid_contributor,      (select  COUNT(*) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id  AND  billing_group_users.status=0) AS pending_contributor,(select ROUND((sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/billing_group.spliting_amount) *100 ,2 ) from billing_group_users  WHERE billing_group_users.group_id=billing_group.group_id ) AS percentage,
       (select  CEIL(billing_group.spliting_amount/COUNT(*)) from billing_group_users WHERE billing_group_users.group_id=billing_group.group_id ) AS each_split ,billing_group.currency  
       FROM billing_group  
