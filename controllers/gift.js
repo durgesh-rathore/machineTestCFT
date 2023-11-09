@@ -126,18 +126,25 @@ exports.categoryAccordingToG= function(req,res) {
     });
 }
 
+// {
+//   "PartnerTag": "xyz-20",
+//   "PartnerType": "Associates",
+//   "ItemIds": ["8424916514"],
+//   "LanguagesOfPreference": ["es_US"]
+// }
 
 
 exports.productDetails= function(req,res) {
   const requestParameters = {
     
       ItemIds: ["B01M0GB8CC","B0851ZPB5C"],
-      ItemIdType: "ASIN",
+      // ItemIdType: "ASIN",
       LanguagesOfPreference: ["en_US"],
-      Marketplace: "www.amazon.com",
+      // Marketplace: "www.amazon.com",
       PartnerTag: "forgetmenote-20",
       PartnerType: "Associates",
-      Resources: ["Images.Primary.Small","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
+      // Resources: ["Images.Primary.Small","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
+
     
   };
 

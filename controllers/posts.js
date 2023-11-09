@@ -1071,25 +1071,57 @@ async function pushNotificationForMultipleUser(data) {
   }
 }
 
+
+
 exports.calenderSelect = function (req, res) {
   var condition =
-    " ( (events.visibilitySelectUsers=1 AND       (         (users_requests.user_id=" +
-    req.query.login_user_id +
-    " AND (users_requests.is_accepted=1 OR users_requests.is_follow=1 )  AND users_requests.is_reject=0  AND users_requests.is_block=0 ) OR (users_requests.request_for=" +
-    req.query.login_user_id +
-    " AND (users_requests.is_accepted=1 OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) )  OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=" +
-    req.query.login_user_id +
-    " THEN false END ) OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=" +
-    req.query.login_user_id +
-    " THEN true END )  OR (events.visibilitySelectUsers=4 AND groups_users.user_id=" +
-    req.query.login_user_id +
-    ")   )  ";
+  ` (               (users_requests.user_id=${
+  req.query.login_user_id } AND 
+   (users_requests.is_accepted=1 OR users_requests.is_follow=1 ) 
+    AND users_requests.is_reject=0  AND users_requests.is_block=0 ) 
+    OR (users_requests.request_for=${
+  req.query.login_user_id } AND (users_requests.is_accepted=1 
+
+  OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) AND
+  (
+    events.visibilitySelectUsers=1
+   OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=${
+  req.query.login_user_id } THEN false ELSE true END  )
+   OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=${
+  req.query.login_user_id } THEN true END )  
+  OR (events.visibilitySelectUsers=4 AND groups_users.user_id=${
+  req.query.login_user_id } ) ) `;
 
   // DATE_FORMAT(your_timestamp_column, '%Y-%m-%d')
   sql =
-    "SELECT events.*,DATE_FORMAT(events.start_date, '%Y-%m-%d') AS start_date FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)     WHERE start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY) AND  (" +
-    condition +
-    ")  GROUP BY events.id ORDER BY events.start_date ASC  ";
+    ` SELECT 
+       subquery.events_id,
+       subquery.start_date ,
+       subquery.title,
+        COUNT(subquery.events_id) AS eventCount
+        FROM (
+            SELECT 
+               events.id AS events_id,
+               events.title AS title,
+               DATE_FORMAT(events.start_date, '%Y-%m-%d') AS start_date
+            FROM
+                events 
+                LEFT JOIN users ON users.id=events.user_id 
+                LEFT JOIN visibility ON visibility.post_id=events.id 
+                LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id 
+                LEFT JOIN users_requests ON 
+                         (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)     
+            WHERE 
+                 start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY) AND  ${
+                 condition} 
+                  GROUP BY events_id, start_date 
+                  
+                  ) AS subquery
+GROUP BY 
+    subquery.start_date
+ORDER BY 
+    subquery.start_date ASC `;
+
   console.log("===", sql);
   connection.query(sql, function (err, post_list) {
     if (post_list.length > 0) {
@@ -1114,6 +1146,54 @@ exports.calenderSelect = function (req, res) {
     }
   });
 };
+// exports.calenderSelect = function (req, res) {
+//   var condition =
+//   ` (               (users_requests.user_id=${
+//   req.query.login_user_id } AND 
+//    (users_requests.is_accepted=1 OR users_requests.is_follow=1 ) 
+//     AND users_requests.is_reject=0  AND users_requests.is_block=0 ) 
+//     OR (users_requests.request_for=${
+//   req.query.login_user_id } AND (users_requests.is_accepted=1 
+
+//   OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) AND
+//   (
+//     events.visibilitySelectUsers=1
+//    OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=${
+//   req.query.login_user_id } THEN false ELSE true END  )
+//    OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=${
+//   req.query.login_user_id } THEN true END )  
+//   OR (events.visibilitySelectUsers=4 AND groups_users.user_id=${
+//   req.query.login_user_id } ) ) `;
+
+//   // DATE_FORMAT(your_timestamp_column, '%Y-%m-%d')
+//   sql =
+//     "SELECT events.*,DATE_FORMAT(events.start_date, '%Y-%m-%d') AS start_date FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)     WHERE start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY) AND  (" +
+//     condition +
+//     ")  GROUP BY events.id ORDER BY events.start_date ASC  ";
+//   console.log("===", sql);
+//   connection.query(sql, function (err, post_list) {
+//     if (post_list.length > 0) {
+//       var postList=[];
+//       for (let i = 0; i < post_list.length; i++) {
+//         post_list[i].eventCount = 1;
+//         // if()
+//       }
+
+//       return res.json({
+//         response: post_list,
+//         success: true,
+//         message: "post list",
+//       });
+//     } else {
+//       return res.json({
+//         response: [],
+//         totalPost: 0,
+//         success: false,
+//         message: "No More post",
+//       });
+//     }
+//   });
+// };
 
 
 // // /////////////////////////////////////////////////////////////////
