@@ -578,15 +578,15 @@ exports.getPostsAndEventsList = function (req, res) {
   }
   if (req.query.type == "feed" && req.query.myProfile != "1") {
     condition +=
-      "  AND ( events.post_type=1  OR (events.user_id =" +
+      "  AND events.post_type=1  OR (events.user_id =" +
       req.query.login_user_id +
-      " AND events.post_type=1  ) ) ";
+      " AND events.post_type=1  ) ";
   } else {
     if (req.query.type == "event" && req.query.myProfile != "1") {
       condition +=
-        "  AND ( events.post_type=0  OR (events.user_id =" +
+        "  AND  events.post_type=0  OR (events.user_id =" +
         req.query.login_user_id +
-        " AND events.post_type=0 ) ) ";
+        " AND events.post_type=0 )  ";
     } else if (req.query.myProfile != "1") {
       condition += " OR events.user_id =" + req.query.login_user_id + " ";
     }
