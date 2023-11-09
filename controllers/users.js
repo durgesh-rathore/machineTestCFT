@@ -570,12 +570,13 @@ exports.getProfile = function (req, res) {
       message: "You not login user.",
     });
   } else {
-    connection.query(
-      "SELECT users.dob,users.mobile_number,users.created_datetime,email,users.id,users.name,CONCAT('" +
-        constants.BASE_URL +
-        "','images/profiles/',users.profile_picture) AS profile_picture,(SELECT COUNT(*) FROM users_requests WHERE users_requests.request_for=users.id AND users_requests.is_follow=1 ) AS following_count,(SELECT COUNT(*) FROM users_requests WHERE users_requests.request_for=users.id AND users_requests.is_follow=1 AND users_requests.is_accepted=1 ) AS followers_count  FROM users  WHERE users.id = " +
-        req.query.login_user_id +
-        "",
+    var sql= "SELECT users.dob,users.mobile_number,users.created_datetime,email,users.id,users.name,CONCAT('" +
+    constants.BASE_URL +
+    "','images/profiles/',users.profile_picture) AS profile_picture,(SELECT COUNT(*) FROM users_requests WHERE users_requests.user_id=users.id AND (users_requests.is_follow=1 OR users_requests.is_request=1)  ) AS following_count,    (SELECT COUNT(*) FROM users_requests WHERE users_requests.request_for=users.id AND (users_requests.is_follow=1 OR users_requests.is_request=1) ) AS followers_count  FROM users  WHERE users.id = " +
+    req.query.login_user_id +
+    "";
+    console.log(sql," ======dddd dd=")
+    connection.query(sql,     
       function (err, users) {
         console.log(err);
 
