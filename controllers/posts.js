@@ -1090,7 +1090,8 @@ exports.calenderSelect = function (req, res) {
    OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=${
   req.query.login_user_id } THEN true END )  
   OR (events.visibilitySelectUsers=4 AND groups_users.user_id=${
-  req.query.login_user_id } ) ) `;
+  req.query.login_user_id } )  OR events.user_id=${
+    req.query.login_user_id }) `;
 
   // DATE_FORMAT(your_timestamp_column, '%Y-%m-%d')
   sql =
