@@ -581,11 +581,11 @@ exports.getPostsAndEventsList = function (req, res) {
       "  AND events.post_type=1  OR (events.user_id =" +
       req.query.login_user_id +
       " AND events.post_type=1  ) ";
-  } else {
-    if (req.query.type == "event" && req.query.myProfile != "1" && (req.query.start_date == "" ||
-    !req.query.start_date || 
-    req.query.start_date == "undefined" ||
-    req.query.start_date == "null")) {
+  } else if(req.query.start_date == "" ||
+  !req.query.start_date || 
+  req.query.start_date == "undefined" ||
+  req.query.start_date == "null"){
+    if (req.query.type == "event" && req.query.myProfile != "1") {
       condition +=
         "  AND  events.post_type=0  OR (events.user_id =" +
         req.query.login_user_id +
