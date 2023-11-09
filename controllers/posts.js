@@ -1125,11 +1125,11 @@ ORDER BY
   console.log("===", sql);
   connection.query(sql, function (err, post_list) {
     if (post_list.length > 0) {
-      var postList=[];
-      for (let i = 0; i < post_list.length; i++) {
-        post_list[i].eventCount = 1;
-        // if()
-      }
+      // var postList=[];
+      // for (let i = 0; i < post_list.length; i++) {
+      //   post_list[i].eventCount = 1;
+      //   // if()
+      // }
 
       return res.json({
         response: post_list,
