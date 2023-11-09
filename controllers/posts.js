@@ -919,9 +919,9 @@ exports.likedOnComment = async function (req, res) {
 
 exports.getPostOrEventById = function (req, res) {
   sql =
-    "SELECT CONCAT('" +
+    "SELECT ( CASE WHEN (events.image IS NOT NULL AND  events.image<>'' ) THEN CONCAT('" +
     constants.BASE_URL +
-    "','images/postImage/',events.image) AS post_image,events.*,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,TIME_FORMAT(events.end_time, '%H:%i') AS end_time FROM  events   WHERE events.id= " +
+    "','images/postImage/',events.image) ELSE '' END ) AS post_image,events.*,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,TIME_FORMAT(events.end_time, '%H:%i') AS end_time FROM  events   WHERE events.id= " +
     req.query.post_id +
     "   ";
 
