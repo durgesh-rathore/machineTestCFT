@@ -600,7 +600,9 @@ exports.getPostsAndEventsList = function (req, res) {
     condition +=
       "  AND  events.post_type=0   AND events.start_date='" +
       req.query.start_date +
-      "' ";
+      "' OR (events.user_id= "+ req.query.login_user_id+ " AND events.start_date='" +
+      req.query.start_date +
+      "')   ";
   }
 
   if (
