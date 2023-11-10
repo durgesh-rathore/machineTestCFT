@@ -19,7 +19,7 @@ router.post('/socialLogin',users.socialLogin);
 
 router.get('/getInterestList',checkUserStatus.userStatus,users.getInterestList);
 router.post('/userInterest',checkUserStatus.userStatus,users.userInterest)
-router.post('/userFavoriteColors',checkUserStatus.userStatus,users.userFavoriteColors) 
+router.post('/userFavoriteColors',users.userFavoriteColors) 
 
 router.put('/forgotPassword',users.forgotPassword) 
 router.put('/resetPassword',users.resetPassword) 
@@ -31,6 +31,6 @@ router.post('/updateUserProfile',
 // checkUserStatus.userStatus,
 uploadFiles('public/images/profiles').single("profile_picture"),users.updateUserProfile);
 
-
+router.get('/getUserInterest',users.getUserInterest);
 
 module.exports = router;

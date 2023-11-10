@@ -385,7 +385,7 @@ exports.userInterest = function (req, res) {
   }
 };
 
-exports.userFavoriteColors = function (req, res) {
+exports.userFavoriteColors1 = function (req, res) {
   if (!req.body || !req.body.user_id || !req.body.favorite_colors) {
     return res.json({
       success: false,
@@ -421,6 +421,43 @@ exports.userFavoriteColors = function (req, res) {
                 message: "Favorite colors save succesful.",
               });
             }
+          });
+        }
+      }
+    );
+  }
+};
+
+
+exports.userFavoriteColors = function (req, res) {
+  if (!req.body || !req.body.user_id || !req.body.favorite_colors) {
+    return res.json({
+      success: false,
+      message: "Please enter required  detail.",
+    });
+  } else {
+    connection.query(
+      "SELECT * FROM users WHERE id = ?",
+      req.body.user_id,
+      function (err, users) {
+        if (users.length <= 0) {
+          return res.json({
+            success: false,
+            message: "Please enter required  detail.",
+          });
+        } else {
+          JSON.parse(req.body.favorite_colors).forEach((element) => {
+            var obj = {
+              user_id: req.body.user_id,
+              color_id: element,
+            };
+
+            save("users_favorite_colors", obj);
+            obj = {};
+          });
+          return res.json({
+            success: true,
+            message: "Favorite colors save succesful.",
           });
         }
       }
@@ -689,3 +726,59 @@ async function x() {
     }
   );
 }
+
+exports.getUserInterest = function (req, res) {
+const {login_user_id}=req.query
+if(!login_user_id){
+  return res.json({
+    success: false,
+    message: "Something went wrong.",
+  })
+}else{
+
+  var sql=`SELECT
+          (SELECT GROUP_CONCAT(i.title) 
+             FROM users_interest AS ui 
+             LEFT JOIN interests AS i 
+               ON i.id=ui.interest_id  
+                  WHERE ui.user_id=${login_user_id}) AS interests,
+          (SELECT GROUP_CONCAT(c.title) 
+             FROM users_favorite_colors AS ufc 
+             LEFT JOIN colors AS c 
+              ON c.id=ufc.color_id   
+                 WHERE ufc.user_id=${login_user_id}) AS favorite_colors`;
+                 console.log(sql,"=====");
+  
+        connection.query(
+          sql,
+          function (err, user_interest) {
+            console.log(err);
+            console.log(user_interest);
+            if (user_interest.length > 0) {
+              if(user_interest[0].interests){
+                user_interest[0].interests=user_interest[0].interests.split(',');
+              }else{
+                user_interest[0].interests=[];
+              }
+              if(user_interest[0].favorite_colors){
+                user_interest[0].favorite_colors=user_interest[0].favorite_colors.split(',');
+              }else{
+                user_interest[0].favorite_colors=[];
+              }
+              
+
+              return res.json({
+                response: user_interest[0],
+                success: true,
+                message: "Color  and Interest  Of users",
+              });
+            }else{
+              return res.json({
+                success: false,
+                message: "Color and interest  not found of users.",
+              });
+            }
+          }
+        );
+        }
+};
