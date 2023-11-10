@@ -65,7 +65,7 @@ exports.amazonProductList= function(req,res) {
 exports.productDetails= function(req,res) {
   const requestParameters = {
     
-      ItemIds: ["B01M0GB8CC"],
+      ItemIds: [`${req.query.asin_no}`],
       PartnerTag: "forgetmenote-20",
       Resources: ["Images.Primary.Small","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
 
