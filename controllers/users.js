@@ -729,7 +729,7 @@ async function x() {
 
 exports.getUserInterest = function (req, res) {
 const {user_id}=req.query
-if(!login_user_id){
+if(!user_id){
   return res.json({
     success: false,
     message: "Something went wrong.",
@@ -741,12 +741,12 @@ if(!login_user_id){
              FROM users_interest AS ui 
              LEFT JOIN interests AS i 
                ON i.id=ui.interest_id  
-                  WHERE ui.user_id=${login_user_id}) AS interests,
+                  WHERE ui.user_id=${user_id}) AS interests,
           (SELECT GROUP_CONCAT(c.title) 
              FROM users_favorite_colors AS ufc 
              LEFT JOIN colors AS c 
               ON c.id=ufc.color_id   
-                 WHERE ufc.user_id=${login_user_id}) AS favorite_colors`;
+                 WHERE ufc.user_id=${user_id}) AS favorite_colors`;
                  console.log(sql,"=====");
   
         connection.query(
