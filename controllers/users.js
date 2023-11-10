@@ -728,7 +728,7 @@ async function x() {
 }
 
 exports.getUserInterest = function (req, res) {
-const {login_user_id}=req.query
+const {user_id}=req.query
 if(!login_user_id){
   return res.json({
     success: false,

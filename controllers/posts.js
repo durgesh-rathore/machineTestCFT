@@ -640,12 +640,7 @@ exports.getPostsAndEventsList = function (req, res) {
       FROM likes
       WHERE likes.post_id = events.id AND likes.is_likes = 1
     ) AS liked_by,
-    (
-      SELECT attending.attending_type
-      FROM attending
-      WHERE attending.post_id = events.id AND attending.user_id = ${req.query.login_user_id}
-      LIMIT 1
-    ) AS attending_type,
+      attending.attending_type,
     (
       SELECT COUNT(*)
       FROM attending
@@ -702,7 +697,8 @@ exports.getPostsAndEventsList = function (req, res) {
       users_requests.request_for = events.user_id OR
       users_requests.user_id = events.user_id
     )
-  WHERE
+    LEFT JOIN attending ON (attending.post_id=events.id AND attending.user_id=${req.query.login_user_id})
+  WHERE (attending.attending_type IS null OR attending.attending_type IN(1,2)) AND 
     (${condition}) ${condition1}
   GROUP BY
     events.id
