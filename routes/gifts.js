@@ -4,10 +4,11 @@ var checkUserStatus = require("../config/checkUserStatus");
 
 var router = express.Router();
 
-router.get("/productSearchOfSearch", gift.productSearchOfSearch);
-router.get("/categorySearchOfSearch", gift.categorySearchOfSearch);
-router.get("/categoryAccordingToG", gift.categoryAccordingToG);
+router.get("/amazonProductList", gift.amazonProductList);
+router.get("/amazonCategoryList", gift.amazonCategoryList);
+
 router.get("/productDetails", gift.productDetails);
+router.get("/categoryAccordingToG", gift.categoryAccordingToG);
 
 
 

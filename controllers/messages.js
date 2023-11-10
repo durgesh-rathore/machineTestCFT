@@ -16,6 +16,9 @@ var a =
   constants.BASE_URL +
   "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
 exports.getChats = async (req, res) => {
+  //  i have to write logic for 
+  // sql1= `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = ${}`;
+
   console.log("req.query===", req.query);
   var sql = "";
   var page = req.query.page ? req.query.page : 0;

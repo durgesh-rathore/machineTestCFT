@@ -13,7 +13,7 @@ const commonParameters = {
   Marketplace: "www.amazon.com", // Default value is US. Note: Host and Region are predetermined based on the marketplace value. There is no need for you to add Host and Region as soon as you specify the correct Marketplace value. If your region is not US or .com, please make sure you add the correct Marketplace value.
 };
 
-exports.productSearchOfSearch= function(req,res) {
+exports.amazonProductList= function(req,res) {
   const requestParameters = {
     Keywords: req.query.searchingTitle,
     SearchIndex: req.query.category,
@@ -62,11 +62,45 @@ exports.productSearchOfSearch= function(req,res) {
 //   ],
 // };
 
+exports.productDetails= function(req,res) {
+  const requestParameters = {
+    
+      ItemIds: ["B01M0GB8CC"],
+      PartnerTag: "forgetmenote-20",
+      Resources: ["Images.Primary.Small","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
+
+    
+  };
+
+  /** Promise */
+  var a;
+  amazonPaapi
+    .GetItems(commonParameters, requestParameters)
+    .then((data) => {
+      // do something with the success response.
+      
+      a=JSON.stringify(data);
+      console.log(data.ItemsResult,
+        " dddddddddd======"    
+        
+      );
+      return res.json({
+        response: data.ItemsResult,
+        success: true,
+        message: "product list  .",
+      });
+    })
+    .catch((error) => {
+      // catch an error.
+      console.log(error);
+    });
+}
 
 
 
 
- exports.categorySearchOfSearch= function(req,res) {
+
+ exports.amazonCategoryList= function(req,res) {
   const requestParameters = {
     "Keywords": "category",
     "Resources": ["SearchRefinements"],
@@ -134,42 +168,40 @@ exports.categoryAccordingToG= function(req,res) {
 // }
 
 
-exports.productDetails= function(req,res) {
-  const requestParameters = {
+// exports.productDetails= function(req,res) {
+//   const requestParameters = {
     
-      ItemIds: ["B01M0GB8CC","B0851ZPB5C"],
-      // ItemIdType: "ASIN",
-      LanguagesOfPreference: ["en_US"],
-      // Marketplace: "www.amazon.com",
-      PartnerTag: "forgetmenote-20",
-      PartnerType: "Associates",
-      // Resources: ["Images.Primary.Small","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
+//       ItemIds: ["B01M0GB8CC"],
+//       // ItemIdType: "ASIN",
+//       // LanguagesOfPreference: ["en_US"],
+//       // Marketplace: "www.amazon.com",
+//       PartnerTag: "forgetmenote-20",
+//       // PartnerType: "Associates",
+//       Resources: ["Images.Primary.Small","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
 
     
-  };
+//   };
 
-  /** Promise */
-  var a;
-  amazonPaapi
-    .SearchItems(commonParameters, requestParameters)
-    .then((data) => {
-      // do something with the success response.
+//   /** Promise */
+//   var a;
+//   amazonPaapi
+//     .GetItems(commonParameters, requestParameters)
+//     .then((data) => {
+//       // do something with the success response.
       
-      a=JSON.stringify(data);
-      console.log(data,
-        " dddddddddd======",
-        JSON.stringify(data),
-        "===========",a
+//       a=JSON.stringify(data);
+//       console.log(data.ItemsResult,
+//         " dddddddddd======"    
         
-      );
-      return res.json({
-        response: data.SearchResult.Items,
-        success: true,
-        message: "product list  .",
-      });
-    })
-    .catch((error) => {
-      // catch an error.
-      console.log(error);
-    });
-}
+//       );
+//       return res.json({
+//         response: data.ItemsResult,
+//         success: true,
+//         message: "product list  .",
+//       });
+//     })
+//     .catch((error) => {
+//       // catch an error.
+//       console.log(error);
+//     });
+// }
