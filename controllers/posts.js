@@ -628,23 +628,92 @@ exports.getPostsAndEventsList = function (req, res) {
   }
 
   sql =
-    "SELECT events.description,  ( CASE WHEN (events.image IS NOT NULL AND  events.image<>'' ) THEN CONCAT('" +
-    constants.BASE_URL +
-    "','images/postImage/',events.image) ELSE '' END ) AS post_image,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT count(*) AS likes_count FROM likes  WHERE likes.post_id=events.id AND likes.is_likes=1) AS liked_by,(SELECT attending.attending_type FROM attending  WHERE attending.post_id=events.id AND attending.user_id=" +
-    req.query.login_user_id +
-    " LIMIT 1) AS attending_type,(SELECT COUNT(*) FROM attending  WHERE attending.post_id=events.id AND attending.attending_type=1 )   AS attending_users_count,  (SELECT  GROUP_CONCAT(users.profile_picture)  FROM attending LEFT JOIN users ON users.id=attending.user_id  WHERE attending.post_id=events.id AND attending.attending_type=1 ) AS attending_users_image,   (SELECT likes.is_likes FROM likes  WHERE likes.liked_by=" +
-    req.query.login_user_id +
-    "  AND likes.post_id=events.id  LIMIT 1) AS is_liked,(SELECT comments.comment FROM comments  WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments,(SELECT users.name FROM comments LEFT JOIN users ON users.id=comments.comment_by WHERE comments.post_id=events.id  ORDER BY comments.created_datetime DESC  LIMIT 1) AS comments_by,TIMESTAMPDIFF(MINUTE, events.updated_datetime , CURRENT_TIMESTAMP) AS create_minute_ago,events.*,CONCAT(DAY(events.start_date), ' ',MONTHNAME(events.start_date)) AS start_date,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,users.name,CONCAT('" +
-    constants.BASE_URL +
-    "','images/profiles/',users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON (visibility.post_id=events.id AND  CASE WHEN events.visibilitySelectUsers<>4 THEN  visibility.user_id=" +
-    req.query.login_user_id +
-    "  ELSE true  END )    LEFT JOIN groups_users ON (groups_users.group_id=visibility.group_id AND groups_users.user_id=" +  req.query.login_user_id + " ) LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)   WHERE (" +
-    condition +
-    ") " +
-    condition1 +
-    " GROUP BY events.id  ORDER BY events.id DESC  Limit " +
-    page * 8 +
-    ",8";
+   `
+  SELECT
+    events.description,
+    CASE
+      WHEN (events.image IS NOT NULL AND events.image <> '')
+        THEN CONCAT('${constants.BASE_URL}','images/postImage/', events.image)
+      ELSE '' END AS post_image,
+    (
+      SELECT count(*) AS likes_count
+      FROM likes
+      WHERE likes.post_id = events.id AND likes.is_likes = 1
+    ) AS liked_by,
+    (
+      SELECT attending.attending_type
+      FROM attending
+      WHERE attending.post_id = events.id AND attending.user_id = ${req.query.login_user_id}
+      LIMIT 1
+    ) AS attending_type,
+    (
+      SELECT COUNT(*)
+      FROM attending
+      WHERE attending.post_id = events.id AND attending.attending_type = 1
+    ) AS attending_users_count,
+    (
+      SELECT GROUP_CONCAT(users.profile_picture)
+      FROM attending
+      LEFT JOIN users ON users.id = attending.user_id
+      WHERE attending.post_id = events.id AND attending.attending_type = 1
+    ) AS attending_users_image,
+    (
+      SELECT likes.is_likes
+      FROM likes
+      WHERE likes.liked_by = ${req.query.login_user_id} AND likes.post_id = events.id
+      LIMIT 1
+    ) AS is_liked,
+    (
+      SELECT comments.comment
+      FROM comments
+      WHERE comments.post_id = events.id
+      ORDER BY comments.created_datetime DESC
+      LIMIT 1
+    ) AS comments,
+    (
+      SELECT users.name
+      FROM comments
+      LEFT JOIN users ON users.id = comments.comment_by
+      WHERE comments.post_id = events.id
+      ORDER BY comments.created_datetime DESC
+      LIMIT 1
+    ) AS comments_by,
+    TIMESTAMPDIFF(MINUTE, events.updated_datetime, CURRENT_TIMESTAMP) AS create_minute_ago,
+    events.*,
+    CONCAT(DAY(events.start_date), ' ', MONTHNAME(events.start_date)) AS start_date,
+    TIME_FORMAT(events.start_time, '%H:%i') AS start_time,
+    users.name,
+    CONCAT('${constants.BASE_URL}','images/profiles/', users.profile_picture) AS profile_picture
+  FROM
+    events
+    LEFT JOIN users ON users.id = events.user_id
+    LEFT JOIN visibility ON (
+      visibility.post_id = events.id AND
+      CASE
+        WHEN events.visibilitySelectUsers <> 4 THEN visibility.user_id = ${req.query.login_user_id}
+        ELSE true
+      END
+    )
+    LEFT JOIN groups_users ON (
+      groups_users.group_id = visibility.group_id AND
+      groups_users.user_id = ${req.query.login_user_id}
+    )
+    LEFT JOIN users_requests ON (
+      users_requests.request_for = events.user_id OR
+      users_requests.user_id = events.user_id
+    )
+  WHERE
+    (${condition}) ${condition1}
+  GROUP BY
+    events.id
+  ORDER BY
+    events.id DESC
+  LIMIT
+    ${page * 8}, 8;
+`;
+
+// Now you can use the 'query' string in your database query execution.
+
   console.log("===", sql);
   connection.query(sql, function (err, post_list) {
     // console.log(err, post_list);
