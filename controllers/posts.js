@@ -589,9 +589,11 @@ exports.getPostsAndEventsList = function (req, res) {
   req.query.start_date == "null"){
     if (req.query.type == "event" && req.query.myProfile != "1") {
       condition +=
-        "  AND  events.post_type=0  OR (events.user_id =" +
-        req.query.login_user_id +
-        " AND events.post_type=0 )  ";
+        "  AND  events.post_type=0    ";
+
+        // OR (events.user_id =" +
+        // req.query.login_user_id +
+        // " AND events.post_type=0 )
     } else if (req.query.myProfile != "1") {
       // condition += " OR events.user_id =" + req.query.login_user_id + " ";
     }
