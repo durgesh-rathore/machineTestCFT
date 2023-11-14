@@ -543,7 +543,8 @@ exports.getPostsAndEventsList = function (req, res) {
 
   // OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )
   var condition1 = " ";
-  var v=`(CASE WHEN events.start_date>=CURRENT_DATE() OR events.post_type=1 THEN true ELSE false END) AND `
+  var v=`(CASE WHEN (events.start_date>=CURRENT_DATE() OR ( events.user_id=${
+    req.query.login_user_id } AND events.start_date>=CURRENT_DATE() ) )OR events.post_type=1 THEN true ELSE false END) AND `
 
  var condition =
     ` ${v} ( (               (users_requests.user_id=${
@@ -592,7 +593,7 @@ exports.getPostsAndEventsList = function (req, res) {
         req.query.login_user_id +
         " AND events.post_type=0 )  ";
     } else if (req.query.myProfile != "1") {
-      condition += " OR events.user_id =" + req.query.login_user_id + " ";
+      // condition += " OR events.user_id =" + req.query.login_user_id + " ";
     }
   }
   if (
