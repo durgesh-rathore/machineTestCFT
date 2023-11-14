@@ -37,6 +37,14 @@ exports.getChats = async (req, res) => {
     req.query.user_id != null &&
     req.query.is_group == 0
   ) {
+
+    var sql1= `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = chats.send_by IN(${
+      req.query.login_user_id },
+      ${req.query.user_id} ) AND chats.sent_to IN(${
+        req.query.login_user_id },
+        ${req.query.user_id} )`;
+
+
     sql =
       "SELECT chats.*,case when chats.images IS NOT NULL then chats.images   else ''  end AS images, CONCAT('" +
       constants.BASE_URL +
@@ -53,6 +61,13 @@ exports.getChats = async (req, res) => {
       ",30";
   }
   if (req.query.is_group == 1 || req.query.is_group == 2) {
+
+    var sql2= `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = chats.send_by IN(${
+      req.query.login_user_id },
+      ${req.query.user_id} ) AND chats.sent_to IN(${
+        req.query.login_user_id },
+        ${req.query.user_id} )`;
+
     sql =
       "SELECT chats.*,CONCAT('" +
       constants.BASE_URL +
