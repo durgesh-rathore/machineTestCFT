@@ -163,35 +163,51 @@ exports.productDetails= function(req,res) {
 
 
 
- exports.amazonCategoryList= function(req,res) {
-  const requestParameters = {
-    "Keywords": "category For female",
-    "Resources": ["SearchRefinements"],
-    "PartnerTag": "forgetmenote-20",
-    "PartnerType": "Associates",
-    "Marketplace": "www.amazon.com",
-    "Operation": "SearchItems"
-   }
+//  exports.amazonCategoryList= function(req,res) {
+//   const requestParameters = {
+//     "Keywords": "category For female",
+//     "Resources": ["SearchRefinements"],
+//     "PartnerTag": "forgetmenote-20",
+//     "PartnerType": "Associates",
+//     "Marketplace": "www.amazon.com",
+//     "Operation": "SearchItems"
+//    }
 
-  /** Promise */
-    amazonPaapi
-    .SearchItems(commonParameters, requestParameters)
-    .then((data) => {
-      // do something with the success response.
-      data=data["SearchResult"]["SearchRefinements"]
-      console.log("ddd==0",data.SearchIndex );
+//   /** Promise */
+//     amazonPaapi
+//     .SearchItems(commonParameters, requestParameters)
+//     .then((data) => {
+//       // do something with the success response.
+//       data=data["SearchResult"]["SearchRefinements"]
+//       console.log("ddd==0",data.SearchIndex );
+      
+//       return res.json({
+//         response: data.SearchIndex.Bins,
+//         success: true,
+//         message: "Category List  .",
+//       });
+//     })
+//     .catch((error) => {
+//       // catch an error.
+//       console.log(error);
+//     });
+// }
+var connection = require("../config/db");
+
+exports.amazonCategoryList= function(req,res) {
+  var sql=`SELECT * FROM amazon_category`;
+ 
+  connection.query(sql,     
+    function (err, categoryData) {
+      console.log(err);    
       return res.json({
-        response: data.SearchIndex.Bins,
+        response: categoryData,
         success: true,
         message: "Category List  .",
       });
     })
-    .catch((error) => {
-      // catch an error.
-      console.log(error);
-    });
+   
 }
-
 exports.categoryAccordingToG= function(req,res) {
   const requestParameters = {
     // "Keywords": "category",
