@@ -16,14 +16,17 @@ const commonParameters = {
 exports.amazonProductList= function(req,res) {
   const requestParameters = {
     Keywords: req.query.searchingTitle,
-    SearchIndex: req.query.category,
-    ItemCount: 2,
+    // SearchIndex: req.query.category,
+    ItemCount: 4,
     Resources: [
       "Images.Primary.Medium",
       "ItemInfo.Title",
       "Offers.Listings.Price",
     ],
   };
+  if(req.query.category){
+    requestParameters.SearchIndex=req.query.category
+  }
 
   /** Promise */
   var a;
@@ -67,7 +70,7 @@ exports.productDetails= function(req,res) {
     
       ItemIds: [`${req.query.asin_no}`],
       PartnerTag: "forgetmenote-20",
-      Resources: ["Images.Primary.Small","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
+      Resources: ["Images.Primary.Small", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
 
     
   };
@@ -96,13 +99,73 @@ exports.productDetails= function(req,res) {
     });
 }
 
+// exports.productDetails= function(req,res) {
+//   const requestParameters = 
+//   {
+    
+//       ItemIds: [`${req.query.asin_no}`],
+//       // Keywords: "Design art",
+//       PartnerTag: "forgetmenote-20",
+//       Resources: ["Images.Primary.Small", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
+
+    
+//   };
+// //   {
+// //     "PartnerTag": "forgetmenote-20",
+// //     "ItemIds": [`${req.query.asin_no}`],
+// //     "Resources": [
+// //         "ItemInfo.ByLineInfo",
+// //         "ItemInfo.ContentInfo",
+// //         "ItemInfo.ContentRating",
+// //         "ItemInfo.Classifications",
+// //         "ItemInfo.ExternalIds",
+// //         "ItemInfo.Features",
+// //         "ItemInfo.ManufactureInfo",
+// //         "ItemInfo.ProductInfo",
+// //         "ItemInfo.TechnicalInfo",
+// //         "ItemInfo.Title",
+// //         "ItemInfo.TradeInInfo"
+// //     ]
+// // }
+// // {
+// //   "PartnerTag": "forgetmenote-20",
+// //   "PartnerType": "Associates",
+// //   "Keywords": "watches",
+// //   "DeliveryFlags": ["Prime"]
+// // }
+
+
+
+//   /** Promise */
+//   var a;
+//   amazonPaapi
+//     .GetItems(commonParameters, requestParameters)
+//     .then((data) => {
+//       // do something with the success response.
+      
+//       a=JSON.stringify(data);
+//       console.log(data,
+//         " dddddddddd======"    
+        
+//       );
+//       return res.json({
+//         response: data.SearchResult,
+//         success: true,
+//         message: "product list  .",
+//       });
+//     })
+//     .catch((error) => {
+//       // catch an error.
+//       console.log(error);
+//     });
+// // }
 
 
 
 
  exports.amazonCategoryList= function(req,res) {
   const requestParameters = {
-    "Keywords": "category",
+    "Keywords": "category For female",
     "Resources": ["SearchRefinements"],
     "PartnerTag": "forgetmenote-20",
     "PartnerType": "Associates",
@@ -116,7 +179,7 @@ exports.productDetails= function(req,res) {
     .then((data) => {
       // do something with the success response.
       data=data["SearchResult"]["SearchRefinements"]
-      console.log("ddd==0", );
+      console.log("ddd==0",data.SearchIndex );
       return res.json({
         response: data.SearchIndex.Bins,
         success: true,
