@@ -27,6 +27,11 @@ router.get(
 );
 
 router.get(
+  "/getChats2",
+    messagesController.getChats2
+);
+
+router.get(
   "/getSpiltChats",
 //   checkUserStatus.userStatus,
   messagesController.getSpiltChats

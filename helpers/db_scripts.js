@@ -8,7 +8,9 @@ var a =
 const db_sql = {
   'Q1': " SELECT users.id,users.name, "+a +" ,bgu.payment_amount FROM `users` LEFT JOIN billing_group_users bgu ON bgu.user_id=users.id WHERE bgu.group_id={var1} AND bgu.status= {var2}",
   'Q2': " SELECT profile_picture FROM users WHERE id={var1}",
-  'Q3': " SELECT * FROM users WHERE id={var1}"
+  'Q3': " SELECT * FROM users WHERE id={var1}",
+  'Q4': " SELECT * FROM chat_seen_in_group_by_user AS csg WHERE csg.group_id={var1} AND csg.user_id={var2} ORDER BY id  DESC LIMIT 1",
+  'Q5': " SELECT chats.*,"+a+" FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to={var1} AND chats.id>{var2} ORDER BY chats.id DESC  Limit 0,5"
   
 };
 // IS  NOT NULL

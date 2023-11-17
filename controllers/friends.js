@@ -767,7 +767,7 @@ exports.getBlockUserList = function (req, res) {
       var sql =
         "SELECT " +
         a +
-        ",users.name, users_requests.*,users.id,  (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.block_by  ='" +
+        ",users.name, users_requests.*,users.id,  (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON ( CASE WHEN users_requests.block_by=users_requests.user_id THEN users.id=users_requests.request_for ELSE users.id=users_requests.user_id END) WHERE users_requests.block_by  ='" +
         req.query.login_user_id +
         "'  AND users_requests.is_block=1  " +
         condition +
@@ -781,7 +781,7 @@ exports.getBlockUserList = function (req, res) {
     connection.query(sql, async function (err, users) {
       // COUNT(users.id) AS total_count
       var sqlCount1 =
-        "SELECT  COUNT(users.id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.block_by  ='" +
+        "SELECT  COUNT(users.id) AS total_count FROM users_requests LEFT JOIN users ON ( CASE WHEN users_requests.block_by=users_requests.user_id THEN users.id=users_requests.request_for ELSE users.id=users_requests.user_id END) WHERE users_requests.block_by  ='" +
         req.query.login_user_id +
         "'  AND users_requests.is_block=1  " +
         condition +

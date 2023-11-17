@@ -22,6 +22,7 @@ exports.amazonProductList= function(req,res) {
       "Images.Primary.Medium",
       "ItemInfo.Title",
       "Offers.Listings.Price",
+      "ItemInfo.ContentRating"
     ],
   };
   if(req.query.category){
