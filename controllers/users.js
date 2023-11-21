@@ -366,6 +366,13 @@ exports.userInterest = function (req, res) {
             message: "Please enter required  detail.",
           });
         } else {
+          console.log(JSON.parse(req.body.interest_fields)," ====ddddddddd");
+          if(JSON.parse(req.body.interest_fields).length>0){
+          connection.query(
+            "DELETE FROM users_interest WHERE user_id = ?",
+            req.body.user_id,
+            function (err, users1) {})
+          }
           JSON.parse(req.body.interest_fields).forEach((element) => {
             var obj = {
               user_id: req.body.user_id,
