@@ -42,14 +42,16 @@ exports.getChats = async (req, res) => {
   }else{
     dd = ' CASE  WHEN chats.images IS NOT NULL then 0   else 0  end AS match_status, '
   }
+
   if (req.query.is_group != 1 && req.query.is_group != 2) {
+    console.log(condition,"  ==========dddddddd condition ");
     if (searchCondition) {
       let s6 = await dbScript(db_sql["Q6"], {
         var1: login_user_id,
         var2: user_id,
         var3: condition,
       });
-      // console.log()
+      console.log(s6,condition,"  ==========dddddddd");
       // group user seen chat yet here
       let chatSearch = await queryAsync(s6);
 
