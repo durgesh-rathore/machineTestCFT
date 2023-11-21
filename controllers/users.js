@@ -373,7 +373,7 @@ exports.userInterest = function (req, res) {
             req.body.user_id,
             function (err, users1) {})
           }
-          JSON.parse(req.body.interest_fields).forEach((element) => {
+         req.body.interest_fields.forEach((element) => {
             var obj = {
               user_id: req.body.user_id,
               interest_id: element,
