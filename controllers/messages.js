@@ -71,7 +71,7 @@ exports.getChats = async (req, res) => {
       dd }  CASE WHEN chats.images IS NOT NULL then chats.images   else ''  end AS images, CONCAT('${
       constants.BASE_URL }','images/profiles/',users.profile_picture) AS profile_picture,users.name FROM chats LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN(${
       req.query.login_user_id },${req.query.user_id}) AND chats.sent_to IN(${req.query.login_user_id },${
-      req.query.user_id }) ${condition2}   " ORDER BY chats.id DESC Limit ${page * 30},30`;
+      req.query.user_id }) ${condition2}    ORDER BY chats.id DESC Limit ${page * 30},30`;
 
     console.log(sql," ======sql=== ");
     connection.query(sql, function (err, chatList) {
