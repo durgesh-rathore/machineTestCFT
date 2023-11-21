@@ -32,10 +32,10 @@ exports.getChats = async (req, res) => {
   var condition2 = "";
   console.log(searchCondition, " ===searchCondition");
   if (searchCondition) {
+  
     dd =
-      "CASE    WHEN MATCH(chats.message) AGAINST('" +
-      req.query.search +
-      "' IN NATURAL LANGUAGE MODE) > 0 THEN 1    ELSE 0  END AS match_status,";
+      ' CASE  WHEN chats.message LIKE "%'+  req.query.search +
+      '%"  THEN 1    ELSE 0  END AS match_status, ';
 
     condition = '  AND (chats.message LIKE "%' + req.query.search + '%") ';
     //  Sigle User Chats
