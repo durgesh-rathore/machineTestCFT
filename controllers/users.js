@@ -366,8 +366,8 @@ exports.userInterest = function (req, res) {
             message: "Please enter required  detail.",
           });
         } else {
-          console.log(JSON.parse(req.body.interest_fields)," ====ddddddddd");
-          if(JSON.parse(req.body.interest_fields).length>0){
+          // console.log(JSON.parse(req.body.interest_fields)," ====ddddddddd");
+          if(req.body.interest_fields.length>0){
           connection.query(
             "DELETE FROM users_interest WHERE user_id = ?",
             req.body.user_id,
