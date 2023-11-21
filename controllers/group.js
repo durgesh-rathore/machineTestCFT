@@ -439,7 +439,7 @@ exports.informationOfGroup = function (req, res) {
   var group_details_sql =
     "SELECT users.id,users.type AS group_type ,users.name AS group_name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN groups_users ON groups_users.user_id=u1.id WHERE groups_users.group_id=users.id AND groups_users.user_id!=" +
     req.query.login_user_id +
-    "  ) AS group_users_image  FROM users    WHERE users.is_group IN(1,2) AND users.id=" +
+    "  ) AS group_users_image  FROM users    WHERE users.is_group=1 AND users.id=" +
     req.query.group_id;
 
   console.log("group details sql==================", group_details_sql);
@@ -615,6 +615,115 @@ exports.paymentStatus = function (req, res) {
       
     });
     }})
+
+ 
+};
+
+
+exports.informationOfSplitGroup = function (req, res) {
+  var page = req.query.page ? req.query.page : 0;
+
+  var condition = " ";
+
+  if (
+    req.query.search != "" &&
+    req.query.search != undefined &&
+    req.query.search != null
+  ) {
+    condition +=
+      '  AND ( users.type LIKE "%' +
+      req.query.search +
+      '%" OR users.name LIKE "%' +
+      req.query.search +
+      '%")  ';
+  }
+
+  var sql = " ";
+  var group_details_sql =
+    "SELECT users.id,users.type AS group_type ,users.name AS group_name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN groups_users ON groups_users.user_id=u1.id WHERE groups_users.group_id=users.id AND groups_users.user_id!=" +
+    req.query.login_user_id +
+    "  ) AS group_users_image  FROM users    WHERE users.is_group=1 AND users.id=" +
+    req.query.group_id;
+
+  console.log("group details sql==================", group_details_sql);
+
+  connection.query(group_details_sql, function (err, group_details) {
+    if (err) {
+      console.log("somthing went wrong");
+      return res.json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
+
+    sql =
+      "SELECT users.*, " +
+      a +
+      "  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+      req.query.group_id;
+    console.log(sql);
+    connection.query(sql, function (err, groupUsers) {
+      console.log(err);
+      var sqlCounts =
+        "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+        req.query.group_id;
+      connection.query(sqlCounts, function (err, group_user_count) {
+        if (err) {
+          console.log(err);
+        }
+        if (groupUsers.length > 0) {
+          return res.json({
+            response: { group: group_details, users: groupUsers },
+            total_member_in_group: group_user_count.length,
+            success: true,
+            message: "Group info .",
+          });
+        } else {
+          return res.json({
+            response: [],
+            total_group: group_user_count.length,
+            success: true,
+            message: "Group info .",
+          });
+        }
+      });
+    });
+  });
+};
+
+exports.isMuted = function (req, res) {
+  const {group_id,user_id,is_muted}=req.body;
+  let status=1;
+  console.log(" in ffdd")
+
+      var sql =
+      `UPDATE group_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}` 
+     
+   connection.query(sql, function (err, muteData) {
+      if (err) {
+        console.log("somthing went wrong",err);
+        return res.json({
+          success: false,
+          message: "Something went wrong",
+        });
+      }else{
+        if(muteData.length==0){
+          return res.json({
+            success: false,
+            message: "Payment method not found.",
+          });
+        }else{
+          return res.json({
+            success: true,
+            message: " Notification muted.",
+            
+          });
+        }
+      }
+  
+      
+    });
+  
 
  
 };

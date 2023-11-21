@@ -67,6 +67,11 @@ router.put(
 //   checkUserStatus.userStatus,
   groupController.paymentStatus
 );
+router.put(
+  "/isMuted",
+//   checkUserStatus.userStatus,
+  groupController.isMuted
+);
 
 
 module.exports = router;

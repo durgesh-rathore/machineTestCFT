@@ -15,111 +15,206 @@ var a =
   "CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
   constants.BASE_URL +
   "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
-exports.getChats = async (req, res) => {
-  //  i have to write logic for
-  // sql1= `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = ${}`;
-
-  console.log("req.query===", req.query);
-  var sql = "";
-  var page = req.query.page ? req.query.page : 0;
-  var condition = " ";
-
-  if (
-    req.query.search != "" &&
-    req.query.search != undefined &&
-    req.query.search != null
-  ) {
-    condition = '  AND (chats.message LIKE "%' + req.query.search + '%") ';
-  }
-  if (
-    req.query.user_id != "" &&
-    req.query.user_id != undefined &&
-    req.query.user_id != null &&
-    req.query.is_group == 0
-  ) {
-    sql =
-      "SELECT chats.*,case when chats.images IS NOT NULL then chats.images   else ''  end AS images, CONCAT('" +
-      constants.BASE_URL +
-      "','images/profiles/',users.profile_picture) AS profile_picture,users.name FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN(" +
-      req.query.login_user_id +
-      "," +
-      req.query.user_id +
-      ") AND chats.sent_to IN(" +
-      req.query.login_user_id +
-      "," +
-      req.query.user_id +
-      ") " +
-      condition +
-      " ORDER BY chats.id DESC Limit " +
-      page * 30 +
-      ",30";
-  }
-  if (req.query.is_group == 1 || req.query.is_group == 2) {
-    var sql2 = `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = chats.send_by IN(${req.query.login_user_id},
-      ${req.query.user_id} ) AND chats.sent_to IN(${req.query.login_user_id},
-        ${req.query.user_id} )`;
-
-    sql =
-      "SELECT chats.*,CONCAT('" +
-      constants.BASE_URL +
-      "','images/profiles/',users.profile_picture) AS profile_picture,users.name,case when chats.images IS NOT NULL then chats.images   else ''  end AS images FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to=" +
-      req.query.user_id +
-      " ORDER BY chats.id DESC  Limit " +
-      page * 30 +
-      ",30";
-  }
-
-  // const numbers = [65, 44, 12, 4];
-  // const newArr = numbers.map(myFunction)
-
-  connection.query(sql, function (err, chatList) {
-    console.log(err, chatList);
-    if (chatList.length > 0) {
-      function parseImagesSync(chatList, index, callback) {
-        if (index < chatList.length) {
-          const chatItem = chatList[index];
-          if (
-            chatItem.images != null &&
-            chatItem.images !== "" &&
-            chatItem.images !== undefined
-          ) {
-            chatItem.images = JSON.parse(chatItem.images);
-            const imageArray = chatItem.images.map(myFunction);
-            function myFunction(image) {
-              return constants.BASE_URL + "images/chatImages/" + image;
-            }
-            chatItem.images = imageArray;
-          } else {
-            chatItem.images = [];
-          }
-          parseImagesSync(chatList, index + 1, callback);
-        } else {
-          callback();
+  exports.getChats = async (req, res) => {
+    //  i have to write logic for
+    // sql1= `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = ${}`;
+    const {login_user_id,user_id,is_group,search}=req.query;
+  
+    console.log("req.query===", req.query);
+    var sql = "";
+    var page = req.query.page ? req.query.page : 0;
+    var condition = " ";
+    var dd = " ";
+   var searchCondition= req.query.search != "" && req.query.search != undefined && req.query.search != null;
+   var condition2='';
+   console.log(searchCondition," ===searchCondition");
+    if ( searchCondition ) {
+      dd =
+        "CASE    WHEN MATCH(chats.message) AGAINST('" +
+        req.query.search +
+        "' IN NATURAL LANGUAGE MODE) > 0 THEN 1    ELSE 0  END AS match_status,";
+  
+      condition = '  AND (chats.message LIKE "%' + req.query.search + '%") ';
+      //  Sigle User Chats
+    }
+    if (req.query.is_group != 1  && req.query.is_group != 2) {
+      if ( searchCondition ) {
+           let s6 = await dbScript(db_sql["Q6"], {
+          
+          var1: login_user_id,
+          var2: user_id,
+          var3: condition,
+        });
+        // console.log()
+        // group user seen chat yet here
+        let chatSearch = await queryAsync(s6);
+    
+        if (chatSearch.length > 0) {
+          condition2='  AND chats.id < ='+chatSearch[0].id;
+        }else{
+          return res.json({
+            response: [],
+            success: false,
+            message: "No match record found.",
+          });
         }
       }
-
-      function processChatList(chatList) {
-        parseImagesSync(chatList, 0, () => {
-          // Perform any further operations on the chatList
-          // console.log(chatList);
-        });
-      }
-
-      processChatList(chatList);
-      return res.json({
-        response: chatList,
-        success: true,
-        message: "Chat list",
+  
+  
+      sql =
+        "SELECT chats.*," +
+        dd +
+        "  case when chats.images IS NOT NULL then chats.images   else ''  end AS images, CONCAT('" +
+        constants.BASE_URL +
+        "','images/profiles/',users.profile_picture) AS profile_picture,users.name FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN(" +
+        req.query.login_user_id +
+        "," +
+        req.query.user_id +
+        ") AND chats.sent_to IN(" +
+        req.query.login_user_id +
+        "," +
+        req.query.user_id +
+        ") " +
+         condition2 
+        " ORDER BY chats.id DESC Limit " +
+        page * 30 +
+        ",30";
+  
+      connection.query(sql, function (err, chatList) {
+        console.log(err, chatList);
+        if (chatList.length > 0) {
+          function parseImagesSync(chatList, index, callback) {
+            if (index < chatList.length) {
+              const chatItem = chatList[index];
+              if (
+                chatItem.images != null &&
+                chatItem.images !== "" &&
+                chatItem.images !== undefined
+              ) {
+                chatItem.images = JSON.parse(chatItem.images);
+                const imageArray = chatItem.images.map(myFunction);
+                function myFunction(image) {
+                  return constants.BASE_URL + "images/chatImages/" + image;
+                }
+                chatItem.images = imageArray;
+              } else {
+                chatItem.images = [];
+              }
+              parseImagesSync(chatList, index + 1, callback);
+            } else {
+              callback();
+            }
+          }
+  
+          function processChatList(chatList) {
+            parseImagesSync(chatList, 0, () => {
+              // Perform any further operations on the chatList
+              // console.log(chatList);
+            });
+          }
+  
+          processChatList(chatList);
+          return res.json({
+            response: chatList,
+            success: true,
+            message: "Chat list",
+          });
+        } else {
+          return res.json({
+            response: [],
+            success: false,
+            message: "No More chats",
+          });
+        }
       });
     } else {
-      return res.json({
-        response: [],
-        success: false,
-        message: "No More chats",
+      //  Group user chat =====
+      console.log(" We are in group user chat gggggggggggggggggggggg")
+      if ( searchCondition ) {
+          var sql2 = `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = chats.send_by IN(${req.query.login_user_id},
+        ${req.query.user_id} ) AND chats.sent_to IN(${req.query.login_user_id},
+          ${req.query.user_id} )`;
+  
+          let s7 = await dbScript(db_sql["Q7"], {                
+            var1: user_id,
+            var2: condition,
+          });
+          // group user seen chat yet here
+          let chatSearch = await queryAsync(s7);
+          console.log(chatSearch," ======ffffffffffffffffff==");
+      
+          if (chatSearch.length > 0) {
+            condition2='  AND chats.id <= '+chatSearch[0].id;
+          }else{
+          return res.json({
+            response: [],
+            success: false,
+            message: "No match record found.",
+          });
+        }
+  
+        }
+        console.log(condition2," condition2  for group chat===");
+      sql =
+        "SELECT chats.*," +
+        dd +
+        "  CONCAT('" +
+        constants.BASE_URL +
+        "','images/profiles/',users.profile_picture) AS profile_picture, users.name,case when chats.images IS NOT NULL then chats.images   else ''  end AS images FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to=" +
+        req.query.user_id +condition2 
+        " ORDER BY chats.id DESC  Limit " +
+        page * 30 +
+        ",30";
+  
+      connection.query(sql, function (err, chatList) {
+        console.log(err, chatList);
+        if (chatList.length > 0) {
+          function parseImagesSync(chatList, index, callback) {
+            if (index < chatList.length) {
+              const chatItem = chatList[index];
+              if (
+                chatItem.images != null &&
+                chatItem.images !== "" &&
+                chatItem.images !== undefined
+              ) {
+                chatItem.images = JSON.parse(chatItem.images);
+                const imageArray = chatItem.images.map(myFunction);
+                function myFunction(image) {
+                  return constants.BASE_URL + "images/chatImages/" + image;
+                }
+                chatItem.images = imageArray;
+              } else {
+                chatItem.images = [];
+              }
+              parseImagesSync(chatList, index + 1, callback);
+            } else {
+              callback();
+            }
+          }
+  
+          function processChatList(chatList) {
+            parseImagesSync(chatList, 0, () => {
+              // Perform any further operations on the chatList
+              // console.log(chatList);
+            });
+          }
+  
+          processChatList(chatList);
+          return res.json({
+            response: chatList,
+            success: true,
+            message: "Chat list",
+          });
+        } else {
+          return res.json({
+            response: [],
+            success: false,
+            message: "No More chats",
+          });
+        }
       });
     }
-  });
-};
+  };
 exports.getChats2 = async (req, res) => {
   //  i have to write logic for
   const { page1, search, login_user_id, user_id, is_group } = req.query;
@@ -475,6 +570,111 @@ exports.getSpiltChats = async (req, res) => {
         response: {},
         success: true,
         // message: "",
+      });
+    }
+  });
+};
+exports.getChats3 = async (req, res) => {
+  //  i have to write logic for
+  // sql1= `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = ${}`;
+
+  console.log("req.query===", req.query);
+  var sql = "";
+  var page = req.query.page ? req.query.page : 0;
+  var condition = " ";
+
+  if (
+    req.query.search != "" &&
+    req.query.search != undefined &&
+    req.query.search != null
+  ) {
+    condition = '  AND (chats.message LIKE "%' + req.query.search + '%") ';
+  }
+  if (
+    req.query.user_id != "" &&
+    req.query.user_id != undefined &&
+    req.query.user_id != null &&
+    req.query.is_group == 0
+  ) {
+    sql =
+      "SELECT chats.*,case when chats.images IS NOT NULL then chats.images   else ''  end AS images, CONCAT('" +
+      constants.BASE_URL +
+      "','images/profiles/',users.profile_picture) AS profile_picture,users.name FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN(" +
+      req.query.login_user_id +
+      "," +
+      req.query.user_id +
+      ") AND chats.sent_to IN(" +
+      req.query.login_user_id +
+      "," +
+      req.query.user_id +
+      ") " +
+      condition +
+      " ORDER BY chats.id DESC Limit " +
+      page * 30 +
+      ",30";
+  }
+  if (req.query.is_group == 1 || req.query.is_group == 2) {
+    var sql2 = `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = chats.send_by IN(${req.query.login_user_id},
+      ${req.query.user_id} ) AND chats.sent_to IN(${req.query.login_user_id},
+        ${req.query.user_id} )`;
+
+    sql =
+      "SELECT chats.*,CONCAT('" +
+      constants.BASE_URL +
+      "','images/profiles/',users.profile_picture) AS profile_picture,users.name,case when chats.images IS NOT NULL then chats.images   else ''  end AS images FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to=" +
+      req.query.user_id +
+      " ORDER BY chats.id DESC  Limit " +
+      page * 30 +
+      ",30";
+  }
+
+  // const numbers = [65, 44, 12, 4];
+  // const newArr = numbers.map(myFunction)
+
+  connection.query(sql, function (err, chatList) {
+    console.log(err, chatList);
+    if (chatList.length > 0) {
+      function parseImagesSync(chatList, index, callback) {
+        if (index < chatList.length) {
+          const chatItem = chatList[index];
+          if (
+            chatItem.images != null &&
+            chatItem.images !== "" &&
+            chatItem.images !== undefined
+          ) {
+            chatItem.images = JSON.parse(chatItem.images);
+            const imageArray = chatItem.images.map(myFunction);
+            function myFunction(image) {
+              return constants.BASE_URL + "images/chatImages/" + image;
+            }
+            chatItem.images = imageArray;
+          } else {
+            chatItem.images = [];
+          }
+          parseImagesSync(chatList, index + 1, callback);
+        } else {
+          callback();
+        }
+      }
+
+      function processChatList(chatList) {
+        parseImagesSync(chatList, 0, () => {
+          // Perform any further operations on the chatList
+          // console.log(chatList);
+        });
+      }
+
+      processChatList(chatList);
+      return res.json({
+        response: chatList,
+        success: true,
+        message: "Chat list",
+      });
+    } else {
+      return res.json({
+        response: [],
+        success: false,
+        message: "No More chats",
       });
     }
   });

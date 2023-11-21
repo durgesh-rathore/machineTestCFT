@@ -19,13 +19,13 @@ module.exports = io => {
     });
 
     socket.on('user-login', uid => {
-      console.log('user-login : ', uid);
+      console.log('user-login : ggg', uid);
       clients[uid.uid]=socket
       sql =
       "SELECT users.id  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id     WHERE users.is_group<>0 AND groups_users.user_id=" +
       uid.uid +     
       " GROUP BY users.id ";
-    console.log(sql);
+    console.log("clients==================",clients,sql);
     connection.query(sql, function (err, roomNames) {
       console.log(err);
       // console.log("uid for ",uid,clients[uid.uid])
@@ -75,10 +75,19 @@ if(clients[sent_to]!=undefined && is_group==0){
 }else if(is_group==1 || is_group==2){
   console.log("send into group========")
 
+  if(is_group==1){
   sql =
   "SELECT users.id,users.divice_token  FROM users  LEFT JOIN groups_users ON groups_users.user_id=users.id     WHERE  groups_users.group_id=" +
   sent_to +     
   " AND users.id<>"+ send_by +" GROUP BY users.id ";
+  }else{
+
+
+  sql =
+  "SELECT users.id,users.divice_token  FROM users  LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id     WHERE  billing_group_users.group_id=" +
+  sent_to +     
+  " AND users.id<>"+ send_by +" GROUP BY users.id ";
+  }
 console.log(sql);
 connection.query(sql, async function (err, roomNames) {
   console.log(err);
@@ -114,7 +123,7 @@ connection.query(sql, async function (err, users) {
   if(users.length>0 && users[0].divice_token!=null && users[0].divice_token!='null' && users[0].divice_token!='undefined'){
     array1.push(users[0].divice_token);
 
-await pushNotification2(array1,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""});
+    await pushNotification2(array1,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""});
 
   }
   array1=[];
