@@ -56,7 +56,7 @@ exports.getChats = async (req, res) => {
       let chatSearch = await queryAsync(s6);
 
       if (chatSearch.length > 0) {
-        condition2 = "  AND chats.id < =" + chatSearch[0].id;
+        condition2 = "  AND chats.id <=" + chatSearch[0].id;
       } else {
         return res.json({
           response: [],
@@ -67,20 +67,11 @@ exports.getChats = async (req, res) => {
     }
 
     sql =
-      "SELECT chats.*," +
-      dd +
-      "  case when chats.images IS NOT NULL then chats.images   else ''  end AS images, CONCAT('" +
-      constants.BASE_URL +
-      "','images/profiles/',users.profile_picture) AS profile_picture,users.name FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN(" +
-      req.query.login_user_id +
-      "," +
-      req.query.user_id +
-      ") AND chats.sent_to IN(" +
-      req.query.login_user_id +
-      "," +
-      req.query.user_id +
-      ") " +
-      condition2+   " ORDER BY chats.id DESC Limit " + page * 30 + ",30";
+      `SELECT chats.*,${
+      dd }  CASE WHEN chats.images IS NOT NULL then chats.images   else ''  end AS images, CONCAT('${
+      constants.BASE_URL }','images/profiles/',users.profile_picture) AS profile_picture,users.name FROM chats LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN(${
+      req.query.login_user_id },${req.query.user_id}) AND chats.sent_to IN(${req.query.login_user_id },${
+      req.query.user_id }) ${condition2}   " ORDER BY chats.id DESC Limit ${page * 30},30`;
 
     console.log(sql," ======sql=== ");
     connection.query(sql, function (err, chatList) {
