@@ -18,7 +18,7 @@ var a =
 exports.getChats = async (req, res) => {
   //  i have to write logic for
   // sql1= `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = ${}`;
-  const { login_user_id, user_id, is_group, search } = req.query;
+  const { login_user_id, user_id, is_group, search, } = req.query;
 
   console.log("req.query===", req.query);
   var sql = "";
@@ -78,8 +78,7 @@ exports.getChats = async (req, res) => {
       "," +
       req.query.user_id +
       ") " +
-      condition2;
-    " ORDER BY chats.id DESC Limit " + page * 30 + ",30";
+      condition2+   " ORDER BY chats.id DESC Limit " + page * 30 + ",30";
 
     console.log(sql," ======sql=== ");
     connection.query(sql, function (err, chatList) {
@@ -163,8 +162,7 @@ exports.getChats = async (req, res) => {
       constants.BASE_URL +
       "','images/profiles/',users.profile_picture) AS profile_picture, users.name,case when chats.images IS NOT NULL then chats.images   else ''  end AS images FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to=" +
       req.query.user_id +
-      condition2;
-    " ORDER BY chats.id DESC  Limit " + page * 30 + ",30";
+      condition2+" ORDER BY chats.id DESC  Limit " + page * 30 + ",30";
     console.log(sql," ======sql=== ");
     connection.query(sql, function (err, chatList) {
       console.log(err, chatList);

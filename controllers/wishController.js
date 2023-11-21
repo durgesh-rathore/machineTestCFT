@@ -21,7 +21,9 @@ var a =
   constants.BASE_URL +
   "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
 
-  exports.createWishList=function (req, res) {}
+  exports.createWishList=function (req, res) {
+    
+  }
   exports.Wishlist=function (req, res) {}
 
 
