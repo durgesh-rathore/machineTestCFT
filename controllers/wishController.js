@@ -45,8 +45,8 @@ exports.createWishList = function (req, res) {
             async function (err, wishList) {
               if (err) console.log(err);
               if (wishList) {
-                console.log(ASIN_product_id, "group_members ");
-                var poroductList = ASIN_product_id.split(",");
+                console.log(ASIN_product_ids, "wilish item or products ");
+                var poroductList = ASIN_product_ids;
                 // poroductList.push(req.body.group_admin_id);
                 poroductList.forEach(async (element) => {
                   var wish_list_product = {
@@ -79,19 +79,141 @@ exports.createWishList = function (req, res) {
     console.error(error);
   }
 };
-exports.Wishlist = function (req, res) {
-const {user_id}=req.query;
+exports.getWishList = function (req, res) {
+const {user_id,search,page}=req.query;
+
+
+var searchCondition =
+    search != "" &&
+    search != undefined &&
+    search != null;
+  
+    var condition=" ";
+   var page1 = page ? page : 0;
+  if (searchCondition) {
+  
+       condition = '  AND (wish_list.folder_name LIKE "%' + search + '%") ';
+  }
+
+
   connection.query(
-    `SELECT * FROM wish_list WHERE  parent_id IS NULL  AND user_id='${user_id}'`,
+    `SELECT wish_list.*, (SELECT COUNT(id) FROM  wish_list  as wl WHERE wl.parent_id=wish_list.id  ) AS total_item FROM wish_list WHERE  parent_id IS NULL  AND user_id='${user_id}'  ${condition}  ORDER BY wish_list.id DESC Limit ${page1 * 10},10`,
     async function (err,wishList) {
-      if (err) console.log(err);
+      if (err){
+         console.log(err);
+         return res.json({
+          success: false,
+          message: "Something went wrong.",
+        });
+      }else
       if (wishList.length > 0) {
+
+        connection.query(
+          `SELECT COUNT(id) AS wishListCount FROM wish_list WHERE  parent_id IS NULL  AND user_id='${user_id}'  ${condition}  `,
+          async function (err,wishListCount) {
+
         return res.json({
           success: true,
-          message: "Wishlist title  already exist.",
+          response:wishList,
+          count:wishListCount[0].wishListCount,
+          message: "Wishlist.",
         });
+      })
       } else {
+        return res.json({
+          success: false,
+          response:[],
+          count:0,
+          message: "Wishlist.",
+        });
       }
     }
   );
 };
+exports.getWishListItems = function (req, res) {
+  const {directory_id}=req.query;
+    connection.query(
+      `SELECT * FROM wish_list WHERE  parent_id =${directory_id} `,
+      async function (err,wishList) {
+        if (err){
+           console.log(err);
+           return res.json({
+            success: false,
+            message: "Something went wrong.",
+          });
+        }else
+        if (wishList.length > 0) {
+          return res.json({
+            success: true,
+            response:wishList,
+            message: "Wishlist.",
+          });
+        } else {
+          return res.json({
+            success: false,
+            response:[],
+            message: "Wishlist.",
+          });
+        }
+      }
+    );
+  };
+
+  exports.addItemInWishList = function (req, res) {
+    console.log("===========", req.body);
+    const { folder_id, user_id, ASIN_product_ids } = req.body;
+    try {
+      var wishList = {
+        user_id: user_id,
+        folder_name: folder_name,
+      };
+      connection.query(
+        `SELECT * FROM wish_list WHERE   parent_id='${folder_id}'  AND user_id='${user_id}'`,
+        async function (err, presentWishList) {
+          if (err) console.log(err);
+          if (presentWishList.length > 0) {
+            return res.json({
+              success: true,
+              message: "Wishlist title  already exist.",
+            });
+          } else {
+            connection.query(
+              "INSERT INTO wish_list SET ?",
+              wishList,
+              async function (err, wishList) {
+                if (err) console.log(err);
+                if (wishList) {
+                  console.log(ASIN_product_ids, "wilish item or products ");
+                  var poroductList = ASIN_product_ids;
+                  // poroductList.push(req.body.group_admin_id);
+                  poroductList.forEach(async (element) => {
+                    var wish_list_product = {
+                      parent_id: wishList.insertId,
+                      ASIN_product_id: element,
+                      user_id: user_id,
+                    };
+                    await save("wish_list", wish_list_product);
+                    console.log("wish_list======", wish_list_product);
+                    group_users = {};
+                  });
+  
+                  return res.json({
+                    success: true,
+                    response: { wishList_id: wishList.insertId },
+                    message: "Wish list  created successful.",
+                  });
+                } else {
+                  return res.json({
+                    success: false,
+                    message: "Something went wrong.",
+                  });
+                }
+              }
+            );
+          }
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };

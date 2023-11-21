@@ -5,7 +5,9 @@ var checkUserStatus = require("../config/checkUserStatus");
 var router = express.Router();
 
 router.post("/createWishList",  wishController.createWishList);
-router.post("/Wishlist",  wishController.Wishlist);
+router.get("/getWishList",  wishController.getWishList);
+router.get("/getWishListItems",  wishController.getWishListItems);
+
 
 
 module.exports = router;
