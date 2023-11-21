@@ -11,7 +11,7 @@ const db_sql = {
   'Q3': " SELECT * FROM users WHERE id={var1}",
   'Q4': " SELECT * FROM chat_seen_in_group_by_user AS csg WHERE csg.group_id={var1} AND csg.user_id={var2} ORDER BY id  DESC LIMIT 1",
   'Q5': " SELECT chats.*,"+a+" FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to={var1} AND chats.id>{var2} ORDER BY chats.id DESC  Limit 0,5",
-  'Q6':"SELECT chats.* FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN({var1},{var2}) AND chats.sent_to IN({var1},{var2}) {v3} ORDER BY chats.id DESC Limit 1",
+  'Q6':"SELECT chats.* FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN({var1},{var2}) AND chats.sent_to IN({var1},{var2}) {var3} ORDER BY chats.id DESC Limit 1",
   'Q7':"SELECT chats.* FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to={var1}    {var2} ORDER BY chats.id DESC  Limit 1",
 };
 // IS  NOT NULL
