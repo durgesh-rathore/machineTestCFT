@@ -39,6 +39,8 @@ exports.getChats = async (req, res) => {
 
     condition = '  AND (chats.message LIKE "%' + req.query.search + '%") ';
     //  Sigle User Chats
+  }else{
+    dd = ' CASE  WHEN chats.images IS NOT NULL then 0   else 0  end AS match_status, '
   }
   if (req.query.is_group != 1 && req.query.is_group != 2) {
     if (searchCondition) {
