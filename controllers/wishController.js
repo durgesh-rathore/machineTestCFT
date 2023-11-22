@@ -163,7 +163,7 @@ exports.getWishListItems = function (req, res) {
     console.log("===========", req.body);
     const { folder_ids, user_id, ASIN_product_id } = req.body;
     try {
-      for await ( const a of folder_ids)
+      // for( let a of folder_ids)
       connection.query(
         `SELECT * FROM wish_list WHERE   parent_id='${folder_id}'  AND ASIN_product_id='${user_id}'`,
         async function (err, presentWishList) {
