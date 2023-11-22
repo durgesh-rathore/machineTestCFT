@@ -37,6 +37,12 @@ router.get(
   messagesController.getSpiltChats
 );
 
+router.get(
+  "/messagesSeen",
+//   checkUserStatus.userStatus,
+  messagesController.messagesSeen
+);
+
 
 
 module.exports = router;
