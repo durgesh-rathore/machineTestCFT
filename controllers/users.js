@@ -357,6 +357,7 @@ exports.userInterest = function (req, res) {
       message: "Please enter required  detail.",
     });
   } else {
+    req.body.interest_fields=JSON.parse(req.body.interest_fields);
     connection.query(
       "SELECT * FROM users WHERE id = ?",
       req.body.user_id,
