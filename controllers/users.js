@@ -350,7 +350,8 @@ exports.getInterestList = function (req, res) {
 };
 
 exports.userInterest = function (req, res) {
-  if (!req.body || !req.body.user_id || !req.body.interest_fields) {
+  console.log(req.body,"  userInterest api ========");
+  if (!req.body || !req.body.user_id || !req.body.interest_fields || req.body.interest_fields.length==0 || req.body.interest_fields=="undefind") {
     return res.json({
       success: false,
       message: "Please enter required  detail.",
