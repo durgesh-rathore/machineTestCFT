@@ -149,13 +149,13 @@ exports.getChats = async (req, res) => {
     }
     console.log(condition2, " condition2  for group chat===",dd);
     sql =
-      "SELECT chats.*," +
+      `SELECT chats.*," +
       dd +
-      "  CONCAT('" +
-      constants.BASE_URL +
-      "','images/profiles/',users.profile_picture) AS profile_picture, users.name,case when chats.images IS NOT NULL then chats.images   else ''  end AS images FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to=" +
-      req.query.user_id +
-      condition2+" ORDER BY chats.id DESC  Limit " + page * 30 + ",30";
+      "  CONCAT('${
+      constants.BASE_URL }','images/profiles/',users.profile_picture) AS profile_picture, users.name,case when chats.images IS NOT NULL then chats.images   else ''  end AS images,(SELECT GROUP_CONCAT(user_id) FROM groups_users WHERE  groups_users.is_muted=1 AND  groups_users.group_id=${req.query.user_id}) AS mute_users FROM chats LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to=${
+      req.query.user_id}    ${condition2} ORDER BY chats.id DESC  Limit ${page * 30},30`;
+
+
     console.log(sql," ======sql=== ");
     connection.query(sql, function (err, chatList) {
       console.log(err, chatList);
@@ -354,26 +354,144 @@ exports.getDirectMessages = async (req, res) => {
       '%" ) ';
   }
 
-  sql =
-    "SELECT users.is_group,users.type AS group_type,CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('http://192.168.0.164:3000/images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture,users.name,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by ,   (SELECT TIMESTAMPDIFF(MINUTE, chats.created_datetime , CURRENT_TIMESTAMP)  FROM chats WHERE (chats.sent_to=users.id)   ORDER BY chats.created_datetime DESC LIMIT 1) AS last_times_user_in ,(SELECT  chats.message  FROM chats WHERE (chats.sent_to=users.id)   ORDER BY chats.created_datetime DESC LIMIT 1) AS message ,  CASE WHEN users.is_group=1  THEN    (SELECT GROUP_CONCAT(users1.profile_picture) FROM users AS users1 LEFT JOIN groups_users ON groups_users.user_id=users1.id WHERE groups_users.group_id= users.id  )  END   AS group_users_image,CASE WHEN users.is_group=0  THEN (  CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
-    constants.BASE_URL +
-    "images/profiles/',users.profile_picture)  ELSE '' END ) ELSE '' END AS profile_picture,CASE WHEN users.is_group=0  THEN (SELECT COUNT(*) FROM chats WHERE chats.send_by=users.id AND chats.sent_to=" +
-    req.query.login_user_id +
-    " AND is_seen=0 ) ELSE 0 END AS newMessageCount FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id!=" +
-    req.query.login_user_id +
-    " Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='" +
-    req.query.login_user_id +
-    "' OR users_requests.request_for='" +
-    req.query.login_user_id +
-    "') AND ( users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='" +
-    req.query.login_user_id +
-    "')  )  AND users.id <> '" +
-    req.query.login_user_id +
-    "' " +
-    search +
-    "  GROUP BY users.id  ORDER BY users.id DESC    limit  " +
-    page * 10 +
-    ",10 ";
+  sqlcopy =
+    `SELECT users.is_group,users.type AS group_type,CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('http://192.168.0.164:3000/images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture,users.name,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by ,  
+    
+    (SELECT TIMESTAMPDIFF(MINUTE, chats.created_datetime , CURRENT_TIMESTAMP)  FROM chats 
+    WHERE  (chats.sent_to=${req.query.login_user_id} AND chats.send_by=users.id
+    )   ORDER BY chats.created_datetime DESC LIMIT 1) AS last_times_user_in ,
+
+    (SELECT  chats.message  FROM chats WHERE (chats.sent_to=${req.query.login_user_id} AND chats.send_by=users.id
+      )    ORDER BY chats.created_datetime DESC LIMIT 1) AS message ,  
+
+    CASE WHEN users.is_group=1  THEN    (SELECT GROUP_CONCAT(users1.profile_picture) FROM users AS users1 LEFT JOIN groups_users ON groups_users.user_id=users1.id WHERE groups_users.group_id= users.id  )  END   AS group_users_image,
+    
+    CASE WHEN users.is_group=0  THEN (  CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT(${
+    constants.BASE_URL},'images/profiles/',users.profile_picture)  ELSE '' END ) ELSE '' END AS profile_picture,
+    
+    CASE WHEN users.is_group=0  THEN (SELECT COUNT(*) FROM chats WHERE chats.send_by=users.id AND chats.sent_to=${
+    req.query.login_user_id } AND is_seen=0 ) ELSE 0 END AS newMessageCount
+    
+    FROM users 
+    LEFT JOIN users_requests 
+    ON (users.id =  case when users_requests.user_id<>${req.query.login_user_id} Then users_requests.user_id ELSE users_requests.request_for END)
+    
+    LEFT JOIN groups_users 
+    ON groups_users.group_id= users.id 
+    
+    WHERE  ( (users_requests.user_id=${
+    req.query.login_user_id } OR users_requests.request_for=${
+    req.query.login_user_id}) AND 
+    ( users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  
+    OR (users.is_group=1 AND groups_users.user_id=${req.query.login_user_id })  ) 
+     AND users.id <> ${req.query.login_user_id} 
+    ${search }
+      GROUP BY users.id  ORDER BY users.id DESC    limit  ${
+    page * 10 },10`;
+
+// THEN CONCAT('http://192.168.0.164:3000/images/profiles/', users.profile_picture)
+    sql=`SELECT
+    users.is_group,
+    users.type AS group_type,
+    CASE
+        WHEN users.profile_picture IS NOT NULL
+                THEN CONCAT('${constants.BASE_URL}','images/profiles/', users.profile_picture)
+        ELSE ''
+    END AS profile_picture,
+    users.name,
+    users.id,
+    (
+        SELECT COUNT(users_requests.request_for)
+        FROM users_requests
+        WHERE users_requests.is_follow != 0
+            AND users_requests.request_for = users.id
+    ) AS followed_by,
+    (
+        SELECT TIMESTAMPDIFF(
+            MINUTE,
+            chats.created_datetime,
+            CURRENT_TIMESTAMP
+        )
+        FROM chats
+        WHERE (
+            chats.sent_to = ${req.query.login_user_id}
+            AND chats.send_by = users.id
+        )
+        ORDER BY chats.created_datetime DESC
+        LIMIT 1
+    ) AS last_times_user_in,
+    (
+        SELECT chats.message
+        FROM chats
+        WHERE (
+            chats.sent_to = ${req.query.login_user_id}
+            AND chats.send_by = users.id
+        )
+        ORDER BY chats.created_datetime DESC
+        LIMIT 1
+    ) AS message,
+    CASE
+        WHEN users.is_group = 1
+        THEN (
+            SELECT GROUP_CONCAT(users1.profile_picture)
+            FROM users AS users1
+            LEFT JOIN groups_users ON groups_users.user_id = users1.id
+            WHERE groups_users.group_id = users.id
+        )
+    END AS group_users_image,
+    CASE
+        WHEN users.is_group = 0
+        THEN (
+            CASE
+                WHEN users.profile_picture IS NOT NULL
+                THEN CONCAT('${constants.BASE_URL}','images/profiles/', users.profile_picture)
+                ELSE ''
+            END
+        )
+        ELSE ''
+    END AS profile_picture,
+    CASE
+        WHEN users.is_group = 0
+        THEN (
+            SELECT COUNT(*)
+            FROM chats
+            WHERE chats.send_by = users.id
+                AND chats.sent_to = ${req.query.login_user_id}
+                AND is_seen = 0
+        )
+        ELSE 0
+    END AS newMessageCount
+FROM
+    users
+LEFT JOIN users_requests ON (
+        users.id = CASE
+            WHEN users_requests.user_id <> ${req.query.login_user_id}
+            THEN users_requests.user_id
+            ELSE users_requests.request_for
+        END
+    )
+LEFT JOIN groups_users ON groups_users.group_id = users.id
+WHERE (
+        (
+            users_requests.user_id = ${req.query.login_user_id}
+            OR users_requests.request_for = ${req.query.login_user_id}
+        )
+        AND (
+            users_requests.is_reject = 0
+            AND users_requests.is_block = 0
+            AND users_requests.is_accepted = 1
+        )
+        OR (
+            users.is_group = 1
+            AND groups_users.user_id = ${req.query.login_user_id}
+        )
+    )
+    AND users.id <> ${req.query.login_user_id}
+    ${search}
+GROUP BY users.id
+ORDER BY users.id DESC
+LIMIT ${page * 10}, 10`;
+
 
   console.log("sql.....................................", sql, "===sql===");
 

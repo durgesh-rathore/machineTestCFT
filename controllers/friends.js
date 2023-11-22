@@ -232,7 +232,7 @@ exports.requestForUser = function (req, res) {
                 usersRequest[0].id;
               pushNotification(
                 notificationFor[0].divice_token,
-                "Frieds request for you by " +
+                "Friends request for you by " +
                   (req.body.login_user_name ? req.body.login_user_name : "") +
                   "",
                 render
