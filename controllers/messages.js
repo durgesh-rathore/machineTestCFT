@@ -176,9 +176,7 @@ exports.getChats = async (req, res) => {
     }
     console.log(condition2, " condition2  for group chat===",dd);
     sql =
-      `SELECT chats.*," +
-      dd +
-      "  CONCAT('${
+      `SELECT chats.*,${dd}  CONCAT('${
       constants.BASE_URL }','images/profiles/',users.profile_picture) AS profile_picture, users.name,case when chats.images IS NOT NULL then chats.images   else ''  end AS images,(SELECT GROUP_CONCAT(user_id) FROM groups_users WHERE  groups_users.is_muted=1 AND  groups_users.group_id=${req.query.user_id}) AS mute_users FROM chats LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to=${
       req.query.user_id}    ${condition2} ORDER BY chats.id DESC  Limit ${page * 30},30`;
 
