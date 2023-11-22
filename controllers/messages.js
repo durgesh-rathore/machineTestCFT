@@ -463,7 +463,12 @@ exports.getDirectMessages = async (req, res) => {
            WHERE  groups_users.is_muted=1 
                   AND  groups_users.group_id=users.id )
         ELSE '' 
-      END  AS mute_users
+      END  AS mute_users,
+    CASE
+      WHEN users.is_group = 1
+      THEN groups_users.is_muted
+      ELSE 0
+    END  AS is_muted
 FROM
     users
 LEFT JOIN users_requests ON (
