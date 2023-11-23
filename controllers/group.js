@@ -694,43 +694,94 @@ exports.informationOfSplitGroup = function (req, res) {
 exports.isMuted = function (req, res) {
   const {group_id,user_id,is_muted,chat_user_id}=req.body;
   let status=1;
+  var message='';
+if(is_muted==0){
+  message="Unmuted."
+}else{
+  message="Muted."
+}
+  
   console.log(" in ffdd")
   var sql =" ";
     if(group_id!='' && group_id && group_id!='undefined' ){
       sql =
       `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}` 
-    } else{
-      
-      connection.query(`SELECT * FROM mute_users_for_sigle_chat WHERE chat_user_id=${chat_user_id} AND user_id=${user_id} `, function (err, muteDataForSigleChat) {})
-      sql =
 
-      `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`
-    }
-     
-   connection.query(sql, function (err, muteData) {
-      if (err) {
-        console.log("somthing went wrong",err);
-        return res.json({
-          success: false,
-          message: "Something went wrong",
-        });
-      }else{
-        if(muteData.length==0){
+      connection.query(sql, function (err, muteData) {
+        if (err) {
+          console.log("somthing went wrong",err);
           return res.json({
             success: false,
-            message: "Payment method not found.",
+            message: "Something went wrong",
           });
         }else{
-          return res.json({
-            success: true,
-            message: " Notification muted.",
-            
-          });
+          if(muteData.length==0){
+            return res.json({
+              success: false,
+              message: "Payment method not found.",
+            });
+          }else{
+            return res.json({
+              success: true,
+              message: message,
+                });
+          }
         }
-      }
-  
+    
+        
+      });
+    } else{
       
-    });
+      connection.query(`SELECT * FROM mute_users_for_sigle_chat WHERE chat_user_id=${chat_user_id} AND user_id=${user_id} `, async function (err, muteDataForSigleChat) {
+        if(muteDataForSigleChat.length>0){
+      sql = `UPDATE mute_users_for_sigle_chat AS mufsc SET  mufsc.is_muted=${is_muted}  WHERE mufsc.chat_user_id=${chat_user_id} AND mufsc.user_id=${user_id}`
+
+      connection.query(sql, function (err, muteData) {
+        if (err) {
+          console.log("somthing went wrong",err);
+          return res.json({
+            success: false,
+            message: "Something went wrong",
+          });
+        }else{
+          if(muteData.length==0){
+            return res.json({
+              success: false,
+              message: "dd",
+            });
+          }else{
+            return res.json({
+              success: true,
+              message: message,
+              
+            });
+          }
+        }
+    
+        
+      });
+
+
+        }else{
+
+          var a=await save("mute_users_for_sigle_chat",{user_id:user_id,chat_user_id:chat_user_id})
+          if(a){
+            return res.json({
+              success: true,
+              message: message,
+              
+            });
+          }else{
+            return res.json({
+              success: false,
+              message: "Something went wrong.",
+            });
+          }
+        }
+    })
+    }
+     
+   
   
 
  

@@ -8,6 +8,8 @@ router.post("/createWishList",  wishController.createWishList);
 router.get("/getWishList",  wishController.getWishList);
 router.get("/getWishListItems",  wishController.getWishListItems);
 router.put("/addItemInWishList",  wishController.addItemInWishList);
+router.get("/icons",  wishController.icons);
+icons
 
 
 module.exports = router;

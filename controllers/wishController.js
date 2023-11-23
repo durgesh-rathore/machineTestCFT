@@ -215,3 +215,19 @@ exports.getWishListItems = function (req, res) {
       console.error(error);
     }
   };
+
+
+  exports.icons= function(req,res) {
+    var sql=`SELECT * FROM icons`;
+   
+    connection.query(sql,     
+      function (err, categoryData) {
+        console.log(err);    
+        return res.json({
+          response: categoryData,
+          success: true,
+          message: "icons List  .",
+        });
+      })
+     
+  }
