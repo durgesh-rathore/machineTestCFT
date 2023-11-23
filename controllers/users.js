@@ -169,6 +169,21 @@ exports.signin = async function (req, res) {
     );
   }
 };
+exports.logout = async function (req, res) {
+  
+                var j = await findByIdAndUpdate(
+                  "users",
+                  { divice_token: '' },
+                  " id=" + req.body.login_user_id
+                );
+                console.log("   dddddddddddd update divice token==", j);
+              
+              return res.json({
+                success: true,
+                message: "Logout successfully.",
+              });
+            
+};
 
 exports.socialLogin = async function (req, res) {
   console.log("socialLogin==========",req.body);

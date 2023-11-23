@@ -692,12 +692,20 @@ exports.informationOfSplitGroup = function (req, res) {
 };
 
 exports.isMuted = function (req, res) {
-  const {group_id,user_id,is_muted}=req.body;
+  const {group_id,user_id,is_muted,chat_user_id}=req.body;
   let status=1;
   console.log(" in ffdd")
-
-      var sql =
+  var sql =" ";
+    if(group_id!='' && group_id && group_id!='undefined' ){
+      sql =
       `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}` 
+    } else{
+      
+      connection.query(`SELECT * FROM mute_users_for_sigle_chat WHERE chat_user_id=${chat_user_id} AND user_id=${user_id} `, function (err, muteDataForSigleChat) {})
+      sql =
+
+      `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`
+    }
      
    connection.query(sql, function (err, muteData) {
       if (err) {

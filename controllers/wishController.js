@@ -23,11 +23,12 @@ var a =
 
 exports.createWishList = function (req, res) {
   console.log("===========", req.body);
-  const { folder_name, user_id, ASIN_product_ids } = req.body;
+  const { folder_name, user_id, ASIN_product_ids,icon } = req.body;
   try {
     var wishList = {
       user_id: user_id,
       folder_name: folder_name,
+      icon:icon
     };
     connection.query(
       `SELECT * FROM wish_list WHERE  parent_id IS NULL AND folder_name='${folder_name}'  AND user_id='${user_id}'`,
@@ -48,16 +49,16 @@ exports.createWishList = function (req, res) {
                 console.log(ASIN_product_ids, "wilish item or products ");
                 var poroductList = ASIN_product_ids;
                 // poroductList.push(req.body.group_admin_id);
-                poroductList.forEach(async (element) => {
-                  var wish_list_product = {
-                    parent_id: wishList.insertId,
-                    ASIN_product_id: element,
-                    user_id: user_id,
-                  };
-                  await save("wish_list", wish_list_product);
-                  console.log("wish_list======", wish_list_product);
-                  group_users = {};
-                });
+                // poroductList.forEach(async (element) => {
+                //   var wish_list_product = {
+                //     parent_id: wishList.insertId,
+                //     ASIN_product_id: element,
+                //     user_id: user_id,
+                //   };
+                //   await save("wish_list", wish_list_product);
+                //   console.log("wish_list======", wish_list_product);
+                //   group_users = {};
+                // });
 
                 return res.json({
                   success: true,

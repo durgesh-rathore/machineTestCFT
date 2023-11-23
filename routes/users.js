@@ -11,6 +11,7 @@ router.get('/', function(req, res, next) {
 });
 router.post('/signup',users.signup) 
 router.post('/signin',users.signin)
+router.post('/logout',users.logout)
 
 router.post('/socialLogin',users.socialLogin);
 

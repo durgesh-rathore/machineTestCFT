@@ -49,7 +49,7 @@ module.exports = io => {
       socket.join(`chat-${roomId}`);
     });
     // {'send_by': userId,'sent_to' :'2', 'newMessage': message, 'name': login_userName,'group_id':''    ,'image': ''};
-    socket.on('user-send-message', async ({ send_by, sent_to,newMessage,name,is_group,images,createdDatetime,profile_picture }) => {
+    socket.on('user-send-message', async ({ send_by, sent_to,newMessage,name,is_group,images,createdDatetime,profile_picture,mute_users,is_meta_data }) => {
 
 
       if(images=='' || images==null || images==undefined || newMessage!='' && send_by!=sent_to  ){
@@ -60,6 +60,9 @@ module.exports = io => {
           sent_to:sent_to,
           is_group:is_group,
           }
+          if(is_meta_data==1){
+            data.is_meta_data=is_meta_data;
+           }
      await save("chats",data)
     }
       console.log("{ conversation, newMessage }========", send_by, sent_to,newMessage,name,is_group,images,createdDatetime,profile_picture);
@@ -69,17 +72,20 @@ module.exports = io => {
       console.log("============client1111111111111111==",clients[sent_to]);
 
 if(clients[sent_to]!=undefined && is_group==0){
+
        clients[sent_to]
   // socket
-  .emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture});
+  .emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
 }else if(is_group==1 || is_group==2){
   console.log("send into group========")
 
   if(is_group==1){
   sql =
-  "SELECT users.id,users.divice_token  FROM users  LEFT JOIN groups_users ON groups_users.user_id=users.id     WHERE  groups_users.group_id=" +
+  "SELECT users.id,users.divice_token ,GROUP_CONCAT(user_id) AS mute_users FROM users  LEFT JOIN groups_users ON groups_users.user_id=users.id     WHERE  groups_users.group_id=" +
   sent_to +     
   " AND users.id<>"+ send_by +" GROUP BY users.id ";
+
+  
   }else{
 
 
@@ -88,6 +94,7 @@ if(clients[sent_to]!=undefined && is_group==0){
   sent_to +     
   " AND users.id<>"+ send_by +" GROUP BY users.id ";
   }
+
 console.log(sql);
 connection.query(sql, async function (err, roomNames) {
   console.log(err);
@@ -107,7 +114,28 @@ if(array1.length>0){
 
 });
 
-socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture});
+if(is_group==1){
+
+  muteUsersSql =
+  "SELECT GROUP_CONCAT(user_id) AS mute_users FROM  groups_users   WHERE groups_users.is_muted=1  AND  groups_users.group_id=" +
+  sent_to +     
+  " ";
+  console.log(muteUsersSql)
+
+connection.query(muteUsersSql, async function (err, muteUsersData) {
+
+  if(err){
+mute_users=''
+socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
+  }else{
+    mute_users=muteUsersData[0].mute_users;
+    socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
+  }
+
+});
+}else{
+  socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
+}
 // io.to(room).emit('notification', { message: 'New notification!' });
 
 }else{
