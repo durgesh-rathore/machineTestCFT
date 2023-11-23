@@ -161,66 +161,65 @@ exports.addSplitGroup = function (req, res) {
       group_admin_id: req.body.group_admin_id,
       is_group: 2,
     };
-            connection.query(
-            "INSERT INTO users SET ?",
-            group,
-            async function (err, users) {
-                 var group_members = req.body.group_members.split(",");
-                      group_members.push(req.body.group_admin_id);
+    connection.query(
+      "INSERT INTO users SET ?",
+      group,
+      async function (err, users) {
+        var group_members = req.body.group_members.split(",");
+        group_members.push(req.body.group_admin_id);
+        if (err) console.log(err);
+        if (group) {
+          var groupData = {
+            spliting_amount: req.body.spliting_amount,
+            event_date: req.body.event_date,
+            due_date: req.body.due_date,
+            group_id: users.insertId,
+            currency: req.body.currency,
+            each_split: req.body.spliting_amount / group_members.length,
+          };
+          if (req.body.payment_method) {
+            groupData.payment_method = req.body.payment_method;
+          }
+
+          connection.query(
+            "INSERT INTO billing_group SET ?",
+            groupData,
+            async function (err, group) {
               if (err) console.log(err);
               if (group) {
-                var groupData = {
-                  spliting_amount: req.body.spliting_amount,
-                  event_date: req.body.event_date,
-                  due_date: req.body.due_date,
-                  group_id: users.insertId,
-                  currency:req.body.currency,
-                  each_split:req.body.spliting_amount/group_members.length,
-                };
-                if(req.body.payment_method){
-                  groupData.payment_method=req.body.payment_method
-                }
+                console.log(req.body.group_members, "group_members ");
+                // var group_members=[1,2,3,4];
 
-                connection.query(
-                  "INSERT INTO billing_group SET ?",
-                  groupData,
-                  async function (err, group) {
-                    if (err) console.log(err);
-                    if (group) {
-                      console.log(req.body.group_members, "group_members ");
-                      // var group_members=[1,2,3,4];
-                   
-                      group_members.forEach((element) => {
-                        var group_users = {
-                          group_id: users.insertId,
-                          user_id: element,
-                        };
-                        let sql = "INSERT INTO billing_group_users SET ?";
-                        connection.query(sql, group_users, async (error) => {
-                          if (error) console.log(error);
-                          console.log("ddd"); //item added!
-                        });
-                        group_users={};
-                      });
+                group_members.forEach((element) => {
+                  var group_users = {
+                    group_id: users.insertId,
+                    user_id: element,
+                  };
+                  let sql = "INSERT INTO billing_group_users SET ?";
+                  connection.query(sql, group_users, async (error) => {
+                    if (error) console.log(error);
+                    console.log("ddd"); //item added!
+                  });
+                  group_users = {};
+                });
 
-                      // console.log("group_user======", group_users);
-                      return res.json({
-                        success: true,
-                        response: { group_id: users.insertId },
-                        message: "Group created successful.",
-                      });
-                    } else {
-                      return res.json({
-                        success: false,
-                        message: "Something went wrong.",
-                      });
-                    }
-                  }
-                );
+                // console.log("group_user======", group_users);
+                return res.json({
+                  success: true,
+                  response: { group_id: users.insertId },
+                  message: "Group created successful.",
+                });
+              } else {
+                return res.json({
+                  success: false,
+                  message: "Something went wrong.",
+                });
               }
             }
           );
-       
+        }
+      }
+    );
   } catch (error) {
     console.error(error);
   }
@@ -270,7 +269,15 @@ exports.getSplitGroupList = function (req, res) {
     var sqlCountsDM =
       "SELECT  COUNT(*) AS counts  FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id<>" +
       req.query.login_user_id +
-      " Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')  )  AND users.id <> '"+req.query.login_user_id +"'  GROUP BY users.id  ";
+      " Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='" +
+      req.query.login_user_id +
+      "' OR users_requests.request_for='" +
+      req.query.login_user_id +
+      "') AND ( users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='" +
+      req.query.login_user_id +
+      "')  )  AND users.id <> '" +
+      req.query.login_user_id +
+      "'  GROUP BY users.id  ";
 
     console.log("sqlCountsDM============>>", sqlCountsDM);
 
@@ -278,61 +285,57 @@ exports.getSplitGroupList = function (req, res) {
       "SELECT COUNT(*) AS counts FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users2.is_group=2 AND billing_group_users.user_id=" +
       req.query.login_user_id +
       condition +
-      " AND YEAR(billing_group.event_date) = YEAR(CURDATE()) AND MONTH(billing_group.event_date) = MONTH(CURDATE())   AND   billing_group.event_date>= CURDATE()"
+      " AND YEAR(billing_group.event_date) = YEAR(CURDATE()) AND MONTH(billing_group.event_date) = MONTH(CURDATE())   AND   billing_group.event_date>= CURDATE()";
 
-    connection.query(sqlCountsSplit, async function (err, sqlCountsSplitResult) {
-      if (err) {
-        console.log(err);
-      }
-
-      connection.query(sqlCountsDM, async function (err, sqlCountsDMResult) {
+    connection.query(
+      sqlCountsSplit,
+      async function (err, sqlCountsSplitResult) {
         if (err) {
           console.log(err);
         }
-        console.log(sqlCountsDMResult,"==========sqlCountsDMResult")
-        if(sqlCountsDMResult.length){
 
-        }
+        connection.query(sqlCountsDM, async function (err, sqlCountsDMResult) {
+          if (err) {
+            console.log(err);
+          }
+          console.log(sqlCountsDMResult, "==========sqlCountsDMResult");
+          if (sqlCountsDMResult.length) {
+          }
 
-      if (groupUsers.length > 0) {
+          if (groupUsers.length > 0) {
+            // for(let i=0;i<groupUsers.length-1;i++){
 
-// for(let i=0;i<groupUsers.length-1;i++){
+            var week = [];
+            var month = [];
 
-var week=[];
-var month=[];
+            await groupUsers.forEach((element) => {
+              if (element.WMTag == "This week") {
+                week.push(element);
+              } else {
+                month.push(element);
+              }
+            });
 
-await groupUsers.forEach(element => {
-if( element.WMTag =="This week"){
-  week.push(element)
-}else{
-  month.push(element)
-}
- 
-});
-
-
-
-
-        return res.json({
-          // response: groupUsers,
-          response: {weekEvents:week,
-          monthEvents:month},
-          DMCounts: sqlCountsDMResult.length,
-          splitCount: sqlCountsSplitResult[0].counts,
-          success: true,
-          message: "Direct message list",
-        });
-      } else {
-        return res.json({
-          response: [],
-          DMCounts: sqlCountsDMResult.length,
-          splitCount: sqlCountsSplitResult[0].counts,
-          success: true,
-          message: "No More post",
+            return res.json({
+              // response: groupUsers,
+              response: { weekEvents: week, monthEvents: month },
+              DMCounts: sqlCountsDMResult.length,
+              splitCount: sqlCountsSplitResult[0].counts,
+              success: true,
+              message: "Direct message list",
+            });
+          } else {
+            return res.json({
+              response: [],
+              DMCounts: sqlCountsDMResult.length,
+              splitCount: sqlCountsSplitResult[0].counts,
+              success: true,
+              message: "No More post",
+            });
+          }
         });
       }
-      });
-    });
+    );
   });
 };
 
@@ -489,136 +492,125 @@ exports.informationOfGroup = function (req, res) {
 };
 
 exports.getPaymentMethod = function (req, res) {
-  
   var sql =
     "SELECT billing_group.payment_method  FROM billing_group    WHERE billing_group.group_id=" +
     req.query.group_id;
 
- connection.query(sql, function (err, paymentMethod) {
+  connection.query(sql, function (err, paymentMethod) {
     if (err) {
-      console.log("somthing went wrong",err);
+      console.log("somthing went wrong", err);
       return res.json({
         success: false,
         message: "Something went wrong",
       });
-    }else{
-      if(paymentMethod.length==0){
+    } else {
+      if (paymentMethod.length == 0) {
         return res.json({
           success: false,
           message: "Payment method not found.",
         });
-      }else{
+      } else {
         return res.json({
           success: true,
           message: "Payment Method",
-          res:paymentMethod
+          res: paymentMethod,
         });
       }
     }
-
-    
   });
 };
 
-
-
 exports.contributorsList = function (req, res) {
-  const {group_id}=req.query;
-  console.log(req.query," in the fight ")
-  
-  var sql =
-    `SELECT users.name, ${ a} ,bgu.* FROM billing_group_users AS bgu LEFT JOIN users ON users.id=bgu.user_id WHERE bgu.group_id=${group_id}`
-   
- connection.query(sql, function (err, paymentMethod) {
+  const { group_id } = req.query;
+  console.log(req.query, " in the fight ");
+
+  var sql = `SELECT users.name, ${a} ,bgu.* FROM billing_group_users AS bgu LEFT JOIN users ON users.id=bgu.user_id WHERE bgu.group_id=${group_id}`;
+
+  connection.query(sql, function (err, paymentMethod) {
     if (err) {
-      console.log("somthing went wrong",err);
+      console.log("somthing went wrong", err);
       return res.json({
         success: false,
         message: "Something went wrong",
       });
-    }else{
-      if(paymentMethod.length==0){
+    } else {
+      if (paymentMethod.length == 0) {
         return res.json({
           success: false,
           message: "Payment method not found.",
         });
-      }else{
-        var sql1=`SELECT CASE WHEN bgu.payment_amount IS NULL THEN 0 ELSE SUM(bgu.payment_amount) END AS total_contributed_payment FROM billing_group_users AS bgu  WHERE  bgu.status=1 AND bgu.group_id=${group_id}`
-        console.log(sql1)
+      } else {
+        var sql1 = `SELECT CASE WHEN bgu.payment_amount IS NULL THEN 0 ELSE SUM(bgu.payment_amount) END AS total_contributed_payment FROM billing_group_users AS bgu  WHERE  bgu.status=1 AND bgu.group_id=${group_id}`;
+        console.log(sql1);
         connection.query(sql1, function (err, totalContributedAmount) {
           if (err) {
-            console.log("somthing went wrong",err);
+            console.log("somthing went wrong", err);
             return res.json({
               success: false,
               message: "Something went wrong",
             });
-          }else{
-console.log(" dddd ===",totalContributedAmount,totalContributedAmount[0].total_contributed_payment)
-            
-        return res.json({
-          success: true,
-          message: "Payment Method",
-          res:paymentMethod,
-          total_contributed_payment:totalContributedAmount[0].total_contributed_payment
+          } else {
+            console.log(
+              " dddd ===",
+              totalContributedAmount,
+              totalContributedAmount[0].total_contributed_payment
+            );
+
+            return res.json({
+              success: true,
+              message: "Payment Method",
+              res: paymentMethod,
+              total_contributed_payment:
+                totalContributedAmount[0].total_contributed_payment,
+            });
+          }
         });
       }
-    })
     }
-  }
-
-    
   });
 };
 
 exports.paymentStatus = function (req, res) {
-  const {group_id,user_id}=req.body;
-  let status=1;
-  console.log(" in ffdd")
+  const { group_id, user_id } = req.body;
+  let status = 1;
+  console.log(" in ffdd");
 
-  var sql1 =
-    `SELECT each_split FROM billing_group WHERE group_id=${group_id}`
-   
- connection.query(sql1, function (err, splitAmount) {
+  var sql1 = `SELECT each_split FROM billing_group WHERE group_id=${group_id}`;
+
+  connection.query(sql1, function (err, splitAmount) {
     if (err) {
-      console.log("somthing went wrong",err);
+      console.log("somthing went wrong", err);
       return res.json({
         success: false,
         message: "Something went wrong",
       });
-    }else{
+    } else {
+      var sql = `UPDATE billing_group_users AS bgu SET  bgu.status=${status},payment_amount=${splitAmount[0].each_split}  WHERE bgu.group_id=${group_id} AND bgu.user_id=${user_id}`;
 
-      var sql =
-      `UPDATE billing_group_users AS bgu SET  bgu.status=${status},payment_amount=${splitAmount[0].each_split}  WHERE bgu.group_id=${group_id} AND bgu.user_id=${user_id}` 
-     
-   connection.query(sql, function (err, paymentMethod) {
-      if (err) {
-        console.log("somthing went wrong",err);
-        return res.json({
-          success: false,
-          message: "Something went wrong",
-        });
-      }else{
-        if(paymentMethod.length==0){
+      connection.query(sql, function (err, paymentMethod) {
+        if (err) {
+          console.log("somthing went wrong", err);
           return res.json({
             success: false,
-            message: "Payment method not found.",
+            message: "Something went wrong",
           });
-        }else{
-          return res.json({
-            success: true,
-            message: "Payment status updated successfully",
-            
-          });
+        } else {
+          if (paymentMethod.length == 0) {
+            return res.json({
+              success: false,
+              message: "Payment method not found.",
+            });
+          } else {
+            return res.json({
+              success: true,
+              message: "Payment status updated successfully",
+            });
+          }
         }
-      }
-  
-      
-    });
-    }})
-
- 
+      });
+    }
+  });
 };
-
 
 exports.informationOfSplitGroup = function (req, res) {
   var page = req.query.page ? req.query.page : 0;
@@ -692,97 +684,87 @@ exports.informationOfSplitGroup = function (req, res) {
 };
 
 exports.isMuted = function (req, res) {
-  const {group_id,user_id,is_muted,chat_user_id}=req.body;
-  let status=1;
-  var message='';
-if(is_muted==0){
-  message="Unmuted."
-}else{
-  message="Muted."
-}
-  
-  console.log(" in ffdd")
-  var sql =" ";
-    if(group_id!='' && group_id && group_id!='undefined' ){
-      sql =
-      `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}` 
+  const { group_id, user_id, is_muted, chat_user_id } = req.body;
+  let status = 1;
+  var message = "";
+  if (is_muted == 0) {
+    message = "Unmuted.";
+  } else {
+    message = "Muted.";
+  }
 
-      connection.query(sql, function (err, muteData) {
-        if (err) {
-          console.log("somthing went wrong",err);
+  console.log(" in ffdd",req.body);
+  var sql = " ";
+  if (group_id != "" && group_id && group_id != "undefined") {
+    sql = `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
+
+    connection.query(sql, function (err, muteData) {
+      if (err) {
+        console.log("somthing went wrong", err);
+        return res.json({
+          success: false,
+          message: "Something went wrong",
+        });
+      } else {
+        if (muteData.length == 0) {
           return res.json({
             success: false,
-            message: "Something went wrong",
+            message: "Already done.",
           });
-        }else{
-          if(muteData.length==0){
-            return res.json({
-              success: false,
-              message: "Payment method not found.",
-            });
-          }else{
-            return res.json({
-              success: true,
-              message: message,
+        } else {
+          return res.json({
+            success: true,
+            message: message,
+          });
+        }
+      }
+    });
+  } else {
+    connection.query(
+      `SELECT * FROM mute_users_for_sigle_chat WHERE chat_user_id=${chat_user_id} AND user_id=${user_id} `,
+      async function (err, muteDataForSigleChat) {
+        if (muteDataForSigleChat.length > 0) {
+          sql = `UPDATE mute_users_for_sigle_chat AS mufsc SET  mufsc.is_muted=${is_muted}  WHERE mufsc.chat_user_id=${chat_user_id} AND mufsc.user_id=${user_id}`;
+
+          connection.query(sql, function (err, muteData) {
+            if (err) {
+              console.log("somthing went wrong", err);
+              return res.json({
+                success: false,
+                message: "Something went wrong",
+              });
+            } else {
+              if (muteData.length == 0) {
+                return res.json({
+                  success: false,
+                  message: "Already done."
                 });
-          }
-        }
-    
-        
-      });
-    } else{
-      
-      connection.query(`SELECT * FROM mute_users_for_sigle_chat WHERE chat_user_id=${chat_user_id} AND user_id=${user_id} `, async function (err, muteDataForSigleChat) {
-        if(muteDataForSigleChat.length>0){
-      sql = `UPDATE mute_users_for_sigle_chat AS mufsc SET  mufsc.is_muted=${is_muted}  WHERE mufsc.chat_user_id=${chat_user_id} AND mufsc.user_id=${user_id}`
-
-      connection.query(sql, function (err, muteData) {
-        if (err) {
-          console.log("somthing went wrong",err);
-          return res.json({
-            success: false,
-            message: "Something went wrong",
+              } else {
+                return res.json({
+                  success: true,
+                  message: message,
+                });
+              }
+            }
           });
-        }else{
-          if(muteData.length==0){
-            return res.json({
-              success: false,
-              message: "dd",
-            });
-          }else{
-            return res.json({
-              success: true,
-              message: message,
-              
-            });
-          }
-        }
-    
-        
-      });
-
-
-        }else{
-
-          var a=await save("mute_users_for_sigle_chat",{user_id:user_id,chat_user_id:chat_user_id})
-          if(a){
+        } else {
+          var a = await save("mute_users_for_sigle_chat", {
+            user_id: user_id,
+            chat_user_id: chat_user_id,
+          });
+          if (a) {
             return res.json({
               success: true,
               message: message,
-              
             });
-          }else{
+          } else {
             return res.json({
               success: false,
               message: "Something went wrong.",
             });
           }
         }
-    })
-    }
-     
-   
-  
-
- 
+      }
+    );
+  }
 };
