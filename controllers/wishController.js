@@ -98,7 +98,16 @@ var searchCondition =
 
 
   connection.query(
-    `SELECT wish_list.*, (SELECT COUNT(id) FROM  wish_list  as wl WHERE wl.parent_id=wish_list.id  ) AS total_item FROM wish_list WHERE  parent_id IS NULL  AND user_id='${user_id}'  ${condition}  ORDER BY wish_list.id DESC Limit ${page1 * 10},10`,
+    `SELECT wish_list.*, 
+            (SELECT COUNT(id) FROM  wish_list  as wl WHERE wl.parent_id=wish_list.id  ) AS total_item ,
+             
+            icons.icon AS icon
+    FROM wish_list 
+    LEFT JOIN icons
+        ON icons.id=wish_list.icon
+    WHERE  wish_list.parent_id IS NULL  AND wish_list.user_id='${user_id}'  ${condition} 
+    ORDER BY wish_list.id DESC 
+    Limit ${page1 * 10},10`,
     async function (err,wishList) {
       if (err){
          console.log(err);
