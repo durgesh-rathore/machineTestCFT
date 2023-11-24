@@ -288,10 +288,13 @@ exports.categoryAccordingToG= function(req,res) {
 
 
 
-exports.getProductDetails= async function(asinId) {
+exports.getProductDetails= async function(asinId,req,res) {
+  console.log(asinId," ====== ASIN number or id of products=");
+  asinId=asinId.split(',');
   const requestParameters = {
     
-      ItemIds: [`${asinId}`],
+      // ItemIds: [`${asinId}`],
+      ItemIds: asinId,
       PartnerTag: "forgetmenote-20",
       Resources: ["Images.Primary.Small", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
 
@@ -310,15 +313,30 @@ exports.getProductDetails= async function(asinId) {
         " dddddddddd======"    
         
       );
-      return data.ItemsResult;
-      // return res.json({
-      //   response: data.ItemsResult,
-      //   success: true,
-      //   message: "product list  .",
-      // });
+      return res.json({
+            success: true,
+            response:data.ItemsResult,
+            message: "Wishlist.",
+          });
+        
+      // else {
+      //     return res.json({
+      //       success: false,
+      //       response:[],
+      //       message: "Wishlist.",
+      //     });
+      //   }
+      // return data.ItemsResult;
+    
     })
     .catch((error) => {
       // catch an error.
+
+        return res.json({
+            success: false,
+            response:[],
+            message: "Wishlist.",
+          });
       console.log(error);
     });
 }

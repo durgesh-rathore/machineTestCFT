@@ -141,9 +141,9 @@ var searchCondition =
   );
 };
 exports.getWishListItems = function (req, res) {
-  const {directory_id}=req.query;
+  const {folder_id,user_id}=req.query;
     connection.query(
-      `SELECT GROUP_CONCAT(wish_list.ASIN_product_id) AS productsId FROM wish_list WHERE  parent_id =${directory_id} LIMIT 0,4 `,
+      `SELECT GROUP_CONCAT(wish_list.ASIN_product_id) AS productsId FROM wish_list WHERE  parent_id =${folder_id} LIMIT 0,4 `,
       async function (err,wishList) {
         if (err){
            console.log(err);
@@ -154,20 +154,22 @@ exports.getWishListItems = function (req, res) {
         }else
         if (wishList.length > 0) {
 
-        var wishList1=await  gift.getProductDetails(wishList[0].productsId)
-          return res.json({
-            success: true,
-            response:wishList1,
-            message: "Wishlist.",
-          });
-        } else {
-          return res.json({
-            success: false,
-            response:[],
-            message: "Wishlist.",
-          });
-        }
+        var wishList1=await  gift.getProductDetails(wishList[0].productsId,req, res)
+        console.log(wishList1);
+          // return res.json({
+          //   success: true,
+          //   response:wishList1,
+          //   message: "Wishlist.",
+          // });
+        // } else {
+        //   return res.json({
+        //     success: false,
+        //     response:[],
+        //     message: "Wishlist.",
+        //   });
+        // }
       }
+    }
     );
   };
 
@@ -226,7 +228,7 @@ exports.getWishListItems = function (req, res) {
     const {  user_id, ASIN_product_id,folder_id } = req.body;
     try {
              connection.query(
-              `DELETE FROM wish_list WHERE user_id=${user_id} AND parent_id=${folder_id} AND ASIN_product_id=${ASIN_product_id}`,
+              `DELETE FROM wish_list WHERE user_id=${user_id} AND parent_id=${folder_id} AND ASIN_product_id='${ASIN_product_id}'`,
                 async function (err, wishList) {
                 if (err) {console.log(err);
                   return res.json({
