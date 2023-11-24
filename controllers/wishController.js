@@ -162,7 +162,7 @@ exports.getWishListItems = function (req, res) {
             message: "Something went wrong.",
           });
         }else
-        if (wishList.length > 0) {
+        if ( wishList.length > 0 && wishList[0].productsId && wishList[0].productsId!="null") {
 
         var wishList1=await  gift.getProductDetails(wishList[0].productsId,req, res)
         console.log(wishList1);
