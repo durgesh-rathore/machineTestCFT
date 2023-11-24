@@ -142,7 +142,7 @@ var searchCondition =
 };
 exports.getWishListItems = function (req, res) {
   const {folder_id,user_id,page}=req.query;
-  var page1
+  var page1=0;
    if(page>=1){
      page1=page*4
     }
