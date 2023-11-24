@@ -463,7 +463,7 @@ exports.getDirectMessages = async (req, res) => {
            WHERE  groups_users.is_muted=1 
                   AND  groups_users.group_id=users.id )
         ELSE 
-          ( CASE 
+          CASE 
               WHEN users.is_group = 0  
               THEN 
                   ( SELECT 
@@ -477,18 +477,18 @@ exports.getDirectMessages = async (req, res) => {
                         )
                   ) 
              ELSE 0 
-          END AS mute_users )
+          END 
         END  AS mute_users,
 
     CASE
       WHEN users.is_group = 1
       THEN groups_users.is_muted
-      ELSE 
-         ( CASE 
+        ELSE 
+          CASE 
              WHEN users.is_group = 0  
              THEN 
                ( SELECT mufsc.is_muted FROM mute_users_for_sigle_chat AS mufsc WHERE mufsc.chat_user_id=users.id AND mufsc.user_id=${req.query.login_user_id} )
-             ELSE 0 END AS is_muted )
+             ELSE 0 END 
     END  AS is_muted
 FROM
     users
