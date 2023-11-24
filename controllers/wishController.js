@@ -171,52 +171,62 @@ exports.getWishListItems = function (req, res) {
 
   exports.addItemInWishList = function (req, res) {
     console.log("===========", req.body);
-    const { folder_ids, user_id, ASIN_product_id } = req.body;
+    const { folder_id, user_id, ASIN_product_id } = req.body;
     try {
       // for( let a of folder_ids)
       connection.query(
-        `SELECT * FROM wish_list WHERE   parent_id='${folder_id}'  AND ASIN_product_id='${user_id}'`,
+        `SELECT * FROM wish_list WHERE   parent_id='${folder_id}'  AND ASIN_product_id<>'${ASIN_product_id}'`,
         async function (err, presentWishList) {
           if (err) console.log(err);
-          if (presentWishList.length > 0) {
+          if (presentWishList.length == 0) {
+            var wish_list_product = {
+              parent_id:folder_id,
+              ASIN_product_id: ASIN_product_id,
+              user_id: user_id,
+            };
+            await save("wish_list", wish_list_product);
             return res.json({
               success: true,
-              message: "Wishlist title  already exist.",
+              message: "Added product in wishlist.",
             });
           } else {
-            connection.query(
-              "INSERT INTO wish_list SET ?",
-              wishList,
-              async function (err, wishList) {
-                if (err) console.log(err);
-                if (wishList) {
-                  console.log(ASIN_product_ids, "wilish item or products ");
-                  var poroductList = ASIN_product_ids;
-                  // poroductList.push(req.body.group_admin_id);
-                  poroductList.forEach(async (element) => {
-                    var wish_list_product = {
-                      parent_id: wishList.insertId,
-                      ASIN_product_id: element,
-                      user_id: user_id,
-                    };
-                    await save("wish_list", wish_list_product);
-                    console.log("wish_list======", wish_list_product);
-                    group_users = {};
-                  });
+            return res.json({
+              success: false,
+              message: "Wishlist not exist.",
+            });
+            // connection.query(
+            //   "INSERT INTO wish_list SET ?",
+            //   wishList,
+            //   async function (err, wishList) {
+            //     if (err) console.log(err);
+            //     if (wishList) {
+            //       console.log(ASIN_product_ids, "wilish item or products ");
+            //       var poroductList = ASIN_product_ids;
+            //       // poroductList.push(req.body.group_admin_id);
+            //       poroductList.forEach(async (element) => {
+            //         var wish_list_product = {
+            //           parent_id: wishList.insertId,
+            //           ASIN_product_id: element,
+            //           user_id: user_id,
+            //         };
+            //         await save("wish_list", wish_list_product);
+            //         console.log("wish_list======", wish_list_product);
+            //         group_users = {};
+            //       });
   
-                  return res.json({
-                    success: true,
-                    response: { wishList_id: wishList.insertId },
-                    message: "Wish list  created successful.",
-                  });
-                } else {
-                  return res.json({
-                    success: false,
-                    message: "Something went wrong.",
-                  });
-                }
-              }
-            );
+            //       return res.json({
+            //         success: true,
+            //         response: { wishList_id: wishList.insertId },
+            //         message: "Wish list  created successful.",
+            //       });
+            //     } else {
+            //       return res.json({
+            //         success: false,
+            //         message: "Something went wrong.",
+            //       });
+            //     }
+            //   }
+            // );
           }
         }
       );
