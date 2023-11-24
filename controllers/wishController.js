@@ -141,9 +141,19 @@ var searchCondition =
   );
 };
 exports.getWishListItems = function (req, res) {
-  const {folder_id,user_id}=req.query;
+  const {folder_id,user_id,page}=req.query;
+  var page1
+   if(page>=1){
+     page1=page*4
+    }
     connection.query(
-      `SELECT GROUP_CONCAT(wish_list.ASIN_product_id) AS productsId FROM wish_list WHERE  parent_id =${folder_id} LIMIT 0,4 `,
+
+      ` SELECT GROUP_CONCAT(ASIN_product_id) AS productsId 
+            FROM ( SELECT ASIN_product_id 
+                FROM wish_list 
+                     WHERE  parent_id =${folder_id}  
+                ORDER BY wish_list.id DESC
+                LIMIT ${page1},4 ) AS subquery`,
       async function (err,wishList) {
         if (err){
            console.log(err);
@@ -156,18 +166,13 @@ exports.getWishListItems = function (req, res) {
 
         var wishList1=await  gift.getProductDetails(wishList[0].productsId,req, res)
         console.log(wishList1);
-          // return res.json({
-          //   success: true,
-          //   response:wishList1,
-          //   message: "Wishlist.",
-          // });
-        // } else {
-        //   return res.json({
-        //     success: false,
-        //     response:[],
-        //     message: "Wishlist.",
-        //   });
-        // }
+          
+      }else{
+        return res.json({
+              success: false,
+              response:[],
+              message: "Wishlist.",
+            });
       }
     }
     );
