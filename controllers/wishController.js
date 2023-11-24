@@ -177,7 +177,7 @@ exports.getWishListItems = function (req, res) {
     try {
       // for( let a of folder_ids)
       connection.query(
-        `SELECT * FROM wish_list WHERE   parent_id='${folder_id}'  AND ASIN_product_id<>'${ASIN_product_id}'`,
+        `SELECT * FROM wish_list WHERE   parent_id='${folder_id}'  AND ASIN_product_id='${ASIN_product_id}'`,
         async function (err, presentWishList) {
           if (err) console.log(err);
           if (presentWishList.length == 0) {
@@ -194,41 +194,8 @@ exports.getWishListItems = function (req, res) {
           } else {
             return res.json({
               success: false,
-              message: "Wishlist not exist.",
+              message: "Product already added nn wishlist .",
             });
-            // connection.query(
-            //   "INSERT INTO wish_list SET ?",
-            //   wishList,
-            //   async function (err, wishList) {
-            //     if (err) console.log(err);
-            //     if (wishList) {
-            //       console.log(ASIN_product_ids, "wilish item or products ");
-            //       var poroductList = ASIN_product_ids;
-            //       // poroductList.push(req.body.group_admin_id);
-            //       poroductList.forEach(async (element) => {
-            //         var wish_list_product = {
-            //           parent_id: wishList.insertId,
-            //           ASIN_product_id: element,
-            //           user_id: user_id,
-            //         };
-            //         await save("wish_list", wish_list_product);
-            //         console.log("wish_list======", wish_list_product);
-            //         group_users = {};
-            //       });
-  
-            //       return res.json({
-            //         success: true,
-            //         response: { wishList_id: wishList.insertId },
-            //         message: "Wish list  created successful.",
-            //       });
-            //     } else {
-            //       return res.json({
-            //         success: false,
-            //         message: "Something went wrong.",
-            //       });
-            //     }
-            //   }
-            // );
           }
         }
       );

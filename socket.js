@@ -1,140 +1,215 @@
 var connection = require("./config/db");
-var { save, findByIdAndUpdate,pushNotification2} = require("./helpers/helper");
-var clients=[];
-module.exports = io => {
-  io.on('connection', socket => {
-    console.log('User has connect55');
-    socket.on('disconnect', _ => {
+var {
+  save,
+  findByIdAndUpdate,
+  pushNotification2,
+} = require("./helpers/helper");
+var clients = [];
+module.exports = (io) => {
+  io.on("connection", (socket) => {
+    console.log("User has connect55");
+    socket.on("disconnect", (_) => {
+      const userId = Object.keys(clients).find(
+        (key) => clients[key] === socket
+      );
+      if (userId) {
+        console.log("when disconted to the user from === ", userId);
+        delete clients[userId];
+      }
 
-      const userId = Object.keys(clients).find((key) => clients[key] === socket);
-  if (userId) {
-    console.log("when disconted to the user from === ",userId)
-    delete clients[userId];
-  }
-
-      console.log('User disconnected');
+      console.log("User disconnected");
 
       // socket.emit('user-disconnect');
       socket.disconnect();
     });
 
-    socket.on('user-login', uid => {
-      console.log('user-login : ggg', uid);
-      clients[uid.uid]=socket
+    socket.on("user-login", (uid) => {
+      console.log("user-login : ggg", uid);
+      clients[uid.uid] = socket;
       sql =
-      "SELECT users.id  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id     WHERE users.is_group<>0 AND groups_users.user_id=" +
-      uid.uid +     
-      " GROUP BY users.id ";
-    console.log("clients==================",clients,sql);
-    connection.query(sql, function (err, roomNames) {
-      console.log(err);
-      // console.log("uid for ",uid,clients[uid.uid])
-      roomNames.forEach((roomName) => {
-        console.log(" join room when login_event fire ===",roomName);
-        socket.join(`chat-${roomName.id}`);
+        "SELECT users.id  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id     WHERE users.is_group<>0 AND groups_users.user_id=" +
+        uid.uid +
+        " GROUP BY users.id ";
+      console.log("clients==================", clients, sql);
+      connection.query(sql, function (err, roomNames) {
+        console.log(err);
+        // console.log("uid for ",uid,clients[uid.uid])
+        roomNames.forEach((roomName) => {
+          console.log(" join room when login_event fire ===", roomName);
+          socket.join(`chat-${roomName.id}`);
+        });
       });
-
-      
-
-    });
-  })
-
-    socket.on('user-setOffline', uid => {
-      console.log('user-offline : ', uid);
-
     });
 
-    socket.on('user-join-room', ({ roomId }) => {
+    socket.on("user-setOffline", (uid) => {
+      console.log("user-offline : ", uid);
+    });
+
+    socket.on("user-join-room", ({ roomId }) => {
       // console.log(`A user joined chat-${roomId}`);
       socket.join(`chat-${roomId}`);
     });
     // {'send_by': userId,'sent_to' :'2', 'newMessage': message, 'name': login_userName,'group_id':''    ,'image': ''};
-    socket.on('user-send-message', async ({ send_by, sent_to,newMessage,name,is_group,images,createdDatetime,profile_picture,mute_users,is_meta_data }) => {
-
-
-      if(images=='' || images==null || images==undefined || newMessage!='' && send_by!=sent_to  ){
-
-        var data={
-          message:newMessage,
-          send_by:send_by,
-          sent_to:sent_to,
-          is_group:is_group,
+    socket.on(
+      "user-send-message",
+      async ({
+        send_by,
+        sent_to,
+        newMessage,
+        name,
+        is_group,
+        images,
+        createdDatetime,
+        profile_picture,
+        mute_users,
+        is_meta_data,
+      }) => {
+        if (
+          images == "" ||
+          images == null ||
+          images == undefined ||
+          (newMessage != "" && send_by != sent_to)
+        ) {
+          var data = {
+            message: newMessage,
+            send_by: send_by,
+            sent_to: sent_to,
+            is_group: is_group,
+          };
+          if (is_meta_data == 1) {
+            data.is_meta_data = is_meta_data;
           }
-          if(is_meta_data==1){
-            data.is_meta_data=is_meta_data;
-           }
-     await save("chats",data)
-    }
-      console.log("{ conversation, newMessage }========", send_by, sent_to,newMessage,name,is_group,images,createdDatetime,profile_picture);
-      // socket
+          await save("chats", data);
+        }
+        console.log(
+          "{ conversation, newMessage }========",
+          send_by,
+          sent_to,
+          newMessage,
+          name,
+          is_group,
+          images,
+          createdDatetime,
+          profile_picture
+        );
+        // socket
         // .to(`chat-${conversation._id}`)
-      // console.log("============client==",clients)
-      console.log("============client1111111111111111==",clients[sent_to]);
+        // console.log("============client==",clients)
+        console.log("============client1111111111111111==", clients[sent_to]);
 
-if(clients[sent_to]!=undefined && is_group==0){
+        if (clients[sent_to] != undefined && is_group == 0) {
+          clients[sent_to]
+            // socket
+            .emit("receive-message", {
+              send_by,
+              sent_to,
+              newMessage,
+              name,
+              is_group,
+              images,
+              createdDatetime,
+              profile_picture,
+              mute_users,
+              is_meta_data,
+            });
+        } else if (is_group == 1 || is_group == 2) {
+          console.log("send into group========");
 
-       clients[sent_to]
-  // socket
-  .emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
-}else if(is_group==1 || is_group==2){
-  console.log("send into group========")
+          if (is_group == 1) {
+            sql =
+              "SELECT users.id,users.divice_token ,GROUP_CONCAT(user_id) AS mute_users FROM users  LEFT JOIN groups_users ON groups_users.user_id=users.id     WHERE  groups_users.group_id=" +
+              sent_to +
+              " AND users.id<>" +
+              send_by +
+              " GROUP BY users.id ";
+          } else {
+            sql =
+              "SELECT users.id,users.divice_token  FROM users  LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id     WHERE  billing_group_users.group_id=" +
+              sent_to +
+              " AND users.id<>" +
+              send_by +
+              " GROUP BY users.id ";
+          }
 
-  if(is_group==1){
-  sql =
-  "SELECT users.id,users.divice_token ,GROUP_CONCAT(user_id) AS mute_users FROM users  LEFT JOIN groups_users ON groups_users.user_id=users.id     WHERE  groups_users.group_id=" +
-  sent_to +     
-  " AND users.id<>"+ send_by +" GROUP BY users.id ";
+          console.log(sql);
+          connection.query(sql, async function (err, roomNames) {
+            console.log(err);
+            // console.log("uid for ",uid,clients[uid.uid])
+            var array1 = [];
+            roomNames.forEach((roomName) => {
+              if (
+                clients[roomName.id] == undefined ||
+                clients[roomName.id] == "undefined"
+              ) {
+                console.log(
+                  roomName.id,
+                  clients[roomName.id],
+                  "dddddddd",
+                  roomName.divice_token
+                );
+                array1.push(roomName.divice_token);
+              }
+            });
+            if (array1.length > 0) {
+              console.log("array1 for push notification ===", array1);
+              await pushNotification2(array1, {
+                send_by: send_by + "",
+                sent_to: sent_to + "",
+                newMessage: newMessage + "",
+                name: name + "",
+                is_group: is_group + "",
+                images: images + "",
+                createdDatetime: createdDatetime + "",
+                profile_picture: profile_picture + "",
+              });
+              array1 = [];
+            }
+          });
 
-  
-  }else{
+          if (is_group == 1) {
+            var muteUsersSql =
+              "SELECT GROUP_CONCAT(user_id) AS mute_users FROM  groups_users   WHERE groups_users.is_muted=1  AND  groups_users.group_id=" +
+              sent_to +
+              " ";
+            console.log(muteUsersSql);
 
-
-  sql =
-  "SELECT users.id,users.divice_token  FROM users  LEFT JOIN billing_group_users ON billing_group_users.user_id=users.id     WHERE  billing_group_users.group_id=" +
-  sent_to +     
-  " AND users.id<>"+ send_by +" GROUP BY users.id ";
-  }
-
-console.log(sql);
-connection.query(sql, async function (err, roomNames) {
-  console.log(err);
-  // console.log("uid for ",uid,clients[uid.uid])
-  var array1=[]
-  roomNames.forEach((roomName) => {
-    if(clients[roomName.id]==undefined || clients[roomName.id]=='undefined' ){
-      console.log(roomName.id,clients[roomName.id],"dddddddd",roomName.divice_token);
-      array1.push(roomName.divice_token);
-    }
-  });
-if(array1.length>0){
-  console.log("array1 for push notification ===",array1);
-  await pushNotification2(array1,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""});
-  array1=[];
-}
-
-});
-
-if(is_group==1){
-
-var  muteUsersSql =
-  "SELECT GROUP_CONCAT(user_id) AS mute_users FROM  groups_users   WHERE groups_users.is_muted=1  AND  groups_users.group_id=" +
-  sent_to +     
-  " ";
-  console.log(muteUsersSql)
-
-connection.query(muteUsersSql, async function (err, muteUsersData) {
-
-  if(err){
-mute_users=''
-socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
-  }else{
-    mute_users=muteUsersData[0].mute_users;
-    socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
-  }
-
-});
-}else{
-var  muteUsersSql=`SELECT  
+            connection.query(muteUsersSql, async function (err, muteUsersData) {
+              if (err) {
+                mute_users = "";
+                socket.broadcast
+                  .to(`chat-${sent_to}`)
+                  .emit("receive-message", {
+                    send_by,
+                    sent_to,
+                    newMessage,
+                    name,
+                    is_group,
+                    images,
+                    createdDatetime,
+                    profile_picture,
+                    mute_users,
+                    is_meta_data,
+                  });
+              } else {
+                mute_users = muteUsersData[0].mute_users;
+                socket.broadcast
+                  .to(`chat-${sent_to}`)
+                  .emit("receive-message", {
+                    send_by,
+                    sent_to,
+                    newMessage,
+                    name,
+                    is_group,
+                    images,
+                    createdDatetime,
+                    profile_picture,
+                    mute_users,
+                    is_meta_data,
+                  });
+              }
+            });
+          } else {
+            var muteUsersSql = `SELECT  
                          GROUP_CONCAT(mufsc.user_id)  AS mute_users  
                    FROM mute_users_for_sigle_chat AS mufsc  
                    WHERE mufsc.is_muted=1 AND
@@ -142,66 +217,99 @@ var  muteUsersSql=`SELECT
                           (mufsc.chat_user_id=${send_by} AND  mufsc.user_id=${sent_to} ) 
                        OR
                           ( mufsc.user_id=${send_by}  AND mufsc.chat_user_id=${sent_to}  ) 
-                        )`
+                        )`;
 
+            connection.query(muteUsersSql, async function (err, muteUsersData) {
+              if (err) {
+                mute_users = "";
+                socket.broadcast
+                  .to(`chat-${sent_to}`)
+                  .emit("receive-message", {
+                    send_by,
+                    sent_to,
+                    newMessage,
+                    name,
+                    is_group,
+                    images,
+                    createdDatetime,
+                    profile_picture,
+                    mute_users,
+                    is_meta_data,
+                  });
+              } else {
+                mute_users = muteUsersData[0].mute_users;
+                socket.broadcast
+                  .to(`chat-${sent_to}`)
+                  .emit("receive-message", {
+                    send_by,
+                    sent_to,
+                    newMessage,
+                    name,
+                    is_group,
+                    images,
+                    createdDatetime,
+                    profile_picture,
+                    mute_users,
+                    is_meta_data,
+                  });
+              }
+            });
+          }
+          // io.to(room).emit('notification', { message: 'New notification!' });
+        } else {
+          var sql =
+            "SELECT users.id,users.divice_token  FROM users WHERE users.id=" +
+            sent_to +
+            " ";
+          console.log("for sigle chat===", sql);
+          connection.query(sql, async function (err, users) {
+            var array1 = [];
 
-connection.query(muteUsersSql, async function (err, muteUsersData) {
+            if (
+              users.length > 0 &&
+              users[0].divice_token != null &&
+              users[0].divice_token != "null" &&
+              users[0].divice_token != "undefined"
+            ) {
+              array1.push(users[0].divice_token);
 
-  if(err){
-mute_users=''
-socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
-}else{
+              await pushNotification2(array1, {
+                send_by: send_by + "",
+                sent_to: sent_to + "",
+                newMessage: newMessage + "",
+                name: name + "",
+                is_group: is_group + "",
+                images: images + "",
+                createdDatetime: createdDatetime + "",
+                profile_picture: profile_picture + "",
+              });
+            }
+            array1 = [];
+          });
+        }
+      }
+    );
 
-  mute_users=muteUsersData[0].mute_users
-  socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
-}
-})
-}
-// io.to(room).emit('notification', { message: 'New notification!' });
-
-}else{
-
- var sql =
-  "SELECT users.id,users.divice_token  FROM users WHERE users.id=" +
-  sent_to +     
-  " ";
-console.log("for sigle chat===",sql);
-connection.query(sql, async function (err, users) {  
-  var array1=[];
-  
-  if(users.length>0 && users[0].divice_token!=null && users[0].divice_token!='null' && users[0].divice_token!='undefined'){
-    array1.push(users[0].divice_token);
-
-    await pushNotification2(array1,{ send_by:send_by+"", sent_to:sent_to+"",newMessage:newMessage+"",name:name+"",is_group:is_group+"",images:images+"",createdDatetime:createdDatetime+"" ,profile_picture:profile_picture+""});
-
-  }
-  array1=[];
-
-})
-
-}
-    })    ;
-
-    socket.on('user-typing-message', ({ cid, uid, isTyping, name }) => {
+    socket.on("user-typing-message", ({ cid, uid, isTyping, name }) => {
       // connection.query("SELECT * FROM users WHERE id=3 ", function (err,result){
-      console.log("user-typing-message",cid,uid,isTyping,name,result)
-      var ram="Shree";
+      console.log("user-typing-message", cid, uid, isTyping, name, result);
+      var ram = "Shree";
       socket
         .to(`chat-${cid}`)
-        .emit('user-typing', { cid, uid, isTyping, name,ram, });
+        .emit("user-typing", { cid, uid, isTyping, name, ram });
 
       // })
     });
 
-    socket.on('new-conversation', ({ conversation, createId }) => {
-      console.log('a client create a new conversation');
+    socket.on("new-conversation", ({ conversation, createId }) => {
+      console.log("a client create a new conversation");
       const otherId =
         conversation.firstId === createId
           ? conversation.secondId
           : conversation.firstId;
-      socket.broadcast.emit('add-new-conversation', {
+      socket.broadcast.emit("add-new-conversation", {
         conversation: conversation,
-        receiveId: otherId
+        receiveId: otherId,
       });
     });
   });
