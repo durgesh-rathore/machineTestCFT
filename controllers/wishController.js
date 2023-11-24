@@ -1,7 +1,7 @@
 var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
-
+var  gift=require("./gift");
 var {
   save,
   findByIdAndUpdate,
@@ -143,7 +143,7 @@ var searchCondition =
 exports.getWishListItems = function (req, res) {
   const {directory_id}=req.query;
     connection.query(
-      `SELECT * FROM wish_list WHERE  parent_id =${directory_id} `,
+      `SELECT GROUP_CONCAT(wish_list.ASIN_product_id) AS productsId FROM wish_list WHERE  parent_id =${directory_id} LIMIT 0,4 `,
       async function (err,wishList) {
         if (err){
            console.log(err);
@@ -153,9 +153,11 @@ exports.getWishListItems = function (req, res) {
           });
         }else
         if (wishList.length > 0) {
+
+        var wishList1=await  gift.getProductDetails(wishList[0].productsId)
           return res.json({
             success: true,
-            response:wishList,
+            response:wishList1,
             message: "Wishlist.",
           });
         } else {
@@ -250,3 +252,36 @@ exports.getWishListItems = function (req, res) {
       })
      
   }
+
+
+  exports.removeProductFromWishList = function (req, res) {
+    console.log("===========", req.body);
+    const {  user_id, ASIN_product_id,folder_id } = req.body;
+    try {
+             connection.query(
+              `DELETE FROM wish_list WHERE user_id=${user_id} AND parent_id=${folder_id} AND ASIN_product_id=${ASIN_product_id}`,
+                async function (err, wishList) {
+                if (err) {console.log(err);
+                  return res.json({
+                    success: false,
+                    message: "Something went wrong.",
+                  });
+                }else
+                if (wishList) {                
+                  return res.json({
+                    success: true,
+                    message: "Deleted item from Wishlist.",
+                  });
+                } else {
+                  return res.json({
+                    success: false,
+                    message: "Something went wrong.",
+                  });
+                }
+              }
+            );
+   
+    } catch (error) {
+      console.error(error);
+    }
+  };

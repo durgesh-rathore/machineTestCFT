@@ -285,3 +285,40 @@ exports.categoryAccordingToG= function(req,res) {
 //       console.log(error);
 //     });
 // }
+
+
+
+exports.getProductDetails= async function(asinId) {
+  const requestParameters = {
+    
+      ItemIds: [`${asinId}`],
+      PartnerTag: "forgetmenote-20",
+      Resources: ["Images.Primary.Small", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
+
+    
+  };
+
+  /** Promise */
+  var a;
+  amazonPaapi
+    .GetItems(commonParameters, requestParameters)
+    .then((data) => {
+      // do something with the success response.
+      
+      a=JSON.stringify(data);
+      console.log(data.ItemsResult,
+        " dddddddddd======"    
+        
+      );
+      return data.ItemsResult;
+      // return res.json({
+      //   response: data.ItemsResult,
+      //   success: true,
+      //   message: "product list  .",
+      // });
+    })
+    .catch((error) => {
+      // catch an error.
+      console.log(error);
+    });
+}

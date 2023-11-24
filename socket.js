@@ -116,7 +116,7 @@ if(array1.length>0){
 
 if(is_group==1){
 
-  muteUsersSql =
+var  muteUsersSql =
   "SELECT GROUP_CONCAT(user_id) AS mute_users FROM  groups_users   WHERE groups_users.is_muted=1  AND  groups_users.group_id=" +
   sent_to +     
   " ";
@@ -134,7 +134,28 @@ socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_t
 
 });
 }else{
+var  muteUsersSql=`SELECT  
+                         GROUP_CONCAT(mufsc.user_id)  AS mute_users  
+                   FROM mute_users_for_sigle_chat AS mufsc  
+                   WHERE mufsc.is_muted=1 AND
+                       (             
+                          (mufsc.chat_user_id=${send_by} AND  mufsc.user_id=${sent_to} ) 
+                       OR
+                          ( mufsc.user_id=${send_by}  AND mufsc.chat_user_id=${sent_to}  ) 
+                        )`
+
+
+connection.query(muteUsersSql, async function (err, muteUsersData) {
+
+  if(err){
+mute_users=''
+socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
+}else{
+
+  mute_users=muteUsersData[0].mute_users
   socket.broadcast.to(`chat-${sent_to}`).emit('receive-message', { send_by, sent_to,newMessage,name,is_group,images,createdDatetime ,profile_picture,mute_users,is_meta_data});
+}
+})
 }
 // io.to(room).emit('notification', { message: 'New notification!' });
 

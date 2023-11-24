@@ -9,7 +9,7 @@ router.get("/getWishList",  wishController.getWishList);
 router.get("/getWishListItems",  wishController.getWishListItems);
 router.post("/addItemInWishList",  wishController.addItemInWishList);
 router.get("/icons",  wishController.icons);
-
+router.delete("/removeProductFromWishList",  wishController.removeProductFromWishList);
 
 
 
