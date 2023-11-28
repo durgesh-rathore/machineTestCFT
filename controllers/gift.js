@@ -18,6 +18,7 @@ exports.amazonProductList= function(req,res) {
     Keywords: req.query.searchingTitle,
     // SearchIndex: req.query.category,
     ItemCount: 4,
+    // ItemPage:2,
     Resources: [
       "Images.Primary.Medium",
       "ItemInfo.Title",
@@ -28,6 +29,10 @@ exports.amazonProductList= function(req,res) {
   if(req.query.category){
     requestParameters.SearchIndex=req.query.category
   }
+  if (req.query.page>=1) {
+    requestParameters.ItemPage = (req.query.page*1)+1;
+  }
+  console.log(requestParameters," ======request Parameters===");
 
   /** Promise */
   var a;
@@ -36,13 +41,13 @@ exports.amazonProductList= function(req,res) {
     .then((data) => {
       // do something with the success response.
       
-      // a=JSON.stringify(data);
-      // console.log(data,
-      //   " dddddddddd======",
-      //   JSON.stringify(data),
-      //   "===========",a
+      a=JSON.stringify(data);
+      console.log(data,
+        " dddddddddd======",
+        JSON.stringify(data),
+        "===========",a
         
-      // );
+      );
       return res.json({
         response: data.SearchResult.Items,
         success: true,
@@ -337,6 +342,6 @@ exports.getProductDetails= async function(asinId,req,res) {
             response:[],
             message: "Wishlist.",
           });
-      console.log(error);
+      
     });
 }
