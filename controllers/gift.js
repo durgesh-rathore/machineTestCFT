@@ -15,7 +15,7 @@ const commonParameters = {
 
 exports.amazonProductList= function(req,res) {
   const requestParameters = {
-    Keywords: req.query.searchingTitle,
+    // Keywords: req.query.searchingTitle,
     // SearchIndex: req.query.category,
     ItemCount: 4,
     // ItemPage:2,
@@ -26,6 +26,11 @@ exports.amazonProductList= function(req,res) {
       "ItemInfo.ContentRating"
     ],
   };
+
+  if(req.query.searchingTitle){
+    requestParameters.Keywords=req.query.searchingTitle
+  }
+
   if(req.query.category){
     requestParameters.SearchIndex=req.query.category
   }
