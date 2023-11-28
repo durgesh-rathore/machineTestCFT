@@ -421,24 +421,6 @@ exports.deleteGroup = function (req, res) {
 };
 
 exports.informationOfGroup = function (req, res) {
-  var page = req.query.page ? req.query.page : 0;
-
-  var condition = " ";
-
-  if (
-    req.query.search != "" &&
-    req.query.search != undefined &&
-    req.query.search != null
-  ) {
-    condition +=
-      '  AND ( users.type LIKE "%' +
-      req.query.search +
-      '%" OR users.name LIKE "%' +
-      req.query.search +
-      '%")  ';
-  }
-
-  var sql = " ";
   var group_details_sql =
     "SELECT users.id,users.type AS group_type ,users.name AS group_name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN groups_users ON groups_users.user_id=u1.id WHERE groups_users.group_id=users.id AND groups_users.user_id!=" +
     req.query.login_user_id +
@@ -455,42 +437,22 @@ exports.informationOfGroup = function (req, res) {
         message: "Something went wrong",
       });
     }
-
-    sql =
-      "SELECT users.*, " +
-      a +
-      "  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+    var sqlCounts =
+      "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
       req.query.group_id;
-    console.log(sql);
-    connection.query(sql, function (err, groupUsers) {
-      console.log(err);
-      var sqlCounts =
-        "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
-        req.query.group_id;
-      connection.query(sqlCounts, function (err, group_user_count) {
-        if (err) {
-          console.log(err);
-        }
-        if (groupUsers.length > 0) {
-          return res.json({
-            response: { group: group_details, users: groupUsers },
-            total_member_in_group: group_user_count.length,
-            success: true,
-            message: "Group info .",
-          });
-        } else {
-          return res.json({
-            response: [],
-            total_group: group_user_count.length,
-            success: true,
-            message: "Group info .",
-          });
-        }
+    connection.query(sqlCounts, function (err, group_user_count) {
+      if (err) {
+        console.log(err);
+      }
+      return res.json({
+        response: group_details,
+        total_member_in_group: group_user_count.length,
+        success: true,
+        message: "Group info .",
       });
     });
   });
 };
-
 
 exports.getGroupUsers = function (req, res) {
   var page = req.query.page ? req.query.page : 0;
@@ -511,41 +473,39 @@ exports.getGroupUsers = function (req, res) {
   }
 
   var sql = " ";
-  
 
-    sql =
-      "SELECT users.*, " +
-      a +
-      "  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+  sql =
+    "SELECT users.*, " +
+    a +
+    "  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+    req.query.group_id;
+  console.log(sql);
+  connection.query(sql, function (err, groupUsers) {
+    console.log(err);
+    var sqlCounts =
+      "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
       req.query.group_id;
-    console.log(sql);
-    connection.query(sql, function (err, groupUsers) {
-      console.log(err);
-      var sqlCounts =
-        "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
-        req.query.group_id;
-      connection.query(sqlCounts, function (err, group_user_count) {
-        if (err) {
-          console.log(err);
-        }
-        if (groupUsers.length > 0) {
-          return res.json({
-            response:  groupUsers,
-            total_member_in_group: group_user_count.length,
-            success: true,
-            message: "Group info .",
-          });
-        } else {
-          return res.json({
-            response: [],
-            total_group: group_user_count.length,
-            success: true,
-            message: "Group info .",
-          });
-        }
-      });
+    connection.query(sqlCounts, function (err, group_user_count) {
+      if (err) {
+        console.log(err);
+      }
+      if (groupUsers.length > 0) {
+        return res.json({
+          response: groupUsers,
+          total_member_in_group: group_user_count.length,
+          success: true,
+          message: "Group info .",
+        });
+      } else {
+        return res.json({
+          response: [],
+          total_group: group_user_count.length,
+          success: true,
+          message: "Group info .",
+        });
+      }
     });
-  
+  });
 };
 
 exports.getPaymentMethod = function (req, res) {
@@ -750,7 +710,7 @@ exports.isMuted = function (req, res) {
     message = "Muted.";
   }
 
-  console.log(" in ffdd",req.body);
+  console.log(" in ffdd", req.body);
   var sql = " ";
   if (group_id != "" && group_id && group_id != "undefined") {
     sql = `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
@@ -794,7 +754,7 @@ exports.isMuted = function (req, res) {
               if (muteData.length == 0) {
                 return res.json({
                   success: false,
-                  message: "Already done."
+                  message: "Already done.",
                 });
               } else {
                 return res.json({
