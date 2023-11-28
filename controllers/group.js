@@ -491,6 +491,63 @@ exports.informationOfGroup = function (req, res) {
   });
 };
 
+
+exports.getGroupUsers = function (req, res) {
+  var page = req.query.page ? req.query.page : 0;
+
+  var condition = " ";
+
+  if (
+    req.query.search != "" &&
+    req.query.search != undefined &&
+    req.query.search != null
+  ) {
+    condition +=
+      '  AND ( users.type LIKE "%' +
+      req.query.search +
+      '%" OR users.name LIKE "%' +
+      req.query.search +
+      '%")  ';
+  }
+
+  var sql = " ";
+  
+
+    sql =
+      "SELECT users.*, " +
+      a +
+      "  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+      req.query.group_id;
+    console.log(sql);
+    connection.query(sql, function (err, groupUsers) {
+      console.log(err);
+      var sqlCounts =
+        "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+        req.query.group_id;
+      connection.query(sqlCounts, function (err, group_user_count) {
+        if (err) {
+          console.log(err);
+        }
+        if (groupUsers.length > 0) {
+          return res.json({
+            response:  groupUsers,
+            total_member_in_group: group_user_count.length,
+            success: true,
+            message: "Group info .",
+          });
+        } else {
+          return res.json({
+            response: [],
+            total_group: group_user_count.length,
+            success: true,
+            message: "Group info .",
+          });
+        }
+      });
+    });
+  
+};
+
 exports.getPaymentMethod = function (req, res) {
   var sql =
     "SELECT billing_group.payment_method  FROM billing_group    WHERE billing_group.group_id=" +
@@ -632,9 +689,9 @@ exports.informationOfSplitGroup = function (req, res) {
 
   var sql = " ";
   var group_details_sql =
-    "SELECT users.id,users.type AS group_type ,users.name AS group_name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN groups_users ON groups_users.user_id=u1.id WHERE groups_users.group_id=users.id AND groups_users.user_id!=" +
+    "SELECT billing_group.*,users.id,users.type AS group_type ,users.name AS group_name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN billing_group_users ON billing_group_users.user_id=u1.id WHERE billing_group_users.group_id=users.id AND billing_group_users.user_id!=" +
     req.query.login_user_id +
-    "  ) AS group_users_image  FROM users    WHERE users.is_group=1 AND users.id=" +
+    "  ) AS group_users_image  FROM users  LEFT JOIN billing_group ON billing_group.group_id=users.id   WHERE users.is_group=2 AND users.id=" +
     req.query.group_id;
 
   console.log("group details sql==================", group_details_sql);
@@ -651,13 +708,13 @@ exports.informationOfSplitGroup = function (req, res) {
     sql =
       "SELECT users.*, " +
       a +
-      "  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+      "  FROM billing_group_users  LEFT JOIN users ON users.id=billing_group_users.user_id     WHERE billing_group_users.group_id=" +
       req.query.group_id;
     console.log(sql);
     connection.query(sql, function (err, groupUsers) {
       console.log(err);
       var sqlCounts =
-        "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+        "SELECT billing_group_users.id  FROM billing_group_users  WHERE billing_group_users.group_id=" +
         req.query.group_id;
       connection.query(sqlCounts, function (err, group_user_count) {
         if (err) {

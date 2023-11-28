@@ -48,6 +48,18 @@ router.get(
 //   checkUserStatus.userStatus,
   groupController.informationOfGroup
 );
+router.get(
+  "/getGroupUsers",
+//   checkUserStatus.userStatus,
+  groupController.getGroupUsers
+);
+
+
+router.get(
+  "/informationOfSplitGroup",
+//   checkUserStatus.userStatus,
+  groupController.informationOfSplitGroup
+);
 
 router.get(
   "/getPaymentMethod",
