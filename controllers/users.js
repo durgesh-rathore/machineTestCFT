@@ -806,3 +806,27 @@ if(!user_id){
         );
         }
 };
+
+exports.deleteUser = async function (req, res) {
+  const { login_user_id}=req.body;
+  
+  // var j = await findByIdAndUpdate(
+  //   "users",
+  //   { divice_token: '' },
+  //   " id=" + req.body.login_user_id
+  // );
+
+var sql=` DELETE FROM users WHERE users.id=${login_user_id}`
+  connection.query(
+    sql,
+    function (err, user_interest) {
+      console.log(err);
+  console.log("   dddddddddddd update divice token==", j);
+
+return res.json({
+  success: true,
+  message: "User deleted successfully.",
+});
+    })
+
+};

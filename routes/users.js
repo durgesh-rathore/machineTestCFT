@@ -13,6 +13,9 @@ router.post('/signup',users.signup)
 router.post('/signin',users.signin)
 router.post('/logout',users.logout)
 
+router.post('/deleteUser',users.deleteUser)
+
+
 router.post('/socialLogin',users.socialLogin);
 
 
@@ -32,6 +35,7 @@ router.post('/updateUserProfile',
 // checkUserStatus.userStatus,
 uploadFiles('public/images/profiles').single("profile_picture"),users.updateUserProfile);
 router.get('/getUserInterest',users.getUserInterest);
+
 
 
 module.exports = router;
