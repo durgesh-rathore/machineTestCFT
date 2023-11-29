@@ -73,7 +73,7 @@ incondition.push(`'${data.SearchResult.Items[i].ASIN}'`)
             for(let k=0;k<data.SearchResult.Items.length;k++){
               data.SearchResult.Items[k].is_wishlist_element=0;
               for(let j=k;j<belongWishlist.length;j++){
-                 if(belongWishlist[j].ASIN_product_id==data.SearchResult.Items[k]){
+                 if(belongWishlist[j].ASIN_product_id==data.SearchResult.Items[k].ASIN){
                    data.SearchResult.Items[k].is_wishlist_element=1;
                 }
                   
