@@ -139,15 +139,37 @@ exports.productDetails= function(req,res) {
       // do something with the success response.
       
       a=JSON.stringify(data);
-      console.log(data.ItemsResult,
-        " dddddddddd======"    
-        
+      console.log(data.ItemsResult.Items,"====DDDDD====")
+      
+      console.log(data.ItemsResult.Items[0].ASIN,
+        " dddddddddd======"     
       );
+
+      if(req.query.login_user_id){
+        var sql =
+        `SELECT wish_list.ASIN_product_id FROM wish_list   WHERE wish_list.user_id=${req.query.login_user_id} AND  wish_list.ASIN_product_id =${data.ItemsResult.Items[0].ASIN}`;
+        console.log("==== ",sql," ===== sql ")
+      connection.query(sql, function (err, belongWishlist) {
+        if (err) {
+          console.log(err);
+        }
+        if(belongWishlist.length>0){
+        data.ItemsResult.Items[0].is_wishlist_element=1
+      }
       return res.json({
         response: data.ItemsResult,
         success: true,
-        message: "product list  .",
+        message: "product detail.",
       });
+    })
+  }else{
+    
+    return res.json({
+      response: data.ItemsResult,
+      success: true,
+      message: "product detail.",
+    });
+  }
     })
     .catch((error) => {
       // catch an error.
