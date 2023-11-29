@@ -60,6 +60,7 @@ exports.amazonProductList= function(req,res) {
       // data.SearchResult.Items[i].ASIN
 incondition.push(`'${data.SearchResult.Items[i].ASIN}'`)
         }
+        if(req.query.login_user_id){
         var sql =
         `SELECT wish_list.ASIN_product_id FROM wish_list   WHERE wish_list.user_id=${req.query.login_user_id} AND  wish_list.ASIN_product_id IN (${incondition})`;
         console.log("==== ",sql," ===== sql ")
@@ -67,14 +68,16 @@ incondition.push(`'${data.SearchResult.Items[i].ASIN}'`)
         if (err) {
           console.log(err);
         }
-        if (belongWishlist.length >0) {
-          for(let j=0;j<belongWishlist.length;j++){
+        // if (belongWishlist.length >0) {
+          
             for(let k=0;k<data.SearchResult.Items.length;k++){
-               if(belongWishlist[j].ASIN_product_id==data.SearchResult.Items[k]){
-                  data.SearchResult.Items[k].is_wishlist_element=1;
-                }else{
-                  data.SearchResult.Items[k].is_wishlist_element=0;
-              }
+              data.SearchResult.Items[k].is_wishlist_element=0;
+              for(let j=k;j<belongWishlist.length;j++){
+                 if(belongWishlist[j].ASIN_product_id==data.SearchResult.Items[k]){
+                   data.SearchResult.Items[k].is_wishlist_element=1;
+                }
+                  
+              
             }
           }
 
@@ -84,14 +87,21 @@ incondition.push(`'${data.SearchResult.Items[i].ASIN}'`)
         success: true,
         message: "product list  .",
       });
-    }else{
-      return res.json({
+    // }else{
+    //   return res.json({
+    //     response: data.SearchResult.Items,
+    //     success: true,
+    //     message: "product list  .",
+    //   });
+    // }
+  })
+}else{
+     return res.json({
         response: data.SearchResult.Items,
         success: true,
         message: "product list  .",
       });
-    }
-  })
+}
 }
     })
     .catch((error) => {
