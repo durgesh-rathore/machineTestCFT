@@ -21,7 +21,7 @@ exports.amazonProductList= function(req,res) {
     ItemCount: 4,
     // ItemPage:2,
     Resources: [
-      "Images.Primary.Medium",
+      "Images.Primary.Large",
       "ItemInfo.Title",
       "Offers.Listings.Price",
       "ItemInfo.ContentRating"
@@ -126,7 +126,7 @@ exports.productDetails= function(req,res) {
     
       ItemIds: [`${req.query.asin_no}`],
       PartnerTag: "forgetmenote-20",
-      Resources: ["Images.Primary.Small", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
+      Resources: ["Images.Primary.Large", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
 
     
   };

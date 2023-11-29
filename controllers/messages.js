@@ -57,7 +57,7 @@ exports.getChats = async (req, res) => {
       let chatSearch = await queryAsync(s6);
 
       if (chatSearch.length > 0) {
-        condition2 = "  AND chats.id <=" + chatSearch[0].id;
+        // condition2 = "  AND chats.id <=" + chatSearch[0].id;
       } else {
         return res.json({
           response: [],
