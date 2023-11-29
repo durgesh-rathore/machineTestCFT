@@ -821,7 +821,7 @@ var sql=` DELETE FROM users WHERE users.id=${login_user_id}`
     sql,
     function (err, user_interest) {
       console.log(err);
-  console.log("   dddddddddddd update divice token==", j);
+  console.log("   dddddddddddd user deleted ==")
 
 return res.json({
   success: true,

@@ -1,4 +1,5 @@
 const amazonPaapi = require("amazon-paapi");
+var connection = require("../config/db");
 // accessKey = 'AKIAJBCOXCXX6YAQD7PA';
 // secretKey = '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';
 
@@ -53,11 +54,45 @@ exports.amazonProductList= function(req,res) {
         "===========",a
         
       );
+      if(data.SearchResult.Items.length>0){
+        var incondition=[];
+        for(let i=0;i<data.SearchResult.Items.length;i++){
+      // data.SearchResult.Items[i].ASIN
+incondition.push(`'${data.SearchResult.Items[i].ASIN}'`)
+        }
+        var sql =
+        `SELECT wish_list.ASIN_product_id FROM wish_list   WHERE wish_list.user_id=${req.query.login_user_id} AND  wish_list.ASIN_product_id IN (${incondition})`;
+        console.log("==== ",sql," ===== sql ")
+      connection.query(sql, function (err, belongWishlist) {
+        if (err) {
+          console.log(err);
+        }
+        if (belongWishlist.length >0) {
+          for(let j=0;j<belongWishlist.length;j++){
+            for(let k=0;k<data.SearchResult.Items.length;k++){
+               if(belongWishlist[j].ASIN_product_id==data.SearchResult.Items[k]){
+                  data.SearchResult.Items[k].is_wishlist_element=1;
+                }else{
+                  data.SearchResult.Items[k].is_wishlist_element=0;
+              }
+            }
+          }
+
+
       return res.json({
         response: data.SearchResult.Items,
         success: true,
         message: "product list  .",
       });
+    }else{
+      return res.json({
+        response: data.SearchResult.Items,
+        success: true,
+        message: "product list  .",
+      });
+    }
+  })
+}
     })
     .catch((error) => {
       // catch an error.

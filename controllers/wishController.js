@@ -63,7 +63,7 @@ exports.createWishList = function (req, res) {
                 return res.json({
                   success: true,
                   response: { wishList_id: wishList.insertId },
-                  message: "Wish list  created successful.",
+                  message: "Wishlist created successfully.",
                 });
               } else {
                 return res.json({
@@ -201,7 +201,7 @@ exports.getWishListItems = function (req, res) {
           } else {
             return res.json({
               success: false,
-              message: "Product already added nn wishlist .",
+              message: "Product already added in wishlist .",
             });
           }
         }
@@ -244,7 +244,7 @@ exports.getWishListItems = function (req, res) {
                 if (wishList) {                
                   return res.json({
                     success: true,
-                    message: "Deleted item from Wishlist.",
+                    message: "Deleted item from wishlist.",
                   });
                 } else {
                   return res.json({
