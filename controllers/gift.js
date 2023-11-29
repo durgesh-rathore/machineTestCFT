@@ -144,7 +144,7 @@ exports.productDetails= function(req,res) {
       console.log(data.ItemsResult.Items[0].ASIN,
         " dddddddddd======"     
       );
-
+      data.ItemsResult.Items[0].is_wishlist_element=0;
       if(req.query.login_user_id){
         var sql =
         `SELECT wish_list.ASIN_product_id FROM wish_list   WHERE wish_list.user_id=${req.query.login_user_id} AND  wish_list.ASIN_product_id =${data.ItemsResult.Items[0].ASIN}`;
@@ -153,6 +153,7 @@ exports.productDetails= function(req,res) {
         if (err) {
           console.log(err);
         }
+        
         if(belongWishlist.length>0){
         data.ItemsResult.Items[0].is_wishlist_element=1
       }
