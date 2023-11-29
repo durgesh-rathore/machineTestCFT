@@ -126,7 +126,7 @@ exports.productDetails= function(req,res) {
     
       ItemIds: [`${req.query.asin_no}`],
       PartnerTag: "forgetmenote-20",
-      Resources: ["Images.Primary.Medium", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
+      Resources: ["Images.Primary.Small", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
 
     
   };
@@ -374,7 +374,7 @@ exports.getProductDetails= async function(asinId,req,res) {
       // ItemIds: [`${asinId}`],
       ItemIds: asinId,
       PartnerTag: "forgetmenote-20",
-      Resources: ["Images.Primary.Small", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
+      Resources: ["Images.Primary.Medium", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
 
     
   };
