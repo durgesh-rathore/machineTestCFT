@@ -165,7 +165,7 @@ exports.getChats = async (req, res) => {
       console.log(chatSearch, " ======ffffffffffffffffff==");
 
       if (chatSearch.length > 0) {
-        condition2 = "  AND chats.id <= " + chatSearch[0].id;
+        // condition2 = "  AND chats.id <= " + chatSearch[0].id;
       } else {
         return res.json({
           response: [],
