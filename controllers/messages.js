@@ -812,14 +812,14 @@ exports.messagesSeen=async (req,res)=>{
   const { login_user_id,seen_chat_user_id,from_chat_id}=req.body;
 
 
-
+if(login_user_id && login_user_id!='undefined' && seen_chat_user_id && seen_chat_user_id!='undefined' && from_chat_id && from_chat_id!='undefined' ){
 var obj={
       from_chat_id:from_chat_id,
       user_id:login_user_id,
       seen_chat_user_id:seen_chat_user_id
     }
 
-      a=await save("chat_seen_in_group_by_user",obh)
+      a=await save("chat_seen_in_group_by_user",obj)
       if(a){
         return res.json({
           success: true,
@@ -831,7 +831,12 @@ var obj={
           message: "Message aren't seen.",
         });
       }
-
+    }else{
+      return res.json({
+        success: false,
+        message: "Something went wrong.",
+      });
+    }
 }
 exports.getChats3 = async (req, res) => {
   //  i have to write logic for
