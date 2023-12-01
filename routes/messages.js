@@ -37,7 +37,7 @@ router.get(
   messagesController.getSpiltChats
 );
 
-router.get(
+router.post(
   "/messagesSeen",
 //   checkUserStatus.userStatus,
   messagesController.messagesSeen
