@@ -101,9 +101,16 @@ exports.getChats = async (req, res) => {
              ${page * 30}, 30`;
 
     console.log(sql, " ======sql=== ");
-    connection.query(sql, function (err, chatList) {
+    connection.query(sql, async function (err, chatList) {
       console.log(err, chatList);
       if (chatList.length > 0) {
+        let s8 = await dbScript(db_sql["Q8"], {
+          var2: user_id,
+          var1: login_user_id,
+        });
+        // seen chat yet here
+        let lastChatSeen = await queryAsync(s8);
+        console.log("======= chat issue ===113", lastChatSeen[0].from_chat_id);
         function parseImagesSync(chatList, index, callback) {
           if (index < chatList.length) {
             const chatItem = chatList[index];
@@ -137,12 +144,13 @@ exports.getChats = async (req, res) => {
         processChatList(chatList);
         return res.json({
           response: chatList,
+          from_chat_id:lastChatSeen[0].from_chat_id,
           success: true,
           message: "Chat list",
         });
       } else {
         return res.json({
-          response: [],
+          response: [],          
           success: false,
           message: "No More chats",
         });
@@ -182,9 +190,17 @@ exports.getChats = async (req, res) => {
     }    ${condition2} ORDER BY chats.id DESC  Limit ${page * 30},30`;
 
     console.log(sql, " ======sql=== ");
-    connection.query(sql, function (err, chatList) {
+    connection.query(sql, async function (err, chatList) {
       console.log(err, chatList);
       if (chatList.length > 0) {
+        let s8 = await dbScript(db_sql["Q8"], {
+          var2: user_id,
+          var1: login_user_id,
+        });
+        // seen chat yet here
+        let lastChatSeen = await queryAsync(s8);
+        console.log("======= chat issue ===201", lastChatSeen[0].from_chat_id);
+
         function parseImagesSync(chatList, index, callback) {
           if (index < chatList.length) {
             const chatItem = chatList[index];
@@ -218,6 +234,7 @@ exports.getChats = async (req, res) => {
         processChatList(chatList);
         return res.json({
           response: chatList,
+          from_chat_id:lastChatSeen[0].from_chat_id,
           success: true,
           message: "Chat list",
         });
@@ -406,8 +423,9 @@ exports.getDirectMessages = async (req, res) => {
         )
         FROM chats
         WHERE (
-            chats.sent_to = ${req.query.login_user_id}
-            AND chats.send_by = users.id
+            ( chats.sent_to = ${req.query.login_user_id}
+            AND chats.send_by = users.id ) OR ( chats.sent_to =users.id
+            AND chats.send_by =  ${req.query.login_user_id} )
         )
         ORDER BY chats.created_datetime DESC
         LIMIT 1
@@ -416,9 +434,10 @@ exports.getDirectMessages = async (req, res) => {
         SELECT chats.message
         FROM chats
         WHERE (
-            chats.sent_to = ${req.query.login_user_id}
-            AND chats.send_by = users.id
-        )
+          ( chats.sent_to = ${req.query.login_user_id}
+          AND chats.send_by = users.id ) OR ( chats.sent_to =users.id
+          AND chats.send_by =  ${req.query.login_user_id} )
+      )
         ORDER BY chats.created_datetime DESC
         LIMIT 1
     ) AS message,
@@ -530,7 +549,7 @@ WHERE (
     AND users.id <> ${req.query.login_user_id}
     ${search}
 GROUP BY users.id
-ORDER BY users.id DESC
+ORDER BY last_times_user_in DESC
 LIMIT ${page * 10}, 10`;
 
   console.log("sql.....................................", sql, "===sql===");

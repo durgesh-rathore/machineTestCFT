@@ -13,6 +13,7 @@ const db_sql = {
   'Q5': " SELECT chats.*,"+a+" FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to={var1} AND chats.id>{var2} ORDER BY chats.id DESC  Limit 0,5",
   'Q6':"SELECT chats.* FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN({var1},{var2}) AND chats.sent_to IN({var1},{var2}) {var3} ORDER BY chats.id DESC Limit 1",
   'Q7':"SELECT chats.* FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to={var1}    {var2} ORDER BY chats.id DESC  Limit 1",
+  'Q8':"SELECT from_chat_id FROM chat_seen_in_group_by_user  WHERE user_id={var1}  AND seen_chat_user_id= {var2} ORDER BY id DESC  Limit 1",
 };
 // IS  NOT NULL
 
