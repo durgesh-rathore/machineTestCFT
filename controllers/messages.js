@@ -549,7 +549,7 @@ WHERE (
     AND users.id <> ${req.query.login_user_id}
     ${search}
 GROUP BY users.id
-ORDER BY last_times_user_in DESC
+ORDER BY last_times_user_in IS NULL, last_times_user_in ASC
 LIMIT ${page * 10}, 10`;
 
   console.log("sql.....................................", sql, "===sql===");
