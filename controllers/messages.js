@@ -453,10 +453,14 @@ exports.getDirectMessages = async (req, res) => {
                 AND chats.id>
         
         (CASE WHEN 
-                 ( SELECT from_chat_id FROM chat_seen_in_group_by_user WHERE chat_seen_in_group_by_user.user_id=${req.query.login_user_id} AND chat_seen_in_group_by_user.seen_chat_user_id=users.id ORDER BY chat_seen_in_group_by_user.id DESC LIMIT 1
+                 ( SELECT from_chat_id FROM chat_seen_in_group_by_user WHERE chat_seen_in_group_by_user.user_id=${req.query.login_user_id} AND chat_seen_in_group_by_user.seen_chat_user_id=users.id 
+                  ORDER BY chat_seen_in_group_by_user.id DESC 
+                  LIMIT 1
         ) IS NULL THEN 0 
          
-         ELSE (SELECT from_chat_id FROM chat_seen_in_group_by_user WHERE chat_seen_in_group_by_user.user_id=${req.query.login_user_id} AND chat_seen_in_group_by_user.seen_chat_user_id=users.id chat_seen_in_group_by_user.id DESC LIMIT 1 )    END  ) )
+         ELSE (SELECT from_chat_id FROM chat_seen_in_group_by_user WHERE chat_seen_in_group_by_user.user_id=${req.query.login_user_id} AND chat_seen_in_group_by_user.seen_chat_user_id=users.id 
+         ORDER BY  chat_seen_in_group_by_user.id DESC
+         LIMIT 1 )    END  ) )
     AS newMessageCount,
 
     CASE
