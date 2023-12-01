@@ -79,7 +79,9 @@ exports.new = async function (req, res) {
 
       
     }else{
+      if(req.body.is_remove_image==1){
       userPost.image = ''
+      }
     }
 
     var c;

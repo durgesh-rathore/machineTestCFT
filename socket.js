@@ -7,42 +7,42 @@ var {
 var clients = [];
 module.exports = (io) => {
   io.on("connection", (socket) => {
-    console.log("User has connect55");
+    // console.log("User has connect55");
     socket.on("disconnect", (_) => {
       const userId = Object.keys(clients).find(
         (key) => clients[key] === socket
       );
       if (userId) {
-        console.log("when disconted to the user from === ", userId);
+        // console.log("when disconted to the user from === ", userId);
         delete clients[userId];
       }
 
-      console.log("User disconnected");
+      // console.log("User disconnected");
 
       // socket.emit('user-disconnect');
       socket.disconnect();
     });
 
     socket.on("user-login", (uid) => {
-      console.log("user-login : ggg", uid);
+      // console.log("user-login : ggg", uid);
       clients[uid.uid] = socket;
       sql =
         "SELECT users.id  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id     WHERE users.is_group<>0 AND groups_users.user_id=" +
         uid.uid +
         " GROUP BY users.id ";
-      console.log("clients==================", clients, sql);
+      // console.log("clients==================", clients, sql);
       connection.query(sql, function (err, roomNames) {
         console.log(err);
         // console.log("uid for ",uid,clients[uid.uid])
         roomNames.forEach((roomName) => {
-          console.log(" join room when login_event fire ===", roomName);
+          // console.log(" join room when login_event fire ===", roomName);
           socket.join(`chat-${roomName.id}`);
         });
       });
     });
 
     socket.on("user-setOffline", (uid) => {
-      console.log("user-offline : ", uid);
+      // console.log("user-offline : ", uid);
     });
 
     socket.on("user-join-room", ({ roomId }) => {
@@ -113,7 +113,7 @@ console.log("=============== socket have a value==============================")
                         )`;
 
             connection.query(muteUsersSql, async function (err, muteUsersData) {
-              console.log(err,muteUsersData," dddddddddddddddddd ");
+              // console.log(err,muteUsersData," dddddddddddddddddd ");
               if (err) {
                 mute_users = "";
                  clients[sent_to]
@@ -182,9 +182,9 @@ console.log("=============== socket have a value==============================")
               " GROUP BY users.id ";
           }
 
-          console.log(sql);
+          // console.log(sql);
           connection.query(sql, async function (err, roomNames) {
-            console.log(err);
+            // console.log(err);
             // console.log("uid for ",uid,clients[uid.uid])
             var array1 = [];
             roomNames.forEach((roomName) => {
@@ -202,7 +202,7 @@ console.log("=============== socket have a value==============================")
               }
             });
             if (array1.length > 0) {
-              console.log("array1 for push notification ===", array1);
+              // console.log("array1 for push notification ===", array1);
               await pushNotification2(array1, {
                 send_by: send_by + "",
                 sent_to: sent_to + "",
@@ -222,7 +222,7 @@ console.log("=============== socket have a value==============================")
               "SELECT GROUP_CONCAT(user_id) AS mute_users FROM  groups_users   WHERE groups_users.is_muted=1  AND  groups_users.group_id=" +
               sent_to +
               " ";
-            console.log(muteUsersSql);
+            // console.log(muteUsersSql);
 
             connection.query(muteUsersSql, async function (err, muteUsersData) {
               if (err) {
