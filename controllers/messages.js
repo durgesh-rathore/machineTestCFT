@@ -110,7 +110,11 @@ exports.getChats = async (req, res) => {
         });
         // seen chat yet here
         let lastChatSeen = await queryAsync(s8);
+        from_chat_id=0
+        if(lastChatSeen.length>0){
+          from_chat_id= lastChatSeen[0].from_chat_id
         console.log("======= chat issue ===113", lastChatSeen[0].from_chat_id);
+        }
         function parseImagesSync(chatList, index, callback) {
           if (index < chatList.length) {
             const chatItem = chatList[index];
@@ -144,7 +148,7 @@ exports.getChats = async (req, res) => {
         processChatList(chatList);
         return res.json({
           response: chatList,
-          from_chat_id:lastChatSeen[0].from_chat_id,
+          from_chat_id:from_chat_id,
           success: true,
           message: "Chat list",
         });
@@ -198,8 +202,11 @@ exports.getChats = async (req, res) => {
           var1: login_user_id,
         });
         // seen chat yet here
-        let lastChatSeen = await queryAsync(s8);
-        console.log("======= chat issue ===201", lastChatSeen[0].from_chat_id);
+        from_chat_id=0
+        if(lastChatSeen.length>0){
+          from_chat_id= lastChatSeen[0].from_chat_id
+        console.log("======= chat issue ===113", lastChatSeen[0].from_chat_id);
+        }
 
         function parseImagesSync(chatList, index, callback) {
           if (index < chatList.length) {
@@ -234,7 +241,7 @@ exports.getChats = async (req, res) => {
         processChatList(chatList);
         return res.json({
           response: chatList,
-          from_chat_id:lastChatSeen[0].from_chat_id,
+          from_chat_id:from_chat_id,
           success: true,
           message: "Chat list",
         });
