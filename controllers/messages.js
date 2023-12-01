@@ -448,8 +448,12 @@ exports.getDirectMessages = async (req, res) => {
 (   SELECT COUNT(*)
              FROM chats
              WHERE 
-                chats.send_by = users.id
-                AND chats.sent_to = ${req.query.login_user_id}
+             CASE
+                WHEN users.is_group = 0 
+                     THEN (
+                       chats.send_by = users.id
+                       AND chats.sent_to = ${req.query.login_user_id} )
+                     ELSE chats.sent_to=users.id END 
                 AND chats.id>
         
         (CASE WHEN 
