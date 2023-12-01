@@ -444,27 +444,21 @@ exports.getDirectMessages = async (req, res) => {
         )
         ELSE ''
     END AS profile_picture,
-    CASE
-        WHEN users.is_group = 0
-        THEN (
-            SELECT COUNT(*)
-            FROM chats
-            WHERE chats.send_by = users.id
+    
+(   SELECT COUNT(*)
+             FROM chats
+             WHERE 
+                chats.send_by = users.id
                 AND chats.sent_to = ${req.query.login_user_id}
-                AND is_seen = 0
-        )
-        ELSE 0
-    END AS newMessageCount1,
-    CASE
-      THEN (
-        SELECT COUNT(*)
-        FROM chats
-        WHERE chats.send_by = users.id
-            AND chats.sent_to = ${req.query.login_user_id}
-            AND chats.id>(SELECT from_chat_id chat_seen_in_group_by_user WHERE user_id=${req.query.login_user_id} AND seen_chat_user_id=users.id)
-    )
-    ELSE 0
-END AS newMessageCount,
+                AND chats.id>
+        
+        (CASE WHEN 
+                 ( SELECT from_chat_id FROM chat_seen_in_group_by_user WHERE chat_seen_in_group_by_user.user_id=${req.query.login_user_id} AND chat_seen_in_group_by_user.seen_chat_user_id=users.id ORDER BY chat_seen_in_group_by_user.id DESC LIMIT 1
+        ) IS NULL THEN 0 
+         
+         ELSE (SELECT from_chat_id FROM chat_seen_in_group_by_user WHERE chat_seen_in_group_by_user.user_id=${req.query.login_user_id} AND chat_seen_in_group_by_user.seen_chat_user_id=users.id chat_seen_in_group_by_user.id DESC LIMIT 1 )    END  ) )
+    AS newMessageCount,
+
     CASE
         WHEN users.is_group = 1
         THEN (
