@@ -95,23 +95,74 @@ module.exports = (io) => {
         // socket
         // .to(`chat-${conversation._id}`)
         // console.log("============client==",clients)
-        console.log("============client1111111111111111==", clients[sent_to]);
+        
 
         if (clients[sent_to] != undefined && is_group == 0) {
-          clients[sent_to]
-            // socket
-            .emit("receive-message", {
-              send_by,
-              sent_to,
-              newMessage,
-              name,
-              is_group,
-              images,
-              createdDatetime,
-              profile_picture,
-              mute_users,
-              is_meta_data,
+
+
+
+console.log("=============== socket have a value==============================");
+            var muteUsersSql = `SELECT  
+                         GROUP_CONCAT(mufsc.user_id)  AS mute_users  
+                   FROM mute_users_for_sigle_chat AS mufsc  
+                   WHERE mufsc.is_muted=1 AND
+                       (             
+                          (mufsc.chat_user_id=${send_by} AND  mufsc.user_id=${sent_to} ) 
+                       OR
+                          ( mufsc.user_id=${send_by}  AND mufsc.chat_user_id=${sent_to}  ) 
+                        )`;
+
+            connection.query(muteUsersSql, async function (err, muteUsersData) {
+              console.log(err,muteUsersData," dddddddddddddddddd ");
+              if (err) {
+                mute_users = "";
+                 clients[sent_to]
+                  .emit("receive-message", {
+                    send_by,
+                    sent_to,
+                    newMessage,
+                    name,
+                    is_group,
+                    images,
+                    createdDatetime,
+                    profile_picture,
+                    mute_users,
+                    is_meta_data,
+                  });
+              } else {
+                mute_users = muteUsersData[0].mute_users;
+                  clients[sent_to]
+                  .emit("receive-message", {
+                    send_by,
+                    sent_to,
+                    newMessage,
+                    name,
+                    is_group,
+                    images,
+                    createdDatetime,
+                    profile_picture,
+                    mute_users,
+                    is_meta_data,
+                  });
+              }
             });
+
+
+
+          // clients[sent_to]
+          //   // socket
+          //   .emit("receive-message", {
+          //     send_by,
+          //     sent_to,
+          //     newMessage,
+          //     name,
+          //     is_group,
+          //     images,
+          //     createdDatetime,
+          //     profile_picture,
+          //     mute_users,
+          //     is_meta_data,
+          //   });
         } else if (is_group == 1 || is_group == 2) {
           console.log("send into group========");
 
@@ -209,20 +260,8 @@ module.exports = (io) => {
               }
             });
           } else {
-            var muteUsersSql = `SELECT  
-                         GROUP_CONCAT(mufsc.user_id)  AS mute_users  
-                   FROM mute_users_for_sigle_chat AS mufsc  
-                   WHERE mufsc.is_muted=1 AND
-                       (             
-                          (mufsc.chat_user_id=${send_by} AND  mufsc.user_id=${sent_to} ) 
-                       OR
-                          ( mufsc.user_id=${send_by}  AND mufsc.chat_user_id=${sent_to}  ) 
-                        )`;
 
-            connection.query(muteUsersSql, async function (err, muteUsersData) {
-              if (err) {
-                mute_users = "";
-                socket.broadcast
+            socket.broadcast
                   .to(`chat-${sent_to}`)
                   .emit("receive-message", {
                     send_by,
@@ -236,24 +275,7 @@ module.exports = (io) => {
                     mute_users,
                     is_meta_data,
                   });
-              } else {
-                mute_users = muteUsersData[0].mute_users;
-                socket.broadcast
-                  .to(`chat-${sent_to}`)
-                  .emit("receive-message", {
-                    send_by,
-                    sent_to,
-                    newMessage,
-                    name,
-                    is_group,
-                    images,
-                    createdDatetime,
-                    profile_picture,
-                    mute_users,
-                    is_meta_data,
-                  });
-              }
-            });
+
           }
           // io.to(room).emit('notification', { message: 'New notification!' });
         } else {

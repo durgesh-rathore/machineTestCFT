@@ -454,7 +454,17 @@ exports.getDirectMessages = async (req, res) => {
                 AND is_seen = 0
         )
         ELSE 0
-    END AS newMessageCount,
+    END AS newMessageCount1,
+    CASE
+      THEN (
+        SELECT COUNT(*)
+        FROM chats
+        WHERE chats.send_by = users.id
+            AND chats.sent_to = ${req.query.login_user_id}
+            AND chats.id>(SELECT from_chat_id chat_seen_in_group_by_user WHERE user_id=${req.query.login_user_id} AND seen_chat_user_id=users.id)
+    )
+    ELSE 0
+END AS newMessageCount,
     CASE
         WHEN users.is_group = 1
         THEN (
@@ -801,10 +811,28 @@ GROUP BY
 
 
 exports.messagesSeen=async (req,res)=>{
-  const { login_user_id,user_id,is_group}=req.query;
-  var sql2 = `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = chats.send_by IN(${req.query.login_user_id},
-    ${req.query.user_id} ) AND chats.sent_to IN(${req.query.login_user_id},
-      ${req.query.user_id} )`;
+  const { login_user_id,seen_chat_user_id,from_chat_id}=req.body;
+
+
+
+var obj={
+      from_chat_id:from_chat_id,
+      user_id:login_user_id,
+      seen_chat_user_id:seen_chat_user_id
+    }
+
+      a=await save("chat_seen_in_group_by_user",obh)
+      if(a){
+        return res.json({
+          success: true,
+          message: "Messages are seen.",
+        });
+      }else{
+        return res.json({
+          success: false,
+          message: "Message aren't seen.",
+        });
+      }
 
 }
 exports.getChats3 = async (req, res) => {

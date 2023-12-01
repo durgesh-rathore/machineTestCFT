@@ -395,7 +395,6 @@ exports.userInterest = function (req, res) {
               user_id: req.body.user_id,
               interest_id: element,
             };
-
             save("users_interest", obj);
             obj = {};
           });
