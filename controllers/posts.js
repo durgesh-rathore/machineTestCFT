@@ -44,7 +44,7 @@ exports.new = async function (req, res) {
       userPost.visibilitySelectUsers = req.body.visibilitySelectUsers;
     }
 
-    if (conditionForPost) {
+    if (conditionForPost && req.body.is_remove_image==1) {
       var postD = findOne("events", " id= " + req.body.post_id);
       console.log(postD, "====dddddddd");
       fs.unlink(
