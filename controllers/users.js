@@ -173,7 +173,7 @@ exports.logout = async function (req, res) {
   
                 var j = await findByIdAndUpdate(
                   "users",
-                  { divice_token: '' },
+                  { divice_token: null },
                   " id=" + req.body.login_user_id
                 );
                 console.log("   dddddddddddd update divice token==", j);
