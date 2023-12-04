@@ -203,10 +203,10 @@ exports.getChats = async (req, res) => {
         });
         // seen chat yet here
         from_chat_id=0
-        if(lastChatSeen.length>0){
-          from_chat_id= lastChatSeen[0].from_chat_id
-        console.log("======= chat issue ===113", lastChatSeen[0].from_chat_id);
-        }
+        // if(lastChatSeen.length>0){
+        //   from_chat_id= lastChatSeen[0].from_chat_id
+        // console.log("======= chat issue ===113", lastChatSeen[0].from_chat_id);
+        // }
 
         function parseImagesSync(chatList, index, callback) {
           if (index < chatList.length) {
