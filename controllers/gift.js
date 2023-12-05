@@ -373,9 +373,9 @@ exports.getProductDetails= async function(asinId,req,res) {
     
       // ItemIds: [`${asinId}`],
       ItemIds: asinId,
+      // ItemIds: [`${req.query.asin_no}`],
       PartnerTag: "forgetmenote-20",
       Resources: ["Images.Primary.Small", "ItemInfo.ContentRating","ItemInfo.Title","ItemInfo.Features", "Offers.Summaries.HighestPrice","ParentASIN"]
-
     
   };
 
