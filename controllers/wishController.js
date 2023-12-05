@@ -233,7 +233,7 @@ exports.getWishListItems = function (req, res) {
     const {  user_id, ASIN_product_id,folder_id } = req.body;
     try {
              connection.query(
-              `DELETE FROM wish_list WHERE user_id=${user_id} AND parent_id=${folder_id} AND ASIN_product_id='${ASIN_product_id}'`,
+              `DELETE FROM wish_list WHERE user_id=${user_id}  AND ASIN_product_id='${ASIN_product_id}'`,
                 async function (err, wishList) {
                 if (err) {console.log(err);
                   return res.json({
