@@ -952,26 +952,81 @@ exports.friendsListAccordingToAddInGroup = function (req, res) {
     }
 
     // if (req.query.type == "allFriends") {
-    var sql =
-      "SELECT " +
-      a +
-      ",users.name,users_requests.*,(CASE WHEN (users_requests.user_id=" +
-      req.query.login_user_id +
-      ") THEN users_requests.is_follow ELSE users_requests.is_follow_by_request_for END ) AS is_follow,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id<>" +
-      req.query.login_user_id +
-      " Then users_requests.user_id ELSE users_requests.request_for END)  WHERE  ( users_requests.user_id='" +
-      req.query.login_user_id +
-      " ' OR users_requests.request_for='" +
-      req.query.login_user_id +
-      "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND (users_requests.is_accepted=1   OR ((users_requests.is_request=1 OR users_requests.is_follow=1 ) AND (users_requests.user_id ='" +
-      req.query.login_user_id +
-      " ' OR users_requests.is_both_follow=1 ) ) OR (users_requests.request_for='" +
-      req.query.login_user_id +
-      " ' AND users_requests.is_follow_by_request_for=1 )  )   " +
-      condition +
-      "  ORDER BY users_requests.update_datetime DESC  limit  " +
-      page * 10 +
-      ", 10";
+    // var sql =
+    //   `SELECT 
+    //   ${a }
+    //   ,users.name,users_requests.*,
+    //   (CASE 
+    //      WHEN (users_requests.user_id=${req.query.login_user_id}) 
+    //      THEN users_requests.is_follow ELSE users_requests.is_follow_by_request_for END )
+    //       AS is_follow,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON (   users.id =  case 
+    //         when users_requests.user_id<>${
+    //   req.query.login_user_id} Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users gu ON gu.user_id=users.id AND gu.group_id=${req.query.group_id}   WHERE  ( users_requests.user_id=${
+    //   req.query.login_user_id } OR users_requests.request_for=${
+    //   req.query.login_user_id} )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND (users_requests.is_accepted=1   OR ((users_requests.is_request=1 OR users_requests.is_follow=1 ) AND (users_requests.user_id =${
+    //   req.query.login_user_id} OR users_requests.is_both_follow=1 ) ) OR (users_requests.request_for=${
+    //   req.query.login_user_id } AND users_requests.is_follow_by_request_for=1 )  )   
+
+    //  ${ condition }  
+    //   ORDER BY users_requests.update_datetime DESC  
+      
+    //    LIMIT ${page * 10} , 10`;
+    var sql = `
+  SELECT 
+    ${a},
+    users.name,
+    users_requests.*,
+    (
+      CASE 
+        WHEN (users_requests.user_id=${req.query.login_user_id}) 
+        THEN users_requests.is_follow 
+        ELSE users_requests.is_follow_by_request_for 
+      END
+    ) AS is_follow,
+    users.id,
+    (
+      SELECT COUNT(users_requests.request_for) 
+      FROM users_requests 
+      WHERE users_requests.is_follow != 0 AND users_requests.request_for = users.id
+    ) AS followed_by
+  FROM 
+    users_requests
+    LEFT JOIN users ON (
+      users.id = CASE 
+        WHEN users_requests.user_id <> ${req.query.login_user_id} 
+        THEN users_requests.user_id 
+        ELSE users_requests.request_for 
+      END
+    )
+    LEFT JOIN groups_users gu ON gu.user_id = users.id AND gu.group_id = ${req.query.group_id}
+  WHERE  gu.id IS NULL AND
+    (
+      users_requests.user_id = ${req.query.login_user_id} 
+      OR users_requests.request_for = ${req.query.login_user_id}
+    )
+    AND users_requests.is_reject = 0 
+    AND users_requests.is_block = 0 
+    AND (
+      users_requests.is_accepted = 1
+      OR (
+        (users_requests.is_request = 1 OR users_requests.is_follow = 1) 
+        AND (
+          users_requests.user_id = ${req.query.login_user_id} 
+          OR users_requests.is_both_follow = 1
+        )
+      )
+      OR (
+        users_requests.request_for = ${req.query.login_user_id} 
+        AND users_requests.is_follow_by_request_for = 1
+      )
+    )
+    ${condition}
+  ORDER BY 
+    users_requests.update_datetime DESC
+  LIMIT 
+    ${page * 10}, 10
+`;
+
 
     console.log("allFriends ===", sql);
 
