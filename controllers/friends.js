@@ -52,8 +52,7 @@ exports.followUser = function (req, res) {
                   ",request_for=" +
                   usersRequest[0].user_id +
                   "  ";
-                
-                
+
                 pushNotification(
                   notificationFor[0].divice_token,
                   "Followed you by " +
@@ -66,7 +65,7 @@ exports.followUser = function (req, res) {
                   forf = " is_follow=1 ";
                   if (usersRequest[0].is_follow_by_request_for == 1) {
                     forf = " is_follow=1,is_both_follow=1 ";
-                        pushNotification(
+                    pushNotification(
                       notificationFor[0].divice_token,
                       "Followed you by " +
                         (req.body.login_user_name
@@ -75,33 +74,8 @@ exports.followUser = function (req, res) {
                         "",
                       "3"
                     );
-                  }else{
-                    
-                  pushNotification(
-                    notificationFor[0].divice_token,
-                    "Followed you by " +
-                      (req.body.login_user_name
-                        ? req.body.login_user_name
-                        : "") +
-                      "",
-                    "2"
-                  );
-                 }
-                } else {
-                  forf = "is_follow_by_request_for=1  ";
-                  if (usersRequest[0].is_follow == 1) {
-                    forf = " is_follow_by_request_for=1,is_both_follow=1 ";
-                        pushNotification(
-                      notificationFor[0].divice_token,
-                      "Followed you by " +
-                        (req.body.login_user_name
-                          ? req.body.login_user_name
-                          : "") +
-                        "",
-                      "3"
-                    );
-                  }else{
-                      pushNotification(
+                  } else {
+                    pushNotification(
                       notificationFor[0].divice_token,
                       "Followed you by " +
                         (req.body.login_user_name
@@ -111,11 +85,34 @@ exports.followUser = function (req, res) {
                       "2"
                     );
                   }
-                 
+                } else {
+                  forf = "is_follow_by_request_for=1  ";
+                  if (usersRequest[0].is_follow == 1) {
+                    forf = " is_follow_by_request_for=1,is_both_follow=1 ";
+                    pushNotification(
+                      notificationFor[0].divice_token,
+                      "Followed you by " +
+                        (req.body.login_user_name
+                          ? req.body.login_user_name
+                          : "") +
+                        "",
+                      "3"
+                    );
+                  } else {
+                    pushNotification(
+                      notificationFor[0].divice_token,
+                      "Followed you by " +
+                        (req.body.login_user_name
+                          ? req.body.login_user_name
+                          : "") +
+                        "",
+                      "2"
+                    );
+                  }
                 }
               }
             } else {
-                  pushNotification(
+              pushNotification(
                 notificationFor[0].divice_token,
                 // "Follow Back you ",
                 "Followed Back  you by " +
@@ -165,7 +162,7 @@ exports.followUser = function (req, res) {
                 connection.query(
                   "SELECT * FROM users WHERE id =" + req.body.request_for + " ",
                   async function (err, notificationFor) {
-                          pushNotification(
+                    pushNotification(
                       notificationFor[0].divice_token,
                       "Followed you by " +
                         (req.body.login_user_name
@@ -341,14 +338,14 @@ exports.unFollowUser = function (req, res) {
                   usersRequest[0].id;
               }
             } else {
-              if(req.body.login_user_id == usersRequest[0].user_id){
-              updateSql =
-                " UPDATE users_requests SET is_follow=0  WHERE id= " +
-                usersRequest[0].id;
-              }else{
+              if (req.body.login_user_id == usersRequest[0].user_id) {
                 updateSql =
-                " UPDATE users_requests SET is_follow_by_request_for=0  WHERE id= " +
-                usersRequest[0].id;
+                  " UPDATE users_requests SET is_follow=0  WHERE id= " +
+                  usersRequest[0].id;
+              } else {
+                updateSql =
+                  " UPDATE users_requests SET is_follow_by_request_for=0  WHERE id= " +
+                  usersRequest[0].id;
               }
             }
           } else {
@@ -457,8 +454,8 @@ exports.blockUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
     connection.query(
       " UPDATE users_requests SET block_by=" +
-      req.body.login_user_id +
-      ", is_block=" +
+        req.body.login_user_id +
+        ", is_block=" +
         req.body.is_block +
         "  WHERE ( user_id=" +
         req.body.login_user_id +
@@ -552,43 +549,42 @@ exports.friendsList = function (req, res) {
     }
 
     var sqlCount1 =
-        "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id=" +
-        req.query.login_user_id +
-        ") OR  (users_requests.user_id=users.id AND users_requests.request_for=" +
-        req.query.login_user_id +
-        "))    WHERE   users.is_group=0   AND ( users_requests.user_id <>'" +
-        req.query.login_user_id +
-        "'   AND users_requests.request_for<> " +
-        req.query.login_user_id +
-        " OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>" +
-        req.query.login_user_id +
-        " ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.user_id = " +
-        req.query.login_user_id +
-        " AND users_requests.is_follow=1) THEN false ELSE true END   ) AND (  case when (users_requests.request_for = " +
-        req.query.login_user_id +
-        " AND users_requests.is_follow_by_request_for=1) THEN false ELSE true END   )   AND users.id<>" +
-        req.query.login_user_id +
-        " GROUP BY users.id";
+      "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id=" +
+      req.query.login_user_id +
+      ") OR  (users_requests.user_id=users.id AND users_requests.request_for=" +
+      req.query.login_user_id +
+      "))    WHERE   users.is_group=0   AND ( users_requests.user_id <>'" +
+      req.query.login_user_id +
+      "'   AND users_requests.request_for<> " +
+      req.query.login_user_id +
+      " OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>" +
+      req.query.login_user_id +
+      " ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.user_id = " +
+      req.query.login_user_id +
+      " AND users_requests.is_follow=1) THEN false ELSE true END   ) AND (  case when (users_requests.request_for = " +
+      req.query.login_user_id +
+      " AND users_requests.is_follow_by_request_for=1) THEN false ELSE true END   )   AND users.id<>" +
+      req.query.login_user_id +
+      " GROUP BY users.id";
 
-      console.log("sqlCount1==========", sqlCount1);
-      var sqlCountrequest =
-        "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
-        req.query.login_user_id +
-        "' AND  users_requests.is_request=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 ";
+    console.log("sqlCount1==========", sqlCount1);
+    var sqlCountrequest =
+      "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
+      req.query.login_user_id +
+      "' AND  users_requests.is_request=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 ";
 
-      var sqlCountAll =
-        "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
-        req.query.login_user_id +
-        " Then users_requests.user_id ELSE users_requests.request_for END)   WHERE  ( users_requests.user_id='" +
-        req.query.login_user_id +
-        " ' OR users_requests.request_for='" +
-        req.query.login_user_id +
-        "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND (users_requests.is_accepted=1   OR ((users_requests.is_request=1 OR users_requests.is_follow=1) AND ( users_requests.user_id ='" +
-        req.query.login_user_id +
-        " ' OR users_requests.is_both_follow=1 ) )  OR (users_requests.request_for='" +
-        req.query.login_user_id +
-        " ' AND users_requests.is_follow_by_request_for=1 )  )     " ;
-
+    var sqlCountAll =
+      "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
+      req.query.login_user_id +
+      " Then users_requests.user_id ELSE users_requests.request_for END)   WHERE  ( users_requests.user_id='" +
+      req.query.login_user_id +
+      " ' OR users_requests.request_for='" +
+      req.query.login_user_id +
+      "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND (users_requests.is_accepted=1   OR ((users_requests.is_request=1 OR users_requests.is_follow=1) AND ( users_requests.user_id ='" +
+      req.query.login_user_id +
+      " ' OR users_requests.is_both_follow=1 ) )  OR (users_requests.request_for='" +
+      req.query.login_user_id +
+      " ' AND users_requests.is_follow_by_request_for=1 )  )     ";
 
     if (req.query.type == "request") {
       var sql =
@@ -604,10 +600,11 @@ exports.friendsList = function (req, res) {
       console.log("request ===", sql);
 
       var sqlCountrequest =
-      "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
-      req.query.login_user_id +
-      "' AND  users_requests.is_request=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 "+ condition+" ";
-
+        "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
+        req.query.login_user_id +
+        "' AND  users_requests.is_request=1 AND users_requests.is_reject<>1 AND users_requests.is_block<>1 AND users_requests.is_accepted<>1 " +
+        condition +
+        " ";
     }
     if (req.query.type == "allFriends") {
       var sql =
@@ -632,7 +629,6 @@ exports.friendsList = function (req, res) {
         ", 10";
       console.log("allFriends ===", sql);
 
-
       var sqlCountAll =
         "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
         req.query.login_user_id +
@@ -647,7 +643,6 @@ exports.friendsList = function (req, res) {
         " ' AND users_requests.is_follow_by_request_for=1 )  )     " +
         condition +
         "";
-
     }
     if (req.query.type == "explore") {
       var sql =
@@ -677,29 +672,27 @@ exports.friendsList = function (req, res) {
       console.log("explore ===", sql);
 
       var sqlCount1 =
-      "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id=" +
-      req.query.login_user_id +
-      ") OR  (users_requests.user_id=users.id AND users_requests.request_for=" +
-      req.query.login_user_id +
-      "))    WHERE   users.is_group=0   AND ( users_requests.user_id <>'" +
-      req.query.login_user_id +
-      "'   AND users_requests.request_for<> " +
-      req.query.login_user_id +
-      " OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>" +
-      req.query.login_user_id +
-      " ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.user_id = " +
-      req.query.login_user_id +
-      " AND users_requests.is_follow=1) THEN false ELSE true END   ) AND (  case when (users_requests.request_for = " +
-      req.query.login_user_id +
-      " AND users_requests.is_follow_by_request_for=1) THEN false ELSE true END   )   AND users.id<>" +
-      req.query.login_user_id +
-      " " +
-      condition +
-      " GROUP BY users.id";
+        "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id=" +
+        req.query.login_user_id +
+        ") OR  (users_requests.user_id=users.id AND users_requests.request_for=" +
+        req.query.login_user_id +
+        "))    WHERE   users.is_group=0   AND ( users_requests.user_id <>'" +
+        req.query.login_user_id +
+        "'   AND users_requests.request_for<> " +
+        req.query.login_user_id +
+        " OR ( (users_requests.is_accepted=0 OR  users_requests.is_accepted IS null ) AND (users_requests.is_reject=0 OR users_requests.is_reject IS null) AND ((users_requests.is_request=0 OR users_requests.is_request IS null )  OR users_requests.is_request=1 AND  users_requests.request_by<>" +
+        req.query.login_user_id +
+        " ) AND ( users_requests.is_both_follow=0 OR users_requests.is_both_follow IS null )  )  ) AND (  case when (users_requests.user_id = " +
+        req.query.login_user_id +
+        " AND users_requests.is_follow=1) THEN false ELSE true END   ) AND (  case when (users_requests.request_for = " +
+        req.query.login_user_id +
+        " AND users_requests.is_follow_by_request_for=1) THEN false ELSE true END   )   AND users.id<>" +
+        req.query.login_user_id +
+        " " +
+        condition +
+        " GROUP BY users.id";
 
-    console.log("sqlCount1==========", sqlCount1);
-
-      
+      console.log("sqlCount1==========", sqlCount1);
     }
     //  AND ( users_requests.user_id!='" +
     // req.query.login_user_id +
@@ -707,7 +700,6 @@ exports.friendsList = function (req, res) {
     connection.query(sql, async function (err, users) {
       // COUNT(users.id) AS total_count
 
-      
       connection.query(sqlCount1, async function (err, usersCountResult) {
         if (err) {
           console.log("====", err);
@@ -751,7 +743,6 @@ exports.friendsList = function (req, res) {
 };
 
 exports.getBlockUserList = function (req, res) {
-
   if (req.query.login_user_id) {
     var page = req.query.page ? req.query.page : 0;
     var condition = " ";
@@ -763,21 +754,18 @@ exports.getBlockUserList = function (req, res) {
       condition = '  AND (users.name LIKE "%' + req.query.search + '%") ';
     }
 
-    
-      var sql =
-        "SELECT " +
-        a +
-        ",users.name, users_requests.*,users.id,  (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON ( CASE WHEN users_requests.block_by=users_requests.user_id THEN users.id=users_requests.request_for ELSE users.id=users_requests.user_id END) WHERE users_requests.block_by  ='" +
-        req.query.login_user_id +
-        "'  AND users_requests.is_block=1  " +
-        condition +
-        " ORDER BY users_requests.update_datetime DESC limit  " +
-        page * 10 +
-        ", 10";
-      console.log("request ===", sql);
-    
-    
-   
+    var sql =
+      "SELECT " +
+      a +
+      ",users.name, users_requests.*,users.id,  (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON ( CASE WHEN users_requests.block_by=users_requests.user_id THEN users.id=users_requests.request_for ELSE users.id=users_requests.user_id END) WHERE users_requests.block_by  ='" +
+      req.query.login_user_id +
+      "'  AND users_requests.is_block=1  " +
+      condition +
+      " ORDER BY users_requests.update_datetime DESC limit  " +
+      page * 10 +
+      ", 10";
+    console.log("request ===", sql);
+
     connection.query(sql, async function (err, users) {
       // COUNT(users.id) AS total_count
       var sqlCount1 =
@@ -787,19 +775,17 @@ exports.getBlockUserList = function (req, res) {
         condition +
         " GROUP BY users.id";
 
-     
       connection.query(sqlCount1, async function (err, usersCountResult) {
         if (err) {
           console.log("====", err);
         } else {
-
           return res.json({
-            response: users,            
-            exploreTotalCount: usersCountResult.length,            
+            response: users,
+            exploreTotalCount: usersCountResult.length,
             success: true,
             message: "users list",
           });
-         }
+        }
       });
     });
   } else {
@@ -952,3 +938,73 @@ exports.friendsListForVisibitly = function (req, res) {
 //     );
 //   }
 // };
+
+exports.friendsListAccordingToAddInGroup = function (req, res) {
+  if (req.query.login_user_id) {
+    var page = req.query.page ? req.query.page : 0;
+    var condition = " ";
+    if (
+      req.query.search != "" &&
+      req.query.search != undefined &&
+      req.query.search != null
+    ) {
+      condition = '  AND (users.name LIKE "%' + req.query.search + '%") ';
+    }
+
+    // if (req.query.type == "allFriends") {
+    var sql =
+      "SELECT " +
+      a +
+      ",users.name,users_requests.*,(CASE WHEN (users_requests.user_id=" +
+      req.query.login_user_id +
+      ") THEN users_requests.is_follow ELSE users_requests.is_follow_by_request_for END ) AS is_follow,users.id, (SELECT  COUNT(users_requests.request_for) FROM users_requests WHERE users_requests.is_follow!=0  AND users_requests.request_for=users.id ) AS followed_by  FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id<>" +
+      req.query.login_user_id +
+      " Then users_requests.user_id ELSE users_requests.request_for END)  WHERE  ( users_requests.user_id='" +
+      req.query.login_user_id +
+      " ' OR users_requests.request_for='" +
+      req.query.login_user_id +
+      "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND (users_requests.is_accepted=1   OR ((users_requests.is_request=1 OR users_requests.is_follow=1 ) AND (users_requests.user_id ='" +
+      req.query.login_user_id +
+      " ' OR users_requests.is_both_follow=1 ) ) OR (users_requests.request_for='" +
+      req.query.login_user_id +
+      " ' AND users_requests.is_follow_by_request_for=1 )  )   " +
+      condition +
+      "  ORDER BY users_requests.update_datetime DESC  limit  " +
+      page * 10 +
+      ", 10";
+
+    console.log("allFriends ===", sql);
+
+    var sqlCountAll =
+      "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
+      req.query.login_user_id +
+      " Then users_requests.user_id ELSE users_requests.request_for END)   WHERE  ( users_requests.user_id='" +
+      req.query.login_user_id +
+      " ' OR users_requests.request_for='" +
+      req.query.login_user_id +
+      "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND (users_requests.is_accepted=1   OR ((users_requests.is_request=1 OR users_requests.is_follow=1) AND ( users_requests.user_id ='" +
+      req.query.login_user_id +
+      " ' OR users_requests.is_both_follow=1 ) )  OR (users_requests.request_for='" +
+      req.query.login_user_id +
+      " ' AND users_requests.is_follow_by_request_for=1 )  )     " +
+      condition +
+      "";
+
+    // }
+
+    connection.query(sql, async function (err, users) {
+      connection.query(sqlCountAll, async function (err, sqlCountAllResult) {
+        if (err) {
+          console.log("====", err);
+        } else {
+          return res.json({
+            response: users,
+            friendsTotalCount: sqlCountAllResult[0].total_count,
+            success: true,
+            message: "users list",
+          });
+        }
+      });
+    });
+  }
+};

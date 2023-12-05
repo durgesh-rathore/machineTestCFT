@@ -28,4 +28,8 @@ router.get(
   friend.friendsListForVisibitly
 );
 
+router.get("/friendsListAccordingToAddInGroup", 
+// checkUserStatus.userStatus,
+ friend.friendsListAccordingToAddInGroup);
+
 module.exports = router;
