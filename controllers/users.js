@@ -469,6 +469,13 @@ exports.userFavoriteColors = function (req, res) {
             message: "Please enter required  detail.",
           });
         } else {
+
+          if(req.body.interest_fields.length>0){
+            connection.query(
+              "DELETE FROM users_favorite_colors WHERE user_id = ?",
+              req.body.user_id,
+              function (err, usersFavoriteColors) {})
+            }
           JSON.parse(req.body.favorite_colors).forEach((element) => {
             var obj = {
               user_id: req.body.user_id,

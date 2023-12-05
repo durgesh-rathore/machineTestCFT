@@ -557,7 +557,7 @@ WHERE (
     ${search}
 GROUP BY users.id
 ORDER BY last_times_user_in IS NULL, last_times_user_in ASC
-LIMIT ${page * 10}, 10`;
+LIMIT ${page * 10}, 20`;
 
   console.log("sql.....................................", sql, "===sql===");
 
