@@ -22,7 +22,7 @@ router.get(
 );
 router.get(
   "/getChats",
-  checkUserStatus.userStatus,
+  // checkUserStatus.userStatus,
   messagesController.getChats
 );
 

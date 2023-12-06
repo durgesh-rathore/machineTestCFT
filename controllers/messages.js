@@ -66,15 +66,7 @@ exports.getChats = async (req, res) => {
         });
       }
     }
-
-    // sql =
-    //   `SELECT chats.*,${
-    //   dd }  CASE WHEN chats.images IS NOT NULL then chats.images   else ''  end AS images, CONCAT('${
-    //   constants.BASE_URL }','images/profiles/',users.profile_picture) AS profile_picture,users.name FROM chats LEFT JOIN users ON users.id=chats.send_by WHERE chats.send_by IN(${
-    //   req.query.login_user_id },${req.query.user_id}) AND chats.sent_to IN(${req.query.login_user_id },${
-    //   req.query.user_id }) ${condition2}    ORDER BY chats.id DESC Limit ${page * 30},30`;
-
-    sql = `SELECT
+   sql = `SELECT
               chats.*,
               ${dd}  
               CASE
@@ -167,9 +159,7 @@ exports.getChats = async (req, res) => {
     //  Group user chat =====
     console.log(" We are in group user chat gggggggggggggggggggggg");
     if (searchCondition) {
-      var sql2 = `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = chats.send_by IN(${req.query.login_user_id},
-        ${req.query.user_id} ) AND chats.sent_to IN(${req.query.login_user_id},
-          ${req.query.user_id} )`;
+     
 
       let s7 = await dbScript(db_sql["Q7"], {
         var1: user_id,
@@ -180,7 +170,7 @@ exports.getChats = async (req, res) => {
       console.log(chatSearch, " ======ffffffffffffffffff==");
 
       if (chatSearch.length > 0) {
-        // condition2 = "  AND chats.id <= " + chatSearch[0].id;
+        //  condition2 = "  AND chats.id <= " + chatSearch[0].id;
       } else {
         return res.json({
           response: [],
@@ -190,6 +180,25 @@ exports.getChats = async (req, res) => {
       }
     }
     console.log(condition2, " condition2  for group chat===", dd);
+
+
+
+      let s9 = await dbScript(db_sql["Q9"], {
+       var1: user_id,
+       var2: login_user_id,
+     });
+     
+     let forExitUser = await queryAsync(s9);
+     console.log(forExitUser, " ======ffffffffffffffffff==");
+
+     if (forExitUser.length > 0) {
+        condition2 = "  AND chats.id <= " + forExitUser[0].at_chat_id;
+     } else {
+      condition2=" ";
+     }
+   
+
+
     sql = `SELECT chats.*,${dd}  CONCAT('${
       constants.BASE_URL
     }','images/profiles/',users.profile_picture) AS profile_picture, users.name,case when chats.images IS NOT NULL then chats.images   else ''  end AS images FROM chats LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to=${
@@ -197,6 +206,7 @@ exports.getChats = async (req, res) => {
     }    ${condition2} ORDER BY chats.id DESC  Limit ${page * 30},30`;
 
     console.log(sql, " ======sql=== ");
+
     connection.query(sql, async function (err, chatList) {
       console.log(err, chatList);
       if (chatList.length > 0) {
@@ -290,6 +300,7 @@ exports.getDirectMessages = async (req, res) => {
     END AS profile_picture,
     users.name,
     users.id,
+    users.group_admin_id,
     (
         SELECT COUNT(users_requests.request_for)
         FROM users_requests
