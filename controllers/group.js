@@ -272,7 +272,7 @@ exports.getSplitGroupList = function (req, res) {
                    THEN 'This week'         
                    ELSE 'This Month'     
                 END AS WMTag , 
-                billing_group_users.is_muted AS is_muted,
+                billing_group_users.is_muted AS is_muted
              FROM 
           users AS users2 
           LEFT JOIN billing_group ON billing_group.group_id=users2.id 
