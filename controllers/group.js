@@ -3,6 +3,7 @@ var connection = require("../config/db");
 var constants = require("../config/constants");
 require("./gift");
 var { encryptPassword, checkPassword } = require("../config/custom");
+const { db_sql, dbScript, queryAsync } = require("../helpers/db_scripts");
 var { save } = require("../helpers/helper");
 var multer = require("multer");
 const path = require("path");
@@ -363,26 +364,36 @@ exports.getSplitGroupList = function (req, res) {
   });
 };
 
-exports.leftGroup = function (req, res) {
+exports.leftGroup =  async function (req, res) {
   // login_user_id  this tag id off which user which is get remove or left group
 
-  const { group_id,login_user_id,at_chat_id,is_left_by_admin} =req.body;
+  const { group_id,login_user_id,is_left_by_admin} =req.body;
   if (
     group_id == undefined ||
     group_id == "" ||
     group_id == null ||
     login_user_id == undefined ||
     login_user_id == "" ||
-    login_user_id == null ||
-    at_chat_id == undefined ||
-    at_chat_id == "" ||
-    at_chat_id == null
+    login_user_id == null   
+    
   ) {
     return res.json({
       success: false,
       message: "Something went wrong.",
     });
   } else {
+
+
+    let s10 = await dbScript(db_sql["Q10"], {
+      var1: group_id,  
+    });
+    var at_chat_id=0;
+    let lastChatWhenLeftUser = await queryAsync(s10);
+    if(lastChatWhenLeftUser.length>0){
+    console.log(lastChatWhenLeftUser[0].id, " ======ffffffffffffffffff==");
+    at_chat_id=lastChatWhenLeftUser[0].id
+    }
+
     let sql =
       `UPDATE  groups_users SET is_not_exist=1,at_chat_id=${at_chat_id} WHERE group_id =${
       group_id }  AND user_id=
@@ -532,9 +543,9 @@ exports.getGroupUsers = function (req, res) {
 
     ORDER BY
   CASE
-    WHEN users.id=${login_user_id} THEN 0 
-    ELSE 1
-  END,
+     WHEN users.id=${login_user_id} THEN 0 
+      ELSE 1
+      END,
   users.id DESC`;
   console.log(sql);
   connection.query(sql, function (err, groupUsers) {
