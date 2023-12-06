@@ -505,20 +505,21 @@ exports.informationOfGroup = function (req, res) {
 };
 
 exports.getGroupUsers = function (req, res) {
-  var page = req.query.page ? req.query.page : 0;
+  let {search,group_id,login_user_id,page}=req.query;
+  var page1 = page ? page : 0;
 
   var condition = " ";
 
   if (
-    req.query.search != "" &&
-    req.query.search != undefined &&
-    req.query.search != null
+    search != "" &&
+    search != undefined &&
+    search != null
   ) {
     condition +=
       '  AND ( users.type LIKE "%' +
-      req.query.search +
+      search +
       '%" OR users.name LIKE "%' +
-      req.query.search +
+      search +
       '%")  ';
   }
 
@@ -527,7 +528,7 @@ exports.getGroupUsers = function (req, res) {
   sql =
     `SELECT users.*, ${
     a }  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=${
-    req.query.group_id}
+    group_id}
 
     ORDER BY
   CASE
@@ -540,7 +541,7 @@ exports.getGroupUsers = function (req, res) {
     console.log(err);
     var sqlCounts =
       "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
-      req.query.group_id;
+      group_id;
     connection.query(sqlCounts, function (err, group_user_count) {
       if (err) {
         console.log(err);
