@@ -525,10 +525,16 @@ exports.getGroupUsers = function (req, res) {
   var sql = " ";
 
   sql =
-    "SELECT users.*, " +
-    a +
-    "  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
-    req.query.group_id;
+    `SELECT users.*, ${
+    a }  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=${
+    req.query.group_id}
+
+    ORDER BY
+  CASE
+    WHEN users.id=${login_user_id} THEN 0 
+    ELSE 1
+  END,
+  users.id DESC`;
   console.log(sql);
   connection.query(sql, function (err, groupUsers) {
     console.log(err);
