@@ -738,9 +738,9 @@ exports.isMuted = function (req, res) {
   var sql = " ";
   if (group_id != "" && group_id && group_id != "undefined") {
     if(group_type==2){
+      sql = `UPDATE billing_group_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
+          }else{
       sql= `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
-    }else{
-    sql = `UPDATE billing_group_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
     }
     connection.query(sql, function (err, muteData) {
       if (err) {
