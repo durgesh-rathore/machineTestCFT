@@ -78,10 +78,12 @@ exports.add = function (req, res) {
 exports.addMembersInGroup = function (req, res) {
   var group_members = req.body.group_members.split(",");
   group_members.forEach((element) => {
+
     var group_users = {
       group_id: req.body.group_id,
       user_id: element,
     };
+
     let sql = "INSERT INTO groups_users SET ?";
     connection.query(sql, group_users, async (error) => {
       group_users = {};
@@ -367,7 +369,7 @@ exports.getSplitGroupList = function (req, res) {
 exports.leftGroup =  async function (req, res) {
   // login_user_id  this tag id off which user which is get remove or left group
 
-  const { group_id,login_user_id,is_left_by_admin} =req.body;
+  const { group_id,login_user_id,is_left_by_admin,name} =req.body;
   if (
     group_id == undefined ||
     group_id == "" ||
@@ -411,14 +413,19 @@ exports.leftGroup =  async function (req, res) {
           left_user_at:1
         };
 
+        let s3 = await dbScript(db_sql["Q3"], {
+          var1: login_user_id,
+        });
+        let forUserName = await queryAsync(s3);
+
         if(is_left_by_admin==1){
          
-         data.message=" Admin remove this users."
+         data.message=` Admin removed ${forUserName[0].name} .`
         
          
         }else{
 
-          data.message=" This user left the group."
+          data.message=`${forUserName[0].name} left the group.`
           
         }
         await save("chats", data);
@@ -538,7 +545,7 @@ exports.getGroupUsers = function (req, res) {
 
   sql =
     `SELECT users.*, ${
-    a }  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=${
+    a }  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.is_not_exist<>1 AND groups_users.group_id=${
     group_id}
 
     ORDER BY

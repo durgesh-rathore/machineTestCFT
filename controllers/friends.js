@@ -980,7 +980,7 @@ exports.friendsListAccordingToAddInGroup = function (req, res) {
       END
     )
     LEFT JOIN groups_users gu ON gu.user_id = users.id AND gu.group_id = ${req.query.group_id}
-  WHERE  gu.id IS NULL AND
+  WHERE  (gu.id IS NULL OR gu.is_not_exist=1) AND
     (
       users_requests.user_id = ${req.query.login_user_id} 
       OR users_requests.request_for = ${req.query.login_user_id}
