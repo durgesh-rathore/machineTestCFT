@@ -472,7 +472,7 @@ exports.deleteGroup = function (req, res) {
 
 exports.informationOfGroup = function (req, res) {
   var group_details_sql =
-    "SELECT users.id,users.type AS group_type ,users.name AS group_name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN groups_users ON groups_users.user_id=u1.id WHERE groups_users.group_id=users.id AND groups_users.user_id!=" +
+    "SELECT users.id,users.type AS group_type ,users.group_admin_id,users.name AS group_name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users AS u1 LEFT JOIN groups_users ON groups_users.user_id=u1.id WHERE groups_users.group_id=users.id AND groups_users.user_id!=" +
     req.query.login_user_id +
     "  ) AS group_users_image  FROM users    WHERE users.is_group=1 AND users.id=" +
     req.query.group_id;
