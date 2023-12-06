@@ -364,13 +364,19 @@ exports.getSplitGroupList = function (req, res) {
 };
 
 exports.leftGroup = function (req, res) {
+  // login_user_id  this tag id off which user which is get remove or left group
+
+  const { group_id,login_user_id,at_chat_id,is_left_by_admin} =req.body;
   if (
-    req.body.group_id == undefined ||
-    req.body.group_id == "" ||
-    req.body.group_id == null ||
-    req.body.login_user_id == undefined ||
-    req.body.login_user_id == "" ||
-    req.body.login_user_id == null
+    group_id == undefined ||
+    group_id == "" ||
+    group_id == null ||
+    login_user_id == undefined ||
+    login_user_id == "" ||
+    login_user_id == null ||
+    at_chat_id == undefined ||
+    at_chat_id == "" ||
+    at_chat_id == null
   ) {
     return res.json({
       success: false,
@@ -378,14 +384,34 @@ exports.leftGroup = function (req, res) {
     });
   } else {
     let sql =
-      "DELETE FROM groups_users WHERE group_id =" +
-      req.body.group_id +
-      "  AND user_id=" +
-      req.body.login_user_id;
+      `UPDATE  groups_users SET is_not_exist=1,at_chat_id=${at_chat_id} WHERE group_id =${
+      group_id }  AND user_id=
+      ${login_user_id}`;
     connection.query(sql, async (error) => {
       if (error) {
         console.log(error);
       } else {
+
+        var data = {
+          
+          send_by: login_user_id,
+          sent_to: group_id,
+          is_group: 1,
+          left_user_at:1
+        };
+
+        if(is_left_by_admin==1){
+         
+         data.message=" Admin remove this users."
+        
+         
+        }else{
+
+          data.message=" This user left the group."
+          
+        }
+        await save("chats", data);
+       
         return res.json({
           success: true,
           message: "Left.",
