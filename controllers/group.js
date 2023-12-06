@@ -256,14 +256,38 @@ exports.getSplitGroupList = function (req, res) {
   }
 
   var sql =
-    "SELECT users2.id,users2.is_group,billing_group.event_date,billing_group.due_date,billing_group.spliting_amount,users2.name AS groups_Name,( SELECT GROUP_CONCAT(u1.profile_picture) FROM users  AS u1 LEFT JOIN  billing_group_users ON billing_group_users.user_id=u1.id WHERE u1.id<>" +
-    req.query.login_user_id +
-    " AND  billing_group_users.group_id=users2.id ) AS group_users_image,  (select (sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/billing_group.spliting_amount) *100  from billing_group_users  WHERE billing_group_users.group_id=users2.id ) AS percentage , MONTH(billing_group.event_date) AS event_month,    YEARWEEK(billing_group.event_date) AS event_week,     YEARWEEK(CURRENT_DATE()) AS current_week ,    CASE             WHEN YEARWEEK(billing_group.event_date) = YEARWEEK(CURDATE()) THEN 'This week'             ELSE 'This Month'         END AS WMTag     FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users2.is_group=2 AND billing_group_users.user_id=" +
-    req.query.login_user_id +
-    condition +
-    " AND YEAR(billing_group.event_date) = YEAR(CURDATE()) AND MONTH(billing_group.event_date) = MONTH(CURDATE())   AND   billing_group.event_date>= CURDATE()  ORDER BY users2.id DESC  Limit " +
-    page * 10 +
-    ",10";
+      ` SELECT 
+            users2.id,users2.is_group,billing_group.event_date,
+            billing_group.due_date,billing_group.spliting_amount,users2.name AS groups_Name,
+            ( SELECT GROUP_CONCAT(u1.profile_picture) 
+              FROM users  AS u1 
+              LEFT JOIN  billing_group_users 
+                  ON billing_group_users.user_id=u1.id WHERE u1.id<>${req.query.login_user_id } AND  billing_group_users.group_id=users2.id ) AS group_users_image, 
+            (select (sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/billing_group.spliting_amount) *100  from billing_group_users  WHERE billing_group_users.group_id=users2.id ) AS percentage , 
+            MONTH(billing_group.event_date) AS event_month,  
+            YEARWEEK(billing_group.event_date) AS event_week,
+            YEARWEEK(CURRENT_DATE()) AS current_week ,  
+            CASE            
+                WHEN  YEARWEEK(billing_group.event_date) = YEARWEEK(CURDATE()) 
+                   THEN 'This week'         
+                   ELSE 'This Month'     
+                END AS WMTag , 
+                billing_group_users.is_muted AS is_muted,
+             FROM 
+          users AS users2 
+          LEFT JOIN billing_group ON billing_group.group_id=users2.id 
+          LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  
+          LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  
+       WHERE
+            users2.is_group=2 
+            AND billing_group_users.user_id=${req.query.login_user_id}   ${condition} 
+            AND YEAR(billing_group.event_date) = YEAR(CURDATE()) 
+            AND MONTH(billing_group.event_date) = MONTH(CURDATE())   
+            AND   billing_group.event_date>= CURDATE() 
+       ORDER BY
+           users2.id DESC  
+       Limit  
+          ${page * 10} ,10`;
   console.log(sql);
   connection.query(sql, function (err, groupUsers) {
     var sqlCountsDM =
@@ -701,7 +725,7 @@ exports.informationOfSplitGroup = function (req, res) {
 };
 
 exports.isMuted = function (req, res) {
-  const { group_id, user_id, is_muted, chat_user_id } = req.body;
+  const { group_id, user_id, is_muted, chat_user_id,group_type } = req.body;
   let status = 1;
   var message = "";
   if (is_muted == 0) {
@@ -713,8 +737,11 @@ exports.isMuted = function (req, res) {
   console.log(" in ffdd", req.body);
   var sql = " ";
   if (group_id != "" && group_id && group_id != "undefined") {
-    sql = `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
-
+    if(group_type==2){
+      sql= `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
+    }else{
+    sql = `UPDATE billing_group_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
+    }
     connection.query(sql, function (err, muteData) {
       if (err) {
         console.log("somthing went wrong", err);
