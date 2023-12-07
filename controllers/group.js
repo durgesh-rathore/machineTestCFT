@@ -126,7 +126,7 @@ exports.addMembersInGroup =async function (req, res) {
   var data = {
           
     send_by: req.body.login_user_id,
-    sent_to: group_id,
+    sent_to: req.body.group_id,
     is_group: 1,
     left_user_at:1,
     images:1,
