@@ -453,6 +453,10 @@ exports.getDirectMessages = async (req, res) => {
          LIMIT 1 )    END  ) )
     AS newMessageCount,
 
+    CASE
+    WHEN users.is_group = 1 AND is_not_exist=1
+    THEN 1  ELSE 0 
+  END  AS is_not_exist,
    
 
     CASE
