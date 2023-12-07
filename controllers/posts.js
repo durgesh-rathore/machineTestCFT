@@ -257,25 +257,23 @@ exports.postEvent = async function (req, res) {
   console.log(conditionForPost, " =========conditionForPost====");
 
 
-  if (conditionForPost) {
-    connection.query(
-      `SELECT * FROM events WHERE id=${req.body.post_id}`,
-      function (err, postD) {
-        console.log(postD, "ddddddd");
-        if (postD && postD.length > 0) {
-          fs.unlink(
-            "./public/images/postImage/" + postD[0].image,
-            function (err) {}
-          );
-        }
-      }
-    );
-  }
+  
   if (req.file) {
     data.image = req.file.filename;
-    
-  }else{
-    data.image = '';
+    if (conditionForPost) {
+      connection.query(
+        `SELECT * FROM events WHERE id=${req.body.post_id}`,
+        function (err, postD) {
+          console.log(postD, "ddddddd");
+          if (postD && postD.length > 0) {
+            fs.unlink(
+              "./public/images/postImage/" + postD[0].image,
+              function (err) {}
+            );
+          }
+        }
+      );
+    }
   }
   data.user_id = req.body.login_user_id;
   if (
