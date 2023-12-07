@@ -1,14 +1,18 @@
 const amazonPaapi = require("amazon-paapi");
 var connection = require("../config/db");
-// accessKey = 'AKIAJBCOXCXX6YAQD7PA';
-// secretKey = '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';
+// created at Dec 7
+// accessKey = 'AKIAISCVCP3EE2MZIHBA';
+// secretKey = '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';
 
 // defaultClient.host = 'webservices.amazon.com';
 // defaultClient.region = 'us-east-1';
 
+// Created 6 Nov
+// AccessKey: "AKIAJBCOXCXX6YAQD7PA",
+//   SecretKey: "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",
 const commonParameters = {
-  AccessKey: "AKIAJBCOXCXX6YAQD7PA",
-  SecretKey: "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",
+  AccessKey: "AKIAISCVCP3EE2MZIHBA",
+  SecretKey: "0nqvO08IT8MXVpqQmJYe0DgsYecb7MEeBiQEsx8N",
   PartnerTag: "forgetmenote-20", // yourtag-20
   PartnerType: "Associates", // Default value is Associates.
   Marketplace: "www.amazon.com", // Default value is US. Note: Host and Region are predetermined based on the marketplace value. There is no need for you to add Host and Region as soon as you specify the correct Marketplace value. If your region is not US or .com, please make sure you add the correct Marketplace value.
