@@ -27,7 +27,7 @@ module.exports = (io) => {
       // console.log("user-login : ggg", uid);
       clients[uid.uid] = socket;
       sql =
-        "SELECT users.id  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id     WHERE users.is_group<>0 AND groups_users.user_id=" +
+        "SELECT users.id  FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id     WHERE groups_users.is_not_exist<>1 AND  users.is_group<>0 AND groups_users.user_id=" +
         uid.uid +
         " GROUP BY users.id ";
       // console.log("clients==================", clients, sql);
