@@ -453,6 +453,7 @@ exports.userFavoriteColors1 = function (req, res) {
 
 
 exports.userFavoriteColors = function (req, res) {
+  
   if (!req.body || !req.body.user_id || !req.body.favorite_colors) {
     return res.json({
       success: false,
@@ -469,14 +470,14 @@ exports.userFavoriteColors = function (req, res) {
             message: "Please enter required  detail.",
           });
         } else {
-
-          if(req.body.interest_fields.length>0){
+         req.body.favorite_colors=JSON.parse(req.body.favorite_colors);
+          if(req.body.favorite_colors.length>0){
             connection.query(
               "DELETE FROM users_favorite_colors WHERE user_id = ?",
               req.body.user_id,
               function (err, usersFavoriteColors) {})
             }
-          JSON.parse(req.body.favorite_colors).forEach((element) => {
+          req.body.favorite_colors.forEach((element) => {
             var obj = {
               user_id: req.body.user_id,
               color_id: element,

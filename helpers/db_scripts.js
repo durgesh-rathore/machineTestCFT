@@ -15,7 +15,25 @@ const db_sql = {
   'Q7':"SELECT chats.* FROM `chats` LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to={var1}    {var2} ORDER BY chats.id DESC  Limit 1",
   'Q8':"SELECT from_chat_id FROM chat_seen_in_group_by_user  WHERE user_id={var1}  AND seen_chat_user_id= {var2} ORDER BY id DESC  Limit 1",
   'Q9':"SELECT  at_chat_id  FROM groups_users WHERE group_id = {var1} AND user_id = {var2} AND is_not_exist = 1",
-  'Q10':" SELECT id FROM chats WHERE sent_to={var1} ORDER BY id DESC LIMIT 1"
+  'Q10':" SELECT id FROM chats WHERE sent_to={var1} ORDER BY id DESC LIMIT 1",
+  'Q11':"SELECT id  FROM groups_users WHERE group_id = {var1} AND user_id = {var2}",
+  'Q12':"SELECT u.name  FROM `users` AS group_ LEFT JOIN users u ON u.id=group_.group_admin_id WHERE group_.id = {var1}",
+  'Q13':`SELECT
+  GROUP_CONCAT(
+    CASE
+      WHEN id = {var1} THEN CONCAT(name, ' and you')
+      ELSE name
+    END
+    ORDER BY
+      CASE
+        WHEN id = {var1} THEN 0
+        ELSE 1
+      END DESC
+    SEPARATOR ', '
+  ) AS concatenated_names
+FROM users
+WHERE id IN ({var2})`
+
 };
 // IS  NOT NULL
 

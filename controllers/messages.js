@@ -199,11 +199,55 @@ exports.getChats = async (req, res) => {
    
 
 
-    sql = `SELECT chats.*,${dd}  CONCAT('${
-      constants.BASE_URL
-    }','images/profiles/',users.profile_picture) AS profile_picture, users.name,case when chats.images IS NOT NULL then chats.images   else ''  end AS images FROM chats LEFT JOIN users ON users.id=chats.send_by WHERE chats.sent_to=${
-      req.query.user_id
-    }    ${condition2} ORDER BY chats.id DESC  Limit ${page * 30},30`;
+    sql = `SELECT 
+              chats.*,
+
+              CASE
+              WHEN chats.left_user_at = 1 THEN
+                (
+                  SELECT
+                    CASE
+                     WHEN chats.images = 1 THEN CONCAT(
+                         (
+                          SELECT
+                            GROUP_CONCAT(
+                              CASE
+                                WHEN id = ${login_user_id} THEN 'and you'
+                                ELSE name
+                              END
+                              ORDER BY
+                                CASE
+                                  WHEN id = ${login_user_id} THEN 0
+                                  ELSE 1
+                                END DESC
+                              SEPARATOR ', '
+                            ) 
+                          FROM users
+                          WHERE FIND_IN_SET(id, chats.message) > 0 
+                        ),'  added  by admin '
+                      )
+                             
+                    
+                      ELSE chats.message
+                    END
+                )
+              ELSE
+                chats.message
+            END AS message,
+
+
+              ${dd}  CONCAT('${ constants.BASE_URL }','images/profiles/',users.profile_picture) AS profile_picture,
+               users.name,
+               case when chats.images IS NOT NULL then chats.images   else ''  end AS images 
+          FROM 
+              chats 
+          LEFT JOIN 
+             users ON users.id=chats.send_by
+          WHERE 
+            chats.sent_to=${req.query.user_id}    ${condition2} 
+          ORDER BY 
+            chats.id DESC  
+          Limit ${page * 30},30`;
 
     console.log(sql, " ======sql=== ");
 

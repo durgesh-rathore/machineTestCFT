@@ -75,9 +75,16 @@ exports.add = function (req, res) {
   }
 };
 
-exports.addMembersInGroup = function (req, res) {
+exports.addMembersInGroup =async function (req, res) {
   var group_members = req.body.group_members.split(",");
-  group_members.forEach((element) => {
+  group_members.forEach( async (element) => {
+
+    let s11 = await dbScript(db_sql["Q11"], {
+      var1:req.body.group_id,
+      var2: element,
+    });
+    let checkingExistingUser = await queryAsync(s11);
+    if(checkingExistingUser.length==0){
 
     var group_users = {
       group_id: req.body.group_id,
@@ -90,7 +97,42 @@ exports.addMembersInGroup = function (req, res) {
       if (error) console.log(error);
       // console.log("ddd"); //item added!
     });
+  }else{
+    let sql =
+    `UPDATE 
+           groups_users 
+        SET 
+          is_not_exist=0,at_chat_id=0 
+        WHERE 
+          id=${checkingExistingUser[0].id} 
+          AND  group_id =${req.body.group_id } 
+          AND user_id=${element}`;
+  connection.query(sql, async (error) => {
+    if (error) {
+      console.log(error);
+    }})
+  }
   });
+  // let s12 = await dbScript(db_sql["Q12"], {
+  //   var1: login_user_id,
+  // });
+  // let adminName = await queryAsync(s12);
+
+  // let s13 = await dbScript(db_sql["Q13"], {
+  //   var1: login_user_id,
+  // });
+  // let adminName = await queryAsync(s13);
+
+  var data = {
+          
+    send_by: login_user_id,
+    sent_to: group_id,
+    is_group: 1,
+    left_user_at:1,
+    images:1,
+    message:req.body.group_members
+  };
+  await save("chats", data);
   return res.json({
     success: true,
     message: "Added.",
@@ -430,6 +472,8 @@ exports.leftGroup =  async function (req, res) {
         }
         await save("chats", data);
        
+
+      
         return res.json({
           success: true,
           message: "Left.",
