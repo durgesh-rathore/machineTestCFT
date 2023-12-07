@@ -428,15 +428,45 @@ exports.leftGroup =  async function (req, res) {
   } else {
 
 
-    let s10 = await dbScript(db_sql["Q10"], {
-      var1: group_id,  
+    // let s10 = await dbScript(db_sql["Q10"], {
+    //   var1: group_id,  
+    // });
+    // var at_chat_id=0;
+    // let lastChatWhenLeftUser = await queryAsync(s10);
+    // if(lastChatWhenLeftUser.length>0){
+    // console.log(lastChatWhenLeftUser[0].id, " ======ffffffffffffffffff==");
+    // at_chat_id=lastChatWhenLeftUser[0].id
+    // }
+    // ,,,,,,,,,,,,,,,,
+
+    var data = {
+          
+      send_by: login_user_id,
+      sent_to: group_id,
+      is_group: 1,
+      left_user_at:1
+    };
+
+    let s3 = await dbScript(db_sql["Q3"], {
+      var1: login_user_id,
     });
-    var at_chat_id=0;
-    let lastChatWhenLeftUser = await queryAsync(s10);
-    if(lastChatWhenLeftUser.length>0){
-    console.log(lastChatWhenLeftUser[0].id, " ======ffffffffffffffffff==");
-    at_chat_id=lastChatWhenLeftUser[0].id
+    let forUserName = await queryAsync(s3);
+
+    if(is_left_by_admin==1){
+     
+     data.message=` Admin removed ${forUserName[0].name} .`
+    
+     
+    }else{
+
+      data.message=`${forUserName[0].name} left the group.`
+      
     }
+    at_chat_id=  await save("chats", data);
+
+    // ============
+
+
 
     let sql =
       `UPDATE  groups_users SET is_not_exist=1,at_chat_id=${at_chat_id} WHERE group_id =${
@@ -447,33 +477,7 @@ exports.leftGroup =  async function (req, res) {
         console.log(error);
       } else {
 
-        var data = {
-          
-          send_by: login_user_id,
-          sent_to: group_id,
-          is_group: 1,
-          left_user_at:1
-        };
-
-        let s3 = await dbScript(db_sql["Q3"], {
-          var1: login_user_id,
-        });
-        let forUserName = await queryAsync(s3);
-
-        if(is_left_by_admin==1){
          
-         data.message=` Admin removed ${forUserName[0].name} .`
-        
-         
-        }else{
-
-          data.message=`${forUserName[0].name} left the group.`
-          
-        }
-        await save("chats", data);
-       
-
-      
         return res.json({
           success: true,
           message: "Left.",

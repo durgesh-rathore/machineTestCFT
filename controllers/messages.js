@@ -271,7 +271,7 @@ exports.getChats = async (req, res) => {
             if (
               chatItem.images != null &&
               chatItem.images !== "" &&
-              chatItem.images !== 1 &&
+              chatItem.images != 1 &&
               chatItem.images !== undefined
             ) {
               chatItem.images = JSON.parse(chatItem.images);
