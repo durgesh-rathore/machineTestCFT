@@ -540,7 +540,7 @@ exports.informationOfGroup = function (req, res) {
       });
     }
     var sqlCounts =
-      "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+      "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.is_not_exist<>1 AND  groups_users.group_id=" +
       req.query.group_id;
     connection.query(sqlCounts, function (err, group_user_count) {
       if (err) {
