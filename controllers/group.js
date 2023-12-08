@@ -450,7 +450,7 @@ exports.leftGroup = async function (req, res) {
       });
       let forGroupAdminId = await queryAsync(s3);
       data.send_by = forGroupAdminId[0].group_admin_id;
-      
+
     } else {
       data.send_by = login_user_id;
     }
@@ -585,7 +585,7 @@ exports.getGroupUsers = function (req, res) {
   connection.query(sql, function (err, groupUsers) {
     console.log(err);
     var sqlCounts =
-      "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id=" +
+      "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.is_not_exist<>1 AND  groups_users.group_id=" +
       group_id;
     connection.query(sqlCounts, function (err, group_user_count) {
       if (err) {
