@@ -203,37 +203,47 @@ exports.getChats = async (req, res) => {
               chats.*,
 
               CASE
-              WHEN chats.left_user_at = 1 THEN
-                (
-                  SELECT
+        WHEN chats.left_user_at = 1 THEN
+            CASE
+                WHEN chats.images = 1 THEN
+                    CONCAT(
+                        (
+                            SELECT
+                                GROUP_CONCAT(
+                                    CASE
+                                        WHEN id = ${login_user_id} THEN 'and you'
+                                        ELSE name
+                                    END
+                                    ORDER BY CASE WHEN id = ${login_user_id} THEN 0 ELSE 1 END DESC
+                                    SEPARATOR ', '
+                                )
+                            FROM users
+                            WHERE FIND_IN_SET(id, chats.message) > 0
+                        ),
+                        ' added by admin '
+                    )
+                ELSE
                     CASE
-                     WHEN chats.images = 1 THEN CONCAT(
-                         (
-                          SELECT
-                            GROUP_CONCAT(
-                              CASE
-                                WHEN id = ${login_user_id} THEN 'and you'
-                                ELSE name
-                              END
-                              ORDER BY
-                                CASE
-                                  WHEN id = ${login_user_id} THEN 0
-                                  ELSE 1
-                                END DESC
-                              SEPARATOR ', '
-                            ) 
-                          FROM users
-                          WHERE FIND_IN_SET(id, chats.message) > 0 
-                        ),'  added  by admin '
-                      )
-                             
-                    
-                      ELSE chats.message
+                        WHEN chats.send_by = ${login_user_id} AND chats.message = chats.send_by THEN
+                            "You left this group."
+                        ELSE
+                            CASE
+                                WHEN chats.send_by = ${login_user_id} THEN
+                                    "Admin removed you."
+                                ELSE
+                                    CASE
+                                        WHEN chats.message = chats.send_by THEN
+                                            CONCAT((SELECT name FROM users WHERE id = chats.message), ' left the group')
+                                        ELSE
+                                            CONCAT((SELECT name FROM users WHERE id = chats.message), ' is removed ')
+                                    END
+                            END
                     END
-                )
-              ELSE
-                chats.message
-            END AS message,
+            END
+        ELSE
+            chats.message
+    END AS message,
+    
 
 
               ${dd}  CONCAT('${ constants.BASE_URL }','images/profiles/',users.profile_picture) AS profile_picture,
@@ -248,6 +258,7 @@ exports.getChats = async (req, res) => {
           ORDER BY 
             chats.id DESC  
           Limit ${page * 30},30`;
+          
 
     console.log(sql, " ======sql=== ");
 
