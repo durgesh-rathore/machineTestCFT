@@ -75,43 +75,41 @@ exports.add = function (req, res) {
   }
 };
 
-exports.addMembersInGroup =async function (req, res) {
+exports.addMembersInGroup = async function (req, res) {
   var group_members = req.body.group_members.split(",");
-  group_members.forEach( async (element) => {
-
+  group_members.forEach(async (element) => {
     let s11 = await dbScript(db_sql["Q11"], {
-      var1:req.body.group_id,
+      var1: req.body.group_id,
       var2: element,
     });
     let checkingExistingUser = await queryAsync(s11);
-    if(checkingExistingUser.length==0){
+    if (checkingExistingUser.length == 0) {
+      var group_users = {
+        group_id: req.body.group_id,
+        user_id: element,
+      };
 
-    var group_users = {
-      group_id: req.body.group_id,
-      user_id: element,
-    };
-
-    let sql = "INSERT INTO groups_users SET ?";
-    connection.query(sql, group_users, async (error) => {
-      group_users = {};
-      if (error) console.log(error);
-      // console.log("ddd"); //item added!
-    });
-  }else{
-    let sql =
-    `UPDATE 
+      let sql = "INSERT INTO groups_users SET ?";
+      connection.query(sql, group_users, async (error) => {
+        group_users = {};
+        if (error) console.log(error);
+        // console.log("ddd"); //item added!
+      });
+    } else {
+      let sql = `UPDATE 
            groups_users 
         SET 
           is_not_exist=0,at_chat_id=0 
         WHERE 
           id=${checkingExistingUser[0].id} 
-          AND  group_id =${req.body.group_id } 
+          AND  group_id =${req.body.group_id} 
           AND user_id=${element}`;
-  connection.query(sql, async (error) => {
-    if (error) {
-      console.log(error);
-    }})
-  }
+      connection.query(sql, async (error) => {
+        if (error) {
+          console.log(error);
+        }
+      });
+    }
   });
   // let s12 = await dbScript(db_sql["Q12"], {
   //   var1: login_user_id,
@@ -124,13 +122,12 @@ exports.addMembersInGroup =async function (req, res) {
   // let adminName = await queryAsync(s13);
 
   var data = {
-          
     send_by: req.body.login_user_id,
     sent_to: req.body.group_id,
     is_group: 1,
-    left_user_at:1,
-    images:1,
-    message:req.body.group_members
+    left_user_at: 1,
+    images: 1,
+    message: req.body.group_members,
   };
   await save("chats", data);
   return res.json({
@@ -300,14 +297,15 @@ exports.getSplitGroupList = function (req, res) {
     condition += '  AND ( users.name LIKE "%' + req.query.search + '%")  ';
   }
 
-  var sql =
-      ` SELECT 
+  var sql = ` SELECT 
             users2.id,users2.is_group,billing_group.event_date,
             billing_group.due_date,billing_group.spliting_amount,users2.name AS groups_Name,
             ( SELECT GROUP_CONCAT(u1.profile_picture) 
               FROM users  AS u1 
               LEFT JOIN  billing_group_users 
-                  ON billing_group_users.user_id=u1.id WHERE u1.id<>${req.query.login_user_id } AND  billing_group_users.group_id=users2.id ) AS group_users_image, 
+                  ON billing_group_users.user_id=u1.id WHERE u1.id<>${
+                    req.query.login_user_id
+                  } AND  billing_group_users.group_id=users2.id ) AS group_users_image, 
             (select (sum( case when billing_group_users.payment_amount IS NOT NULL then billing_group_users.payment_amount else 0 end )/billing_group.spliting_amount) *100  from billing_group_users  WHERE billing_group_users.group_id=users2.id ) AS percentage , 
             MONTH(billing_group.event_date) AS event_month,  
             YEARWEEK(billing_group.event_date) AS event_week,
@@ -325,7 +323,9 @@ exports.getSplitGroupList = function (req, res) {
           LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  
        WHERE
             users2.is_group=2 
-            AND billing_group_users.user_id=${req.query.login_user_id}   ${condition} 
+            AND billing_group_users.user_id=${
+              req.query.login_user_id
+            }   ${condition} 
             AND YEAR(billing_group.event_date) = YEAR(CURDATE()) 
             AND MONTH(billing_group.event_date) = MONTH(CURDATE())   
             AND   billing_group.event_date>= CURDATE() 
@@ -408,28 +408,25 @@ exports.getSplitGroupList = function (req, res) {
   });
 };
 
-exports.leftGroup =  async function (req, res) {
+exports.leftGroup = async function (req, res) {
   // login_user_id  this tag id off which user which is get remove or left group
 
-  const { group_id,login_user_id,is_left_by_admin,name} =req.body;
+  const { group_id, login_user_id, is_left_by_admin, name } = req.body;
   if (
     group_id == undefined ||
     group_id == "" ||
     group_id == null ||
     login_user_id == undefined ||
     login_user_id == "" ||
-    login_user_id == null   
-    
+    login_user_id == null
   ) {
     return res.json({
       success: false,
       message: "Something went wrong.",
     });
   } else {
-
-
     // let s10 = await dbScript(db_sql["Q10"], {
-    //   var1: group_id,  
+    //   var1: group_id,
     // });
     // var at_chat_id=0;
     // let lastChatWhenLeftUser = await queryAsync(s10);
@@ -440,44 +437,33 @@ exports.leftGroup =  async function (req, res) {
     // ,,,,,,,,,,,,,,,,
 
     var data = {
-          
-      send_by: login_user_id,
+      // send_by: login_user_id,
       sent_to: group_id,
       is_group: 1,
-      left_user_at:1
+      left_user_at: 1,
+      message: login_user_id,
     };
 
-    let s3 = await dbScript(db_sql["Q3"], {
-      var1: login_user_id,
-    });
-    let forUserName = await queryAsync(s3);
-
-    if(is_left_by_admin==1){
-     
-     data.message=` Admin removed ${forUserName[0].name} .`
-    
-     
-    }else{
-
-      data.message=`${forUserName[0].name} left the group.`
+    if (is_left_by_admin == 1) {
+      let s3 = await dbScript(db_sql['Q3'], {
+        var1: group_id,
+      });
+      let forGroupAdminId = await queryAsync(s3);
+      data.send_by = forGroupAdminId[0].group_admin_id;
       
+    } else {
+      data.send_by = login_user_id;
     }
-    at_chat_id=  await save("chats", data);
+    at_chat_id = await save("chats", data);
 
     // ============
 
-
-
-    let sql =
-      `UPDATE  groups_users SET is_not_exist=1,at_chat_id=${at_chat_id} WHERE group_id =${
-      group_id }  AND user_id=
+    let sql = `UPDATE  groups_users SET is_not_exist=1,at_chat_id=${at_chat_id} WHERE group_id =${group_id}  AND user_id=
       ${login_user_id}`;
     connection.query(sql, async (error) => {
       if (error) {
         console.log(error);
       } else {
-
-         
         return res.json({
           success: true,
           message: "Left.",
@@ -571,16 +557,12 @@ exports.informationOfGroup = function (req, res) {
 };
 
 exports.getGroupUsers = function (req, res) {
-  let {search,group_id,login_user_id,page}=req.query;
+  let { search, group_id, login_user_id, page } = req.query;
   var page1 = page ? page : 0;
 
   var condition = " ";
 
-  if (
-    search != "" &&
-    search != undefined &&
-    search != null
-  ) {
+  if (search != "" && search != undefined && search != null) {
     condition +=
       '  AND ( users.type LIKE "%' +
       search +
@@ -591,10 +573,7 @@ exports.getGroupUsers = function (req, res) {
 
   var sql = " ";
 
-  sql =
-    `SELECT users.*, ${
-    a }  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.is_not_exist<>1 AND groups_users.group_id=${
-    group_id}
+  sql = `SELECT users.*, ${a}  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.is_not_exist<>1 AND groups_users.group_id=${group_id}
 
     ORDER BY
   CASE
@@ -824,7 +803,7 @@ exports.informationOfSplitGroup = function (req, res) {
 };
 
 exports.isMuted = function (req, res) {
-  const { group_id, user_id, is_muted, chat_user_id,group_type } = req.body;
+  const { group_id, user_id, is_muted, chat_user_id, group_type } = req.body;
   let status = 1;
   var message = "";
   if (is_muted == 0) {
@@ -836,10 +815,10 @@ exports.isMuted = function (req, res) {
   console.log(" in ffdd", req.body);
   var sql = " ";
   if (group_id != "" && group_id && group_id != "undefined") {
-    if(group_type==2){
+    if (group_type == 2) {
       sql = `UPDATE billing_group_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
-          }else{
-      sql= `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
+    } else {
+      sql = `UPDATE groups_users AS gu SET  gu.is_muted=${is_muted}  WHERE gu.group_id=${group_id} AND gu.user_id=${user_id}`;
     }
     connection.query(sql, function (err, muteData) {
       if (err) {

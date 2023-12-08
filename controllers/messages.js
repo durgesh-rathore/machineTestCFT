@@ -66,7 +66,7 @@ exports.getChats = async (req, res) => {
         });
       }
     }
-   sql = `SELECT
+    sql = `SELECT
               chats.*,
               ${dd}  
               CASE
@@ -159,8 +159,6 @@ exports.getChats = async (req, res) => {
     //  Group user chat =====
     console.log(" We are in group user chat gggggggggggggggggggggg");
     if (searchCondition) {
-     
-
       let s7 = await dbScript(db_sql["Q7"], {
         var1: user_id,
         var2: condition,
@@ -181,23 +179,19 @@ exports.getChats = async (req, res) => {
     }
     console.log(condition2, " condition2  for group chat===", dd);
 
+    let s9 = await dbScript(db_sql["Q9"], {
+      var1: user_id,
+      var2: login_user_id,
+    });
 
+    let forExitUser = await queryAsync(s9);
+    console.log(forExitUser, " ======ffffffffffffffffff==");
 
-      let s9 = await dbScript(db_sql["Q9"], {
-       var1: user_id,
-       var2: login_user_id,
-     });
-     
-     let forExitUser = await queryAsync(s9);
-     console.log(forExitUser, " ======ffffffffffffffffff==");
-
-     if (forExitUser.length > 0) {
-        condition2 = "  AND chats.id <= " + forExitUser[0].at_chat_id;
-     } else {
-      condition2=" ";
-     }
-   
-
+    if (forExitUser.length > 0) {
+      condition2 = "  AND chats.id <= " + forExitUser[0].at_chat_id;
+    } else {
+      condition2 = " ";
+    }
 
     sql = `SELECT 
               chats.*,
@@ -205,6 +199,19 @@ exports.getChats = async (req, res) => {
               CASE
         WHEN chats.left_user_at = 1 THEN
             CASE
+            WHEN chats.images = 1 AND chats.send_by = (SELECT users.group_admin_id FROM users WHERE id = ${user_id}) THEN
+            CONCAT(
+                'You added ',
+                (
+                    SELECT
+                        GROUP_CONCAT(
+                            name
+                            SEPARATOR ', '
+                        )
+                    FROM users
+                    WHERE FIND_IN_SET(id, chats.message) > 0
+                )
+            )
                 WHEN chats.images = 1 THEN
                     CONCAT(
                         (
@@ -212,6 +219,7 @@ exports.getChats = async (req, res) => {
                                 GROUP_CONCAT(
                                     CASE
                                         WHEN id = ${login_user_id} THEN 'and you'
+                                        WHEN id = ${login_user_id} AND LENGTH(chats.message) = 1 THEN 'you'
                                         ELSE name
                                     END
                                     ORDER BY CASE WHEN id = ${login_user_id} THEN 0 ELSE 1 END DESC
@@ -246,7 +254,9 @@ exports.getChats = async (req, res) => {
     
 
 
-              ${dd}  CONCAT('${ constants.BASE_URL }','images/profiles/',users.profile_picture) AS profile_picture,
+              ${dd}  CONCAT('${
+      constants.BASE_URL
+    }','images/profiles/',users.profile_picture) AS profile_picture,
                users.name,
                case when chats.images IS NOT NULL then chats.images   else ''  end AS images 
           FROM 
@@ -258,7 +268,6 @@ exports.getChats = async (req, res) => {
           ORDER BY 
             chats.id DESC  
           Limit ${page * 30},30`;
-          
 
     console.log(sql, " ======sql=== ");
 
