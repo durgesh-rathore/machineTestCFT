@@ -233,7 +233,7 @@ exports.getChats = async (req, res) => {
                 ELSE
                     CASE
                         WHEN chats.send_by = ${login_user_id} AND chats.message = chats.send_by THEN
-                            "You left ."
+                            "You left."
                         ELSE
                             CASE
                                 WHEN chats.send_by = ${login_user_id} THEN
@@ -243,7 +243,7 @@ exports.getChats = async (req, res) => {
                                         WHEN chats.message = chats.send_by THEN
                                             CONCAT((SELECT name FROM users WHERE id = chats.message), ' left.')
                                         ELSE
-                                            CONCAT((SELECT name FROM users WHERE id = chats.message), ' is removed ')
+                                            CONCAT((SELECT name FROM users WHERE id = chats.message), ' is removed. ')
                                     END
                             END
                     END
@@ -431,7 +431,7 @@ exports.getDirectMessages = async (req, res) => {
             SELECT GROUP_CONCAT(users1.profile_picture)
             FROM users AS users1
             LEFT JOIN groups_users ON groups_users.user_id = users1.id
-            WHERE groups_users.group_id = users.id
+            WHERE groups_users.group_id = users.id AND groups_users.is_not_exist<>1
         )
     END AS group_users_image,
     CASE
