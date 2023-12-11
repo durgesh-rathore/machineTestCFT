@@ -227,7 +227,7 @@ exports.getChats = async (req, res) => {
                                     SEPARATOR ', '
                                 )
                             FROM users
-                            WHERE FIND_IN_SET(id, chats.message) > 0
+                            WHERE id= chats.message
                         )
                         
                     )
