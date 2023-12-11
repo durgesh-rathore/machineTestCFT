@@ -213,7 +213,7 @@ exports.getChats = async (req, res) => {
                 )
             )
                 WHEN chats.images = 1 THEN
-                    CONCAT(
+                    CONCAT('Admin added ',
                         (
                             SELECT
                                 GROUP_CONCAT(
@@ -227,8 +227,8 @@ exports.getChats = async (req, res) => {
                                 )
                             FROM users
                             WHERE FIND_IN_SET(id, chats.message) > 0
-                        ),
-                        ' added by admin '
+                        )
+                        
                     )
 
 
