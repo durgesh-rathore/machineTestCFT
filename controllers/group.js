@@ -133,6 +133,7 @@ exports.addMembersInGroup = async function (req, res) {
   //   var1: login_user_id,
   // });
   // let adminName = await queryAsync(s13);
+  if(req.body.login_user_id!==element){
 
   var data = {
     send_by: req.body.login_user_id,
@@ -143,6 +144,7 @@ exports.addMembersInGroup = async function (req, res) {
     message: req.body.group_members,
   };
   await save("chats", data);
+}
   return res.json({
     success: true,
     message: "Added.",
