@@ -425,16 +425,45 @@ exports.leftGroup = async function (req, res) {
       message: "Something went wrong.",
     });
   } else {
-    // let s10 = await dbScript(db_sql["Q10"], {
-    //   var1: group_id,
-    // });
-    // var at_chat_id=0;
-    // let lastChatWhenLeftUser = await queryAsync(s10);
-    // if(lastChatWhenLeftUser.length>0){
-    // console.log(lastChatWhenLeftUser[0].id, " ======ffffffffffffffffff==");
-    // at_chat_id=lastChatWhenLeftUser[0].id
-    // }
-    // ,,,,,,,,,,,,,,,,
+    
+    let s14 = await dbScript(db_sql['Q14'], {
+      var1: group_id,
+      var2:login_user_id
+    });
+    let DeleteGroupIf = await queryAsync(s14);
+    if(DeleteGroupIf.length>0){
+      console.log(" all the data is clearing.===========");
+      let s15 = await dbScript(db_sql['Q15'], {
+        var1: group_id,
+        var2:login_user_id
+      });
+      let DeletedGroup = await queryAsync(s15);
+
+      let s16 = await dbScript(db_sql['Q16'], {
+        var1: group_id,
+           });
+      let DeletedGroupUsers = await queryAsync(s16);
+
+
+      let s17 = await dbScript(db_sql['Q17'], {
+        var1: group_id,
+        
+      });
+      let DeletedGroupChats = await queryAsync(s17);
+
+      if(DeletedGroup){
+        return res.json({
+          success: true,
+          message: "Group is deleted successfully.",
+        });
+      }
+
+    }
+
+    // data.send_by = forGroupAdminId[0].group_admin_id;
+
+// 'Q14': " SELECT * FROM users WHERE group_admin_id={var1}",
+
 
     var data = {
       // send_by: login_user_id,

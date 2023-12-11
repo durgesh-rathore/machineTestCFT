@@ -32,7 +32,11 @@ const db_sql = {
     SEPARATOR ', '
   ) AS concatenated_names
 FROM users
-WHERE id IN ({var2})`
+WHERE id IN ({var2})`,
+'Q14': " SELECT * FROM users WHERE id={var1} AND group_admin_id={var2}",
+'Q15': " DELETE FROM users WHERE id={var1} AND group_admin_id={var2}",
+'Q16': " DELETE FROM groups_users WHERE  group_id={var1}",
+'Q17': " DELETE FROM chats WHERE  sent_to={var1} AND is_group=1",
 
 };
 // IS  NOT NULL
