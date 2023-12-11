@@ -49,19 +49,23 @@ exports.add = function (req, res) {
                     group_id: group.insertId,
                     user_id: element,
                   };
+
                   await save("groups_users", group_users);
-                  console.log("group_user======", group_users);
                   group_users = {};
+                  var data = {
+                    send_by: req.body.group_admin_id,
+                    sent_to: group.insertId,
+                    is_group: 1,
+                    left_user_at: 1,
+                    images: 1,
+                    message: element,
+                  };
+                  await save("chats", data);
+                  data={};
+                  console.log("group_user======", group_users);
+                 
                 });
-                var data = {
-                  send_by: req.body.group_admin_id,
-                  sent_to: group.insertId,
-                  is_group: 1,
-                  left_user_at: 1,
-                  images: 1,
-                  message: req.body.group_members,
-                };
-                await save("chats", data);
+              
 
                 return res.json({
                   success: true,
