@@ -233,7 +233,7 @@ exports.getChats = async (req, res) => {
                 ELSE
                     CASE
                         WHEN chats.send_by = ${login_user_id} AND chats.message = chats.send_by THEN
-                            "You left this group."
+                            "You left ."
                         ELSE
                             CASE
                                 WHEN chats.send_by = ${login_user_id} THEN
@@ -241,7 +241,7 @@ exports.getChats = async (req, res) => {
                                 ELSE
                                     CASE
                                         WHEN chats.message = chats.send_by THEN
-                                            CONCAT((SELECT name FROM users WHERE id = chats.message), ' left the group')
+                                            CONCAT((SELECT name FROM users WHERE id = chats.message), ' left.')
                                         ELSE
                                             CONCAT((SELECT name FROM users WHERE id = chats.message), ' is removed ')
                                     END
