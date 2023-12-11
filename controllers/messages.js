@@ -218,8 +218,9 @@ exports.getChats = async (req, res) => {
                             SELECT
                                 GROUP_CONCAT(
                                     CASE
+                                    WHEN id = ${login_user_id} AND LENGTH(chats.message) = 1 THEN 'you'
                                         WHEN id = ${login_user_id} THEN 'and you'
-                                        WHEN id = ${login_user_id} AND LENGTH(chats.message) = 1 THEN 'you'
+                                        
                                         ELSE name
                                     END
                                     ORDER BY CASE WHEN id = ${login_user_id} THEN 0 ELSE 1 END DESC
