@@ -199,7 +199,7 @@ exports.getChats = async (req, res) => {
               CASE
         WHEN chats.left_user_at = 1 THEN
             CASE
-            WHEN chats.images = 1 AND chats.send_by = (SELECT users.group_admin_id FROM users WHERE id = ${user_id}) THEN
+            WHEN chats.images = 1 AND chats.send_by = ${login_user_id} THEN
             CONCAT(
                 'You added ',
                 (
@@ -230,6 +230,8 @@ exports.getChats = async (req, res) => {
                         ),
                         ' added by admin '
                     )
+
+
                 ELSE
                     CASE
                         WHEN chats.send_by = ${login_user_id} AND chats.message = chats.send_by THEN
