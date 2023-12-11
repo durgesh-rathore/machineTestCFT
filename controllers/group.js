@@ -52,6 +52,7 @@ exports.add = function (req, res) {
 
                   await save("groups_users", group_users);
                   group_users = {};
+                  if(req.body.login_user_id!==element){
                   var data = {
                     send_by: req.body.group_admin_id,
                     sent_to: group.insertId,
@@ -62,6 +63,7 @@ exports.add = function (req, res) {
                   };
                   await save("chats", data);
                   data={};
+                }
                   console.log("group_user======", group_users);
                  
                 });
@@ -121,30 +123,29 @@ exports.addMembersInGroup = async function (req, res) {
         if (error) {
           console.log(error);
         }
+
+       
       });
+
     }
+
+    var data = {
+      send_by: req.body.login_user_id,
+      sent_to: req.body.group_id,
+      is_group: 1,
+      left_user_at: 1,
+      images: 1,
+      message: element,
+    };
+    await save("chats", data);
+    data={}
+
   });
-  // let s12 = await dbScript(db_sql["Q12"], {
-  //   var1: login_user_id,
-  // });
-  // let adminName = await queryAsync(s12);
+  
+  
 
-  // let s13 = await dbScript(db_sql["Q13"], {
-  //   var1: login_user_id,
-  // });
-  // let adminName = await queryAsync(s13);
-  if(req.body.login_user_id!==element){
+ 
 
-  var data = {
-    send_by: req.body.login_user_id,
-    sent_to: req.body.group_id,
-    is_group: 1,
-    left_user_at: 1,
-    images: 1,
-    message: req.body.group_members,
-  };
-  await save("chats", data);
-}
   return res.json({
     success: true,
     message: "Added.",

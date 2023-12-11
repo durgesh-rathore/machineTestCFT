@@ -203,11 +203,8 @@ exports.getChats = async (req, res) => {
             CONCAT(
                 'You added ',
                 (
-                    SELECT
-                        GROUP_CONCAT(
-                            name
-                            SEPARATOR ', '
-                        )
+                    SELECT   name                      
+                        
                     FROM users
                     WHERE id=chats.message
                 )
@@ -219,13 +216,10 @@ exports.getChats = async (req, res) => {
                                 GROUP_CONCAT(
                                     CASE
                                     WHEN id = ${login_user_id} AND LENGTH(chats.message) = 1 THEN 'you'
-                                        WHEN id = ${login_user_id} THEN 'and you'
-                                        
+                                                                               
                                         ELSE name
                                     END
-                                    ORDER BY CASE WHEN id = ${login_user_id} THEN 0 ELSE 1 END DESC
-                                    SEPARATOR ', '
-                                )
+                                   )
                             FROM users
                             WHERE id= chats.message
                         )
