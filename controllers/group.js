@@ -53,6 +53,15 @@ exports.add = function (req, res) {
                   console.log("group_user======", group_users);
                   group_users = {};
                 });
+                var data = {
+                  send_by: req.body.group_admin_id,
+                  sent_to: group.insertId,
+                  is_group: 1,
+                  left_user_at: 1,
+                  images: 1,
+                  message: req.body.group_members,
+                };
+                await save("chats", data);
 
                 return res.json({
                   success: true,
