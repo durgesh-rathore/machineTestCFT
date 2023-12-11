@@ -211,18 +211,12 @@ exports.getChats = async (req, res) => {
             )
                 WHEN chats.images = 1 THEN
                     CONCAT('Admin added ',
-                        (
-                            SELECT
-                                GROUP_CONCAT(
-                                    CASE
-                                    WHEN id = ${login_user_id} AND LENGTH(chats.message) = 1 THEN 'you'
-                                                                               
-                                        ELSE name
-                                    END
-                                   )
-                            FROM users
-                            WHERE id= chats.message
-                        )
+                    CASE WHEN chats.message<>${login_user_id} THEN
+                    (    SELECT     name                      
+                          FROM users
+                         WHERE id= chats.message
+                      ) ELSE                        
+                       " you"  END
                         
                     )
 
