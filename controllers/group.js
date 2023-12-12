@@ -52,7 +52,7 @@ exports.add = function (req, res) {
 
                   await save("groups_users", group_users);
                   group_users = {};
-                  if(req.body.login_user_id!=element){
+                  if(req.body.group_admin_id!=element){
                   var data = {
                     send_by: req.body.group_admin_id,
                     sent_to: group.insertId,
