@@ -376,6 +376,19 @@ exports.getDirectMessages = async (req, res) => {
         ORDER BY chats.created_datetime DESC
         LIMIT 1
     ) 
+    WHEN users.is_group=1  THEN
+    (
+        SELECT TIMESTAMPDIFF(
+            MINUTE,
+            chats.created_datetime,
+            CURRENT_TIMESTAMP
+        )
+        FROM chats
+        WHERE   chats.sent_to =users.id      ORDER BY chats.created_datetime DESC
+        LIMIT 1
+    )
+
+
     ELSE 
     (  SELECT TIMESTAMPDIFF(
       MINUTE,

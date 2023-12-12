@@ -196,7 +196,7 @@ exports.getWishListItems = function (req, res) {
             await save("wish_list", wish_list_product);
             return res.json({
               success: true,
-              message: "Added product in wishlist.",
+              message: "Product has been added to wish list.",
             });
           } else {
             return res.json({
