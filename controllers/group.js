@@ -31,7 +31,7 @@ exports.add = function (req, res) {
         if (err) console.log(err);
         if (presentgroup.length > 0) {
           return res.json({
-            success: true,
+            success: 1,
             message: "Group already exist.",
           });
         } else {
