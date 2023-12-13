@@ -49,6 +49,12 @@ module.exports = (io) => {
       // console.log(`A user joined chat-${roomId}`);
       socket.join(`chat-${roomId}`);
     });
+
+    socket.on("user-leave-room", () => {
+      // Leave the room
+      socket.leave(`chat-${roomId}`);
+    })
+
     // {'send_by': userId,'sent_to' :'2', 'newMessage': message, 'name': login_userName,'group_id':''    ,'image': ''};
     socket.on(
       "user-send-message",
