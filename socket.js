@@ -45,15 +45,34 @@ module.exports = (io) => {
       // console.log("user-offline : ", uid);
     });
 
-    socket.on("user-join-room", ({ roomId }) => {
-      // console.log(`A user joined chat-${roomId}`);
-      socket.join(`chat-${roomId}`);
-    });
+  // Assume 'socket' is the user's Socket.IO socket instance
 
-    socket.on("user-leave-room", () => {
-      // Leave the room
-      socket.leave(`chat-${roomId}`);
-    })
+socket.on("user-join-room", ({ roomId }) => {
+  // Check if the user is already in the room
+  if (!isUserInRoom(roomId)) {
+    // If not, join the room
+    socket.join(`chat-${roomId}`);
+    // console.log(`A user joined chat-${roomId}`);
+  } else {
+    // console.log(`User is already in chat-${roomId}`);
+  }
+});
+
+socket.on("user-leave-room", (roomId) => {
+
+  if (isUserInRoom(roomId)) {
+    socket.leave(`chat-${roomId}`);
+    console.log(`User left chat-${roomId}`);
+  } else {
+    console.log("User is not in any room to leave");
+  }
+});
+
+// Function to check if a user is in a room
+function isUserInRoom(roomId) {
+  const rooms = Object.keys(socket.rooms);
+  return rooms.includes(`chat-${roomId}`);
+}
 
     // {'send_by': userId,'sent_to' :'2', 'newMessage': message, 'name': login_userName,'group_id':''    ,'image': ''};
     socket.on(
