@@ -340,7 +340,190 @@ exports.socialLogin = async function (req, res) {
     );
   }
 };
+exports.socialLogin1 = async function (req, res) {
+  console.log("socialLogin==========",req.body);
+  const {email,insta_id,is_insta_login,facebook_id,is_facebook_login, google_id,is_gogle_login,apple_id,is_apple_login}=req.body
+ var condition=" WHERE 1"
+if(email){
+ condition=`users.email ='${email}'`;
+ }else
+  if(is_insta_login=1){
+    condition=`profile.insta_id='${insta_id}'`;
+  }else
+if(is_facebook_login=1){
+  condition=`profile.facebook_id='${facebook_id}'`;
+  }else
+  if(is_apple_login=1){
+    condition=`profile.apple_id='${apple_id}'`;
+    }
 
+
+  var sql=`SELECT users.*, profile.*,CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('${constants.BASE_URL}','images/profiles/',users.profile_picture) ELSE '' END AS profile_picture FROM users LEFT JOIN profile ON profile.user_id=users.id ${condition}`
+    connection.query( sql, async function (err, users) {
+        if (users.length > 0) {
+          if(req.body.is_signup==1){
+            return res.json({
+              success: false,
+              message: "User Already exist.",
+            });
+          }else
+          if ((users[0].is_gogle_login = 0) && false) {
+            return res.json({
+              success: false,
+              message: "User Already exist.",
+            });
+          } else {
+            if (
+              req.body.auth_token != "" ||
+              req.body.auth_token != null ||
+              req.body.auth_token != undefined
+            ) {
+              connection.query(
+                "UPDATE users SET auth_token='" +
+                  req.body.auth_token +
+                  "' WHERE id=" +
+                  users[0].id +
+                  " ",
+                async function (err, user) {
+                  if (err) throw err;
+                  if (user) {
+                  }
+                }
+              );
+            }
+
+
+
+            var profile ={ };
+            if(req.body.is_gogle_login==1 && users[0].is_gogle_login!=1 ){
+             profile.is_gogle_login=1;
+            }
+            
+            if(req.body.is_apple_login==1 && users[0].is_apple_login!=1){
+              profile.is_apple_login=1;
+             }
+
+             if(profile.is_gogle_login==1 || profile.is_apple_login==1 ){
+              connection.query(
+               "UPDATE profile SET ? WHERE user_id="+users[0].id,
+                profile,
+                async function (err, user_profile) {
+                if (err) throw err;
+                if (user_profile) {
+
+                }})
+              }
+              if (
+                req.body.divice_token &&
+                req.body.divice_token != "undefined" &&
+                req.body.divice_token != "null"
+              ) {
+                var j = await findByIdAndUpdate(
+                  "users",
+                  { divice_token: req.body.divice_token },
+                  " id=" + users[0].id
+                );
+                console.log("   dddddddddddd update divice token==", j);
+              }
+            var token = jwt.sign({ id: users[0].id }, constants.SECRET, {
+              expiresIn: "7d", // expires in 24 hours
+            });
+            return res.json({
+              success: true,
+              token: "JWT " + token,
+              response: users[0],
+              message: "Login successfully.",
+            });
+          }
+        } else {
+          // let password = await encryptPassword(req.body.password);
+          var newUser = {
+            name: req.body.name
+            
+               };
+               if(email){
+               newUser.email=email.toLowerCase()
+              }
+          if (
+            req.body.divice_token &&
+            req.body.divice_token != "undefined" &&
+            req.body.divice_token != "null"
+          ) {
+            newUser.divice_token = req.body.divice_token;
+          }
+          if(req.body.is_signup==1){
+          connection.query(
+            "INSERT INTO users SET ?",
+            newUser,
+            async function (err, user) {
+              if (err) throw err;
+              if (user) {
+                var token = jwt.sign({ id: user.insertId }, constants.SECRET, {
+                  expiresIn: "7d", // expires in 24 hours
+                });
+
+                var profile ={
+                  user_id:user.insertId
+                };
+                if(is_gogle_login==1){
+                 profile.is_gogle_login=1;
+                 if(google_id){
+                  profile.google_id=google_id;
+                }
+                }
+                
+                if(is_apple_login==1){
+                  profile.is_apple_login=1;
+                  if(apple_id){
+                    profile.apple_id=apple_id;
+                  }
+                 }
+
+                 if(is_insta_login=1){
+                  profile.insta_id=insta_id;
+                  profile.is_insta_login=1;
+                }
+
+              if(is_facebook_login=1){
+                if(facebook_id){
+                   profile.facebook_id=facebook_id;
+                 }
+                profile.is_facebook_login=1;
+                }
+
+                 connection.query(
+                  "INSERT INTO profile SET ?",
+                  profile,
+                  async function (err, user_profile) {
+                    if (err) throw err;
+                    if (user) {
+
+                    }})
+
+                return res.json({
+                  success: true,
+                  token: "JWT " + token,
+                  response:{  id: user.insertId,
+                               name: req.body.name,
+                               profile_picture: null,
+                               profie_step:0
+                  },
+                  message: "Signup successfully.",
+                });
+              }
+            }
+          );
+          }else{
+            return res.json({
+              success: false,
+              message: "User dosen't exits Please signup .",
+            });
+          }
+        }
+      }
+    );
+  
+};
 
 
 exports.getInterestList = function (req, res) {
@@ -402,7 +585,7 @@ exports.userInterest = function (req, res) {
           });
           return res.json({
             success: true,
-            message: "Interest fields save succesful.",
+            message: "Interest  saved successfully.",
           });
         }
       }
@@ -490,7 +673,7 @@ exports.userFavoriteColors = function (req, res) {
           });
           return res.json({
             success: true,
-            message: "Favorite colors save succesful.",
+            message: "Favorite colors saved successfully.",
           });
         }
       }
