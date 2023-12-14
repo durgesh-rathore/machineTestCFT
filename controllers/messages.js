@@ -238,7 +238,7 @@ exports.getChats = async (req, res) => {
                                              WHEN chats.message = ${login_user_id} THEN
                                               'Admin removed you'
                                                ELSE
-                                                CONCAT('Admin removed ',(SELECT name FROM users WHERE id = chats.message), )
+                                                CONCAT('Admin removed ',(SELECT name FROM users WHERE id = chats.message) )
                                             END
                                     END
                             END
