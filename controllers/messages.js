@@ -228,13 +228,18 @@ exports.getChats = async (req, res) => {
                         ELSE
                             CASE
                                 WHEN chats.send_by = ${login_user_id} THEN
-                                CONCAT('You removed ',(SELECT name FROM users WHERE id = chats.message),'.')
+                                CONCAT('You removed ',(SELECT name FROM users WHERE id = chats.message))
                                 ELSE
                                     CASE
                                         WHEN chats.message = chats.send_by THEN
                                             CONCAT((SELECT name FROM users WHERE id = chats.message), ' left.')
-                                        ELSE
-                                            CONCAT((SELECT name FROM users WHERE id = chats.message), ' is removed. ')
+                                        ELSE 
+                                          CASE
+                                             WHEN chats.message = ${login_user_id} THEN
+                                              'Admin removed you'
+                                               ELSE
+                                                CONCAT('Admin removed ',(SELECT name FROM users WHERE id = chats.message), )
+                                            END
                                     END
                             END
                     END
