@@ -564,6 +564,7 @@ exports.getPostsAndEventsList = function (req, res) {
     req.query.login_user_id } THEN true END )  
     OR (events.visibilitySelectUsers=4 AND groups_users.user_id=${
     req.query.login_user_id })  
+    OR events.user_id=${req.query.login_user_id }
      ) ) `;
 
   if (req.query.myProfile == "1") {

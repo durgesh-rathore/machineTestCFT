@@ -341,6 +341,8 @@ exports.socialLogin = async function (req, res) {
   }
 };
 
+
+
 exports.getInterestList = function (req, res) {
   var page = req.query.page ? req.query.page : 0;
   connection.query(
