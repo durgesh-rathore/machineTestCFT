@@ -623,6 +623,7 @@ exports.getGroupUsers = function (req, res) {
     ORDER BY
   CASE
      WHEN users.id=${login_user_id} THEN 0 
+     WHEN users.id=(SELECT users.group_admin_id FROM users WHERE id=${group_id}) THEN 0
       ELSE 1
       END,
   users.id DESC`;
