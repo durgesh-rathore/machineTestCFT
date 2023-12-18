@@ -153,6 +153,9 @@ function isUserInRoom(roomId) {
               });
             } else {
               mute_users = muteUsersData[0].mute_users;
+              if(mute_users==null){
+                mute_users='';
+              }
               clients[sent_to].emit("receive-message", {
                 send_by,
                 sent_to,
@@ -243,7 +246,7 @@ function isUserInRoom(roomId) {
               " ";
           } else{
              muteUsersSql =
-            "SELECT GROUP_CONCAT(user_id) AS mute_users FROM  groups_users   WHERE groups_users.is_muted=1  AND  groups_users.group_id=" +
+            "SELECT GROUP_CONCAT(user_id) AS mute_users FROM  billing_group_users   WHERE billing_group_users.is_muted=1  AND  billing_group_users.group_id=" +
             sent_to +
             " ";
 
@@ -252,6 +255,7 @@ function isUserInRoom(roomId) {
 
             connection.query(muteUsersSql, async function (err, muteUsersData) {
               if (err) {
+                console.log(err,"===  258 ===");
                 mute_users = "";
                 socket.broadcast.to(`chat-${sent_to}`).emit("receive-message", {
                   send_by,
@@ -267,6 +271,10 @@ function isUserInRoom(roomId) {
                 });
               } else {
                 mute_users = muteUsersData[0].mute_users;
+                 if(mute_users==null){
+                mute_users='';
+              }
+              console.log(" ======================= 277    277")
                 socket.broadcast.to(`chat-${sent_to}`).emit("receive-message", {
                   send_by,
                   sent_to,

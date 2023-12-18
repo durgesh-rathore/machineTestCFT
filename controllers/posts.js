@@ -22,13 +22,11 @@ var a =
   "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
 
 exports.new = async function (req, res) {
-  console.log("dddd", req);
   const conditionForPost =
     req.body.post_id &&
     req.body.post_id != "undefined" &&
     req.body.post_id != "null" &&
     req.body.post_id != "";
-  console.log("condition for post == ", conditionForPost);
 
   try {
     userPost = {
@@ -44,13 +42,10 @@ exports.new = async function (req, res) {
       userPost.visibilitySelectUsers = req.body.visibilitySelectUsers;
     }
 
-    if (conditionForPost && req.body.is_remove_image==1) {
+    if (conditionForPost && req.body.is_remove_image == 1) {
       var postD = findOne("events", " id= " + req.body.post_id);
-      console.log(postD, "====dddddddd");
-      fs.unlink(
-        "./public/images/postImage/" + postD.image,
-        function (err) {}
-      );
+
+      fs.unlink("./public/images/postImage/" + postD.image, function (err) {});
     }
     if (req.file && req.file != "" && req.file != undefined) {
       // if(false){}
@@ -73,14 +68,10 @@ exports.new = async function (req, res) {
         await fs.writeFileSync(outputImagePath, watermarkedImageBuffer);
 
         userPost.image = fileName;
-      } catch (err) {
-        console.log(err);
-      }
-
-      
-    }else{
-      if(req.body.is_remove_image==1){
-      userPost.image = ''
+      } catch (err) {}
+    } else {
+      if (req.body.is_remove_image == 1) {
+        userPost.image = "";
       }
     }
 
@@ -88,10 +79,9 @@ exports.new = async function (req, res) {
     if (conditionForPost) {
       var con = ` events.id=${req.body.post_id} AND events.user_id=${req.body.login_user_id} `;
       c = await findByIdAndUpdate("events", userPost, con);
-      console.log("c==== when are we editing", c);
     } else {
       c = await save("events", userPost);
-      console.log("c==== when are we creating", c);
+
       var PNF = {
         post_id: c,
         message:
@@ -106,7 +96,6 @@ exports.new = async function (req, res) {
 
       pushNotificationForMultipleUser(PNF);
     }
-    console.log("c==== perfection ", c);
 
     if (c) {
       if (req.body.visibilitySelectUsers != 1 && !conditionForPost) {
@@ -120,9 +109,7 @@ exports.new = async function (req, res) {
           "DELETE FROM visibility  WHERE post_id= " + req.body.post_id + "",
           (err, result) => {
             if (err) {
-              console.log("error in DELETE FROM visibility==", err);
             } else {
-              console.log("result from DELETE ==", result);
             }
           }
         );
@@ -150,13 +137,12 @@ exports.new = async function (req, res) {
 // Add watermark to the image buffer
 
 // exports.new = async function (req, res) {
-//   console.log("dddd", req);
+
 //   const conditionForPost =
 //     req.body.post_id &&
 //     req.body.post_id != "undefined" &&
 //     req.body.post_id != "null" &&
 //     req.body.post_id != "";
-//   console.log("condition for post == ", conditionForPost);
 
 //   try {
 //     userPost = {
@@ -175,7 +161,7 @@ exports.new = async function (req, res) {
 //       userPost.image = req.file.filename;
 //       if (conditionForPost) {
 //         var postD = findOne("events", " id= " + req.body.post_id);
-//         console.log(postD, "====dddddddd");
+
 //         fs.unlink(
 //           "./public/images/postImage/" + postD.image,
 //           function (err) {}
@@ -187,10 +173,10 @@ exports.new = async function (req, res) {
 //     if (conditionForPost) {
 //       var con = ` events.id=${req.body.post_id} AND events.user_id=${req.body.login_user_id} `;
 //       c = await findByIdAndUpdate("events", userPost, con);
-//       console.log("c==== when are we editing", c);
+
 //     } else {
 //       c = await save("events", userPost);
-//       console.log("c==== when are we creating", c);
+
 //       var PNF = {
 //         post_id: c,
 //         message:
@@ -205,7 +191,6 @@ exports.new = async function (req, res) {
 
 //       pushNotificationForMultipleUser(PNF);
 //     }
-//     console.log("c==== perfection ", c);
 
 //     if (c) {
 //       if (req.body.visibilitySelectUsers != 1 && !conditionForPost) {
@@ -219,9 +204,9 @@ exports.new = async function (req, res) {
 //           "DELETE FROM visibility  WHERE post_id= " + req.body.post_id + "",
 //           (err, result) => {
 //             if (err) {
-//               console.log("error in DELETE FROM visibility==", err);
+
 //             } else {
-//               console.log("result from DELETE ==", result);
+
 //             }
 //           }
 //         );
@@ -248,23 +233,19 @@ exports.new = async function (req, res) {
 
 exports.postEvent = async function (req, res) {
   var data = {};
-  console.log("ddddddddddddd", req.body.post_id);
+
   const conditionForPost =
     req.body.post_id &&
     req.body.post_id != "undefined" &&
     req.body.post_id != "null" &&
     req.body.post_id != "";
-  console.log(conditionForPost, " =========conditionForPost====");
 
-
-  
   if (req.file) {
     data.image = req.file.filename;
     if (conditionForPost) {
       connection.query(
         `SELECT * FROM events WHERE id=${req.body.post_id}`,
         function (err, postD) {
-          console.log(postD, "ddddddd");
           if (postD && postD.length > 0) {
             fs.unlink(
               "./public/images/postImage/" + postD[0].image,
@@ -347,10 +328,8 @@ exports.postEvent = async function (req, res) {
   if (conditionForPost) {
     var con = ` events.id=${req.body.post_id} AND events.user_id=${req.body.login_user_id} `;
     c = await findByIdAndUpdate("events", data, con);
-    console.log("c==== when are we editing", c);
   } else {
     c = await save("events", data);
-    console.log("c==== when are we creating", c);
 
     var PNF = {
       post_id: c,
@@ -366,7 +345,7 @@ exports.postEvent = async function (req, res) {
 
     pushNotificationForMultipleUser(PNF);
   }
-  console.log("c====", c);
+
   if (c) {
     if (req.body.visibilitySelectUsers != 1) {
       var visibility_data = {};
@@ -384,7 +363,6 @@ exports.postEvent = async function (req, res) {
 };
 
 async function visibility(data) {
-  console.log("===========", data);
   let c;
   try {
     let visibility_data = {};
@@ -410,10 +388,8 @@ async function visibility(data) {
             visibility_data_copy,
             function (err, data1) {
               if (err) {
-                console.log(err, "====err");
                 reject(err);
               } else {
-                console.log(data1);
                 resolve();
               }
             }
@@ -423,15 +399,12 @@ async function visibility(data) {
 
       async function processElements() {
         for (const element of data.user_id.split(",")) {
-          console.log(element);
           await insertData(element);
         }
       }
 
       processElements()
-        .then(() => {
-          console.log("All insertions completed.");
-        })
+        .then(() => {})
         .catch((error) => {
           console.error("Error:", error);
         });
@@ -447,7 +420,7 @@ async function visibility(data) {
       //   var c = await save("visibility", visibility_data);
       // });
 
-       async function insertData(element) {
+      async function insertData(element) {
         return new Promise((resolve, reject) => {
           const visibility_data_copy = { ...visibility_data };
           visibility_data_copy.user_id = element;
@@ -457,10 +430,8 @@ async function visibility(data) {
             visibility_data_copy,
             function (err, data1) {
               if (err) {
-                console.log(err, "====err");
                 reject(err);
               } else {
-                console.log(data1);
                 resolve();
               }
             }
@@ -470,15 +441,12 @@ async function visibility(data) {
 
       async function processElements() {
         for (const element of data.user_id.split(",")) {
-          console.log(element);
           await insertData(element);
         }
       }
 
       processElements()
-        .then(() => {
-          console.log("All insertions completed.");
-        })
+        .then(() => {})
         .catch((error) => {
           console.error("Error:", error);
         });
@@ -490,7 +458,7 @@ async function visibility(data) {
     ) {
       visibility_data.user_id = data.login_user_id;
 
-     async function insertData(element) {
+      async function insertData(element) {
         return new Promise((resolve, reject) => {
           const visibility_data_copy = { ...visibility_data };
           visibility_data_copy.group_id = element;
@@ -500,10 +468,8 @@ async function visibility(data) {
             visibility_data_copy,
             function (err, data1) {
               if (err) {
-                console.log(err, "====err");
                 reject(err);
               } else {
-                console.log(data1);
                 resolve();
               }
             }
@@ -513,15 +479,12 @@ async function visibility(data) {
 
       async function processElements() {
         for (const element of data.user_id.split(",")) {
-          console.log(element);
           await insertData(element);
         }
       }
 
       processElements()
-        .then(() => {
-          console.log("All insertions completed.");
-        })
+        .then(() => {})
         .catch((error) => {
           console.error("Error:", error);
         });
@@ -543,28 +506,21 @@ exports.getPostsAndEventsList = function (req, res) {
 
   // OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )
   var condition1 = " ";
-  var v=`(CASE WHEN (events.start_date>=CURRENT_DATE() AND events.start_time>= DATE_FORMAT(NOW(), '%H:%i:%s')  OR ( events.user_id=${
-            req.query.login_user_id } AND events.start_date>=CURRENT_DATE()  AND events.start_time>= DATE_FORMAT(NOW(), '%H:%i:%s')) )
-         OR events.post_type=1 THEN true ELSE false END) AND `
+  var v = `(CASE WHEN (events.start_date>=CURRENT_DATE() AND events.start_time>= DATE_FORMAT(NOW(), '%H:%i:%s')  OR ( events.user_id=${req.query.login_user_id} AND events.start_date>=CURRENT_DATE()  AND events.start_time>= DATE_FORMAT(NOW(), '%H:%i:%s')) )
+         OR events.post_type=1 THEN true ELSE false END) AND `;
 
- var condition =
-    ` ${v} ( (               (users_requests.user_id=${
-    req.query.login_user_id } AND 
+  var condition = ` ${v} ( (               (users_requests.user_id=${req.query.login_user_id} AND 
      (users_requests.is_accepted=1 OR users_requests.is_follow=1 ) 
       AND users_requests.is_reject=0  AND users_requests.is_block=0 ) 
-      OR (users_requests.request_for=${
-    req.query.login_user_id } AND (users_requests.is_accepted=1 
+      OR (users_requests.request_for=${req.query.login_user_id} AND (users_requests.is_accepted=1 
 
     OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) AND
     (
       events.visibilitySelectUsers=1
-     OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=${
-    req.query.login_user_id } THEN false ELSE true END  )
-     OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=${
-    req.query.login_user_id } THEN true END )  
-    OR (events.visibilitySelectUsers=4 AND groups_users.user_id=${
-    req.query.login_user_id })  
-    OR events.user_id=${req.query.login_user_id }
+     OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=${req.query.login_user_id} THEN false ELSE true END  )
+     OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=${req.query.login_user_id} THEN true END )  
+    OR (events.visibilitySelectUsers=4 AND groups_users.user_id=${req.query.login_user_id})  
+    OR events.user_id=${req.query.login_user_id}
      ) ) `;
 
   if (req.query.myProfile == "1") {
@@ -585,17 +541,18 @@ exports.getPostsAndEventsList = function (req, res) {
       "  AND events.post_type=1  OR (events.user_id =" +
       req.query.login_user_id +
       " AND events.post_type=1  ) ";
-  } else if(req.query.start_date == "" ||
-  !req.query.start_date || 
-  req.query.start_date == "undefined" ||
-  req.query.start_date == "null"){
+  } else if (
+    req.query.start_date == "" ||
+    !req.query.start_date ||
+    req.query.start_date == "undefined" ||
+    req.query.start_date == "null"
+  ) {
     if (req.query.type == "event" && req.query.myProfile != "1") {
-      condition +=
-        "  AND  events.post_type=0    ";
+      condition += "  AND  events.post_type=0    ";
 
-        // OR (events.user_id =" +
-        // req.query.login_user_id +
-        // " AND events.post_type=0 )
+      // OR (events.user_id =" +
+      // req.query.login_user_id +
+      // " AND events.post_type=0 )
     } else if (req.query.myProfile != "1") {
       // condition += " OR events.user_id =" + req.query.login_user_id + " ";
     }
@@ -609,7 +566,9 @@ exports.getPostsAndEventsList = function (req, res) {
     condition +=
       "  AND  events.post_type=0   AND events.start_date='" +
       req.query.start_date +
-      "' OR (events.user_id= "+ req.query.login_user_id+ " AND events.start_date='" +
+      "' OR (events.user_id= " +
+      req.query.login_user_id +
+      " AND events.start_date='" +
       req.query.start_date +
       "')   ";
   }
@@ -633,8 +592,7 @@ exports.getPostsAndEventsList = function (req, res) {
       '%") ';
   }
 
-  sql =
-   `
+  sql = `
   SELECT
     events.description,
     CASE
@@ -661,7 +619,9 @@ exports.getPostsAndEventsList = function (req, res) {
     (
       SELECT likes.is_likes
       FROM likes
-      WHERE likes.liked_by = ${req.query.login_user_id} AND likes.post_id = events.id
+      WHERE likes.liked_by = ${
+        req.query.login_user_id
+      } AND likes.post_id = events.id
       LIMIT 1
     ) AS is_liked,
     (
@@ -684,14 +644,18 @@ exports.getPostsAndEventsList = function (req, res) {
     CONCAT(DAY(events.start_date), ' ', MONTHNAME(events.start_date)) AS start_date,
     TIME_FORMAT(events.start_time, '%H:%i') AS start_time,
     users.name,
-    CONCAT('${constants.BASE_URL}','images/profiles/', users.profile_picture) AS profile_picture
+    CONCAT('${
+      constants.BASE_URL
+    }','images/profiles/', users.profile_picture) AS profile_picture
   FROM
     events
     LEFT JOIN users ON users.id = events.user_id
     LEFT JOIN visibility ON (
       visibility.post_id = events.id AND
       CASE
-        WHEN events.visibilitySelectUsers <> 4 THEN visibility.user_id = ${req.query.login_user_id}
+        WHEN events.visibilitySelectUsers <> 4 THEN visibility.user_id = ${
+          req.query.login_user_id
+        }
         ELSE true
       END
     )
@@ -703,7 +667,9 @@ exports.getPostsAndEventsList = function (req, res) {
       users_requests.request_for = events.user_id OR
       users_requests.user_id = events.user_id
     )
-    LEFT JOIN attending ON (attending.post_id=events.id AND attending.user_id=${req.query.login_user_id})
+    LEFT JOIN attending ON (attending.post_id=events.id AND attending.user_id=${
+      req.query.login_user_id
+    })
   WHERE (attending.attending_type IS null OR attending.attending_type IN(1,2)) AND 
     (${condition}) ${condition1}
   GROUP BY
@@ -714,11 +680,9 @@ exports.getPostsAndEventsList = function (req, res) {
     ${page * 8}, 8;
 `;
 
-// Now you can use the 'query' string in your database query execution.
+  // Now you can use the 'query' string in your database query execution.
 
-  console.log("===", sql);
   connection.query(sql, function (err, post_list) {
-    // console.log(err, post_list);
     if (post_list.length > 0) {
       var sqlCounts =
         "SELECT events.id FROM  events LEFT JOIN users ON users.id=events.user_id LEFT JOIN visibility ON visibility.post_id=events.id    LEFT JOIN groups_users ON groups_users.group_id=visibility.group_id LEFT JOIN users_requests ON (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)     WHERE " +
@@ -726,9 +690,7 @@ exports.getPostsAndEventsList = function (req, res) {
         " GROUP BY events.id";
       connection.query(sqlCounts, function (err, counts) {
         if (err) {
-          console.log(err);
         }
-        console.log(counts, "======sqlCounts==", sqlCounts);
 
         return res.json({
           response: post_list,
@@ -758,7 +720,7 @@ exports.saveComment = async function (req, res) {
     };
 
     var c = await save("comments", data);
-    console.log("c====", c);
+
     if (c) {
       return res.json({ success: true, message: "commeted" });
     } else {
@@ -778,9 +740,8 @@ exports.getCommentListOnPosts = function (req, res) {
     " Limit " +
     page +
     ",8";
-  console.log("sql====", sql);
+
   connection.query(sql, function (err, comments_list) {
-    console.log(err);
     if (comments_list.length > 0) {
       var sqlCounts =
         "SELECT count(*) AS likes_count FROM comments LEFT JOIN users ON users.id=comments.comment_by WHERE comments.post_id=" +
@@ -788,7 +749,6 @@ exports.getCommentListOnPosts = function (req, res) {
         "";
       connection.query(sqlCounts, function (err, total_comment) {
         if (err) {
-          console.log(err);
         }
 
         return res.json({
@@ -798,7 +758,7 @@ exports.getCommentListOnPosts = function (req, res) {
           message: "Comments list .",
         });
       });
-    }else{
+    } else {
       return res.json({
         response: [],
         total_comment: 0,
@@ -818,14 +778,12 @@ exports.liked = async function (req, res) {
       req.body.liked_by +
       "";
     connection.query(sql, async function (err, likes_list) {
-      console.log(err);
-
       if (likes_list.length == 0) {
         var c = await save("likes", {
           liked_by: req.body.liked_by,
           post_id: req.body.post_id,
         });
-        console.log("c====", c);
+
         if (c) {
           return res.json({ success: true, message: "liked" });
         } else {
@@ -861,14 +819,12 @@ exports.getLikedListOnPosts = function (req, res) {
     ",8";
 
   connection.query(sql, function (err, likes_list) {
-    console.log(err);
     var sqlCounts =
       "SELECT count(*) AS likes_count FROM likes LEFT JOIN users ON users.id=likes.liked_by WHERE likes.post_id=" +
       req.query.post_id +
       "";
     connection.query(sqlCounts, function (err, likes_count) {
       if (err) {
-        console.log(err);
       }
       if (likes_list.length > 0) {
         return res.json({
@@ -911,28 +867,24 @@ exports.attending = async function (req, res) {
 
             switch (req.body.attending_type) {
               case "1":
-                console.log("It's 1 case !");
                 message =
                   " " +
                   (req.body.login_user_name ? req.body.login_user_name : " ") +
                   "  will  attend the  event ";
                 break;
               case "2":
-                console.log("It's Tuesday!");
                 message =
                   " " +
                   (req.body.login_user_name ? req.body.login_user_name : " ") +
                   "  may be  attend the  event ";
                 break;
               case "3":
-                console.log("It's Tuesday!");
                 message =
                   " " +
                   (req.body.login_user_name ? req.body.login_user_name : " ") +
                   "  will not attend the  event ";
                 break;
               default:
-                console.log("It's the weekend!");
             }
           }
 
@@ -942,7 +894,7 @@ exports.attending = async function (req, res) {
     );
 
     var c = await save("attending", data);
-    console.log("c====", c);
+
     if (c) {
       return res.json({ success: true, message: req.body.attending_type });
     } else {
@@ -951,7 +903,6 @@ exports.attending = async function (req, res) {
   }
 };
 exports.likedOnComment = async function (req, res) {
-  console.log(req.body);
   if (req.body.liked_by && req.body.comment_id) {
     sql =
       "SELECT * FROM likes  WHERE likes.comment_id=" +
@@ -959,16 +910,14 @@ exports.likedOnComment = async function (req, res) {
       "  AND likes.liked_by=" +
       req.body.liked_by +
       "";
-    console.log("===", sql);
-    connection.query(sql, async function (err, likes_list) {
-      console.log(err);
 
+    connection.query(sql, async function (err, likes_list) {
       if (likes_list.length == 0) {
         var c = await save("likes", {
           liked_by: req.body.liked_by,
           comment_id: req.body.comment_id,
         });
-        console.log("c====", c);
+
         if (c) {
           return res.json({ success: true, message: "liked" });
         } else {
@@ -1001,9 +950,7 @@ exports.getPostOrEventById = function (req, res) {
     req.query.post_id +
     "   ";
 
-  console.log("===", sql);
   connection.query(sql, function (err, postData) {
-    console.log(err, postData);
     if (postData.length > 0) {
       return res.json({
         response: postData[0],
@@ -1021,7 +968,6 @@ exports.getPostOrEventById = function (req, res) {
 };
 
 exports.deletePostOrEventById = function (req, res) {
-  console.log(req.query, "............... deletePostOrEventById ");
   sql =
     "SELECT  events.id  FROM  events   WHERE events.id= " +
     req.query.post_id +
@@ -1029,16 +975,13 @@ exports.deletePostOrEventById = function (req, res) {
     req.query.login_user_id +
     " ";
 
-  console.log("===", sql);
   connection.query(sql, function (err, postData) {
-    console.log(err, postData);
     if (postData.length > 0) {
       const deleteSql =
         " DELETE FROM events  WHERE events.id =" + postData[0].id + " ";
 
       connection.query(deleteSql, function (err, deletedRes) {
         if (err) {
-          console.log(err);
           return res.json({
             message: "Something went wrong.",
             success: false,
@@ -1062,7 +1005,6 @@ exports.deletePostOrEventById = function (req, res) {
 };
 
 async function pushNotificationForMultipleUser(data) {
-  console.log("===========", data);
   var sql = " ";
   try {
     if (
@@ -1087,7 +1029,6 @@ async function pushNotificationForMultipleUser(data) {
       data.user_id.length > 0 &&
       data.visibilitySelectUsers == 3
     ) {
-      console.log("dddd for 2==", data.user_id);
       sql =
         "SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE users.id IN (" +
         data.user_id +
@@ -1121,17 +1062,13 @@ async function pushNotificationForMultipleUser(data) {
         "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1    AND users.id <>'" +
         data.login_user_id +
         " '   ";
-      console.log("friendsListForVisibitly ===", sql);
     }
-    console.log("739====", sql);
+
     connection.query(sql, async function (err, device_tokens) {
-      console.log(err, device_tokens);
       if (device_tokens[0].divice_token && device_tokens.length > 0) {
         const originalTokenString = device_tokens[0].divice_token;
         const tokenArray = originalTokenString.split(", ");
         // const newArray = [{ divice_token: tokenArray }];
-
-        console.log(tokenArray);
 
         await pushNotification1(
           tokenArray,
@@ -1147,31 +1084,21 @@ async function pushNotificationForMultipleUser(data) {
   }
 }
 
-
-
 exports.calenderSelect = function (req, res) {
-  var condition =
-  ` (               (users_requests.user_id=${
-  req.query.login_user_id } AND 
+  var condition = ` (               (users_requests.user_id=${req.query.login_user_id} AND 
    (users_requests.is_accepted=1 OR users_requests.is_follow=1 ) 
     AND users_requests.is_reject=0  AND users_requests.is_block=0 ) 
-    OR (users_requests.request_for=${
-  req.query.login_user_id } AND (users_requests.is_accepted=1 
+    OR (users_requests.request_for=${req.query.login_user_id} AND (users_requests.is_accepted=1 
 
   OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) AND
   (
     events.visibilitySelectUsers=1
-   OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=${
-  req.query.login_user_id } THEN false ELSE true END  )
-   OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=${
-  req.query.login_user_id } THEN true END )  
-  OR (events.visibilitySelectUsers=4 AND groups_users.user_id=${
-  req.query.login_user_id } )  OR events.user_id=${
-    req.query.login_user_id }) `;
+   OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=${req.query.login_user_id} THEN false ELSE true END  )
+   OR (events.visibilitySelectUsers=3 AND CASE WHEN visibility.user_id=${req.query.login_user_id} THEN true END )  
+  OR (events.visibilitySelectUsers=4 AND groups_users.user_id=${req.query.login_user_id} )  OR events.user_id=${req.query.login_user_id}) `;
 
   // DATE_FORMAT(your_timestamp_column, '%Y-%m-%d')
-  sql =
-    ` SELECT 
+  sql = ` SELECT 
        subquery.events_id,
        subquery.start_date ,
        subquery.title,
@@ -1189,8 +1116,7 @@ exports.calenderSelect = function (req, res) {
                 LEFT JOIN users_requests ON 
                          (users_requests.request_for=events.user_id OR users_requests.user_id=events.user_id)     
             WHERE 
-                 start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY) AND  ${
-                 condition} 
+                 start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY) AND  ${condition} 
                   GROUP BY events_id, start_date 
                   
                   ) AS subquery
@@ -1199,7 +1125,6 @@ GROUP BY
 ORDER BY 
     subquery.start_date ASC `;
 
-  console.log("===", sql);
   connection.query(sql, function (err, post_list) {
     if (post_list.length > 0) {
       // var postList=[];
@@ -1223,4 +1148,3 @@ ORDER BY
     }
   });
 };
-

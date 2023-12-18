@@ -37,7 +37,7 @@ exports.followUser = function (req, res) {
               var1: req.body.request_for,
             });
             let notificationFor = await queryAsync(s3);
-            // console.log(notificationFor, "ddddddd notificationFor===");
+            
 
             var forf = " is_both_follow=1,is_follow_by_request_for=1  ";
 
@@ -157,7 +157,7 @@ exports.followUser = function (req, res) {
             users_request,
             async function (err, result) {
               if (err) throw err;
-              console.log("follow", err);
+              
               if (result) {
                 connection.query(
                   "SELECT * FROM users WHERE id =" + req.body.request_for + " ",
@@ -281,7 +281,7 @@ exports.requestForUser = function (req, res) {
             users_request,
             async function (err, result) {
               if (err) throw err;
-              console.log("Request button api", err);
+              
               if (result) {
                 pushNotification(
                   notificationFor[0].divice_token,
@@ -567,7 +567,7 @@ exports.friendsList = function (req, res) {
       req.query.login_user_id +
       " GROUP BY users.id";
 
-    console.log("sqlCount1==========", sqlCount1);
+    
     var sqlCountrequest =
       "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
       req.query.login_user_id +
@@ -597,7 +597,7 @@ exports.friendsList = function (req, res) {
         " ORDER BY users_requests.update_datetime DESC limit  " +
         page * 10 +
         ", 10";
-      console.log("request ===", sql);
+      
 
       var sqlCountrequest =
         "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for='" +
@@ -627,7 +627,7 @@ exports.friendsList = function (req, res) {
         "  ORDER BY users_requests.update_datetime DESC  limit  " +
         page * 10 +
         ", 10";
-      console.log("allFriends ===", sql);
+      
 
       var sqlCountAll =
         "SELECT COUNT(users_requests.user_id) AS total_count FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id!=" +
@@ -669,7 +669,7 @@ exports.friendsList = function (req, res) {
         " GROUP BY users.id  ORDER BY users.id DESC  limit  " +
         page * 10 +
         ", 10";
-      console.log("explore ===", sql);
+      
 
       var sqlCount1 =
         "SELECT  COUNT(users.id) AS total_count FROM users LEFT JOIN users_requests ON ((users_requests.request_for=users.id AND users_requests.user_id=" +
@@ -692,7 +692,7 @@ exports.friendsList = function (req, res) {
         condition +
         " GROUP BY users.id";
 
-      console.log("sqlCount1==========", sqlCount1);
+      
     }
     //  AND ( users_requests.user_id!='" +
     // req.query.login_user_id +
@@ -702,19 +702,19 @@ exports.friendsList = function (req, res) {
 
       connection.query(sqlCount1, async function (err, usersCountResult) {
         if (err) {
-          console.log("====", err);
+          
         } else {
           connection.query(
             sqlCountrequest,
             async function (err, sqlCountrequestResult) {
               if (err) {
-                console.log("====", err);
+                
               } else {
                 connection.query(
                   sqlCountAll,
                   async function (err, sqlCountAllResult) {
                     if (err) {
-                      console.log("====", err);
+                      
                     } else {
                       return res.json({
                         response: users,
@@ -764,7 +764,7 @@ exports.getBlockUserList = function (req, res) {
       " ORDER BY users_requests.update_datetime DESC limit  " +
       page * 10 +
       ", 10";
-    console.log("request ===", sql);
+    
 
     connection.query(sql, async function (err, users) {
       // COUNT(users.id) AS total_count
@@ -777,7 +777,7 @@ exports.getBlockUserList = function (req, res) {
 
       connection.query(sqlCount1, async function (err, usersCountResult) {
         if (err) {
-          console.log("====", err);
+          
         } else {
           return res.json({
             response: users,
@@ -798,7 +798,7 @@ exports.getBlockUserList = function (req, res) {
 };
 
 exports.friendsListForVisibitly = function (req, res) {
-  console.log(req.query, " req.query ");
+  
   if (req.query.login_user_id) {
     var page = req.query.page ? req.query.page : 0;
     var condition = " ";
@@ -838,7 +838,7 @@ exports.friendsListForVisibitly = function (req, res) {
       " limit  " +
       page * 10 +
       ", 10";
-    console.log("friendsListForVisibitly ===", sql);
+    
 
     connection.query(sql, async function (err, users) {
       var sqlCountAll =
@@ -855,7 +855,7 @@ exports.friendsListForVisibitly = function (req, res) {
         "";
       connection.query(sqlCountAll, async function (err, sqlCountAllResult) {
         if (err) {
-          console.log("====", err);
+          
         } else {
           return res.json({
             response: users,
@@ -1009,7 +1009,7 @@ exports.friendsListAccordingToAddInGroup = function (req, res) {
 `;
 
 
-    console.log("allFriends ===", sql);
+    
 
     var sqlCountAll =
       `SELECT COUNT(users_requests.user_id) AS total_count  FROM 
@@ -1050,7 +1050,7 @@ exports.friendsListAccordingToAddInGroup = function (req, res) {
     connection.query(sql, async function (err, users) {
       connection.query(sqlCountAll, async function (err, sqlCountAllResult) {
         if (err) {
-          console.log("====", err);
+          
         } else {
           return res.json({
             response: users,

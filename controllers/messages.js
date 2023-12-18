@@ -20,7 +20,6 @@ exports.getChats = async (req, res) => {
   // sql1= `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = ${}`;
   const { login_user_id, user_id, is_group, search } = req.query;
 
-  console.log("req.query===", req.query);
   var sql = "";
   var page = req.query.page ? req.query.page : 0;
   var condition = " ";
@@ -30,7 +29,7 @@ exports.getChats = async (req, res) => {
     req.query.search != undefined &&
     req.query.search != null;
   var condition2 = "";
-  console.log(searchCondition, " ===searchCondition");
+
   if (searchCondition) {
     dd =
       ' CASE  WHEN chats.message LIKE "%' +
@@ -45,14 +44,13 @@ exports.getChats = async (req, res) => {
   }
 
   if (req.query.is_group != 1 && req.query.is_group != 2) {
-    console.log(condition, "  ==========dddddddd condition ");
     if (searchCondition) {
       let s6 = await dbScript(db_sql["Q6"], {
         var1: login_user_id,
         var2: user_id,
         var3: condition,
       });
-      console.log(s6, condition, "  ==========dddddddd");
+
       // group user seen chat yet here
       let chatSearch = await queryAsync(s6);
 
@@ -92,9 +90,7 @@ exports.getChats = async (req, res) => {
           LIMIT
              ${page * 30}, 30`;
 
-    console.log(sql, " ======sql=== ");
     connection.query(sql, async function (err, chatList) {
-      console.log(err, chatList);
       if (chatList.length > 0) {
         let s8 = await dbScript(db_sql["Q8"], {
           var2: user_id,
@@ -105,10 +101,6 @@ exports.getChats = async (req, res) => {
         from_chat_id = 0;
         if (lastChatSeen.length > 0) {
           from_chat_id = lastChatSeen[0].from_chat_id;
-          console.log(
-            "======= chat issue ===113",
-            lastChatSeen[0].from_chat_id
-          );
         }
         function parseImagesSync(chatList, index, callback) {
           if (index < chatList.length) {
@@ -136,7 +128,6 @@ exports.getChats = async (req, res) => {
         function processChatList(chatList) {
           parseImagesSync(chatList, 0, () => {
             // Perform any further operations on the chatList
-            // console.log(chatList);
           });
         }
 
@@ -157,7 +148,7 @@ exports.getChats = async (req, res) => {
     });
   } else {
     //  Group user chat =====
-    console.log(" We are in group user chat gggggggggggggggggggggg");
+
     if (searchCondition) {
       let s7 = await dbScript(db_sql["Q7"], {
         var1: user_id,
@@ -165,7 +156,6 @@ exports.getChats = async (req, res) => {
       });
       // group user seen chat yet here
       let chatSearch = await queryAsync(s7);
-      console.log(chatSearch, " ======ffffffffffffffffff==");
 
       if (chatSearch.length > 0) {
         //  condition2 = "  AND chats.id <= " + chatSearch[0].id;
@@ -177,7 +167,6 @@ exports.getChats = async (req, res) => {
         });
       }
     }
-    console.log(condition2, " condition2  for group chat===", dd);
 
     let s9 = await dbScript(db_sql["Q9"], {
       var1: user_id,
@@ -185,7 +174,6 @@ exports.getChats = async (req, res) => {
     });
 
     let forExitUser = await queryAsync(s9);
-    console.log(forExitUser, " ======ffffffffffffffffff==");
 
     if (forExitUser.length > 0) {
       condition2 = "  AND chats.id <= " + forExitUser[0].at_chat_id;
@@ -265,10 +253,7 @@ exports.getChats = async (req, res) => {
             chats.id DESC  
           Limit ${page * 30},30`;
 
-    console.log(sql, " ======sql=== ");
-
     connection.query(sql, async function (err, chatList) {
-      console.log(err, chatList);
       if (chatList.length > 0) {
         let s8 = await dbScript(db_sql["Q8"], {
           var2: user_id,
@@ -278,7 +263,7 @@ exports.getChats = async (req, res) => {
         from_chat_id = 0;
         // if(lastChatSeen.length>0){
         //   from_chat_id= lastChatSeen[0].from_chat_id
-        // console.log("======= chat issue ===113", lastChatSeen[0].from_chat_id);
+
         // }
 
         function parseImagesSync(chatList, index, callback) {
@@ -308,7 +293,6 @@ exports.getChats = async (req, res) => {
         function processChatList(chatList) {
           parseImagesSync(chatList, 0, () => {
             // Perform any further operations on the chatList
-            // console.log(chatList);
           });
         }
 
@@ -532,11 +516,7 @@ GROUP BY users.id
 ORDER BY last_times_user_in IS NULL, last_times_user_in ASC
 LIMIT ${page * 10}, 20`;
 
-  console.log("sql.....................................", sql, "===sql===");
-
   connection.query(sql, function (err, directMessages) {
-    console.log(err, directMessages);
-
     // var sqlCountsDM= "  SELECT COUNT(*) AS counts FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id!=1 Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')   )  AND users.id <> '"+req.query.login_user_id +"' "  + search + "  GROUP BY users.id    "
 
     sqlCountsDM =
@@ -564,14 +544,11 @@ LIMIT ${page * 10}, 20`;
       " AND YEAR(billing_group.event_date) = YEAR(CURDATE()) AND MONTH(billing_group.event_date) = MONTH(CURDATE())   AND   billing_group.event_date>= CURDATE() ";
     connection.query(sqlCountsSplit, function (err, sqlCountsSplitResult) {
       if (err) {
-        console.log(err);
       }
 
       connection.query(sqlCountsDM, function (err, sqlCountsDMResult) {
         if (err) {
-          console.log(err);
         }
-        console.log(sqlCountsDM, "==========directemesage========");
 
         if (directMessages.length > 0) {
           return res.json({
@@ -640,7 +617,7 @@ exports.sendMessage = async (req, res) => {
     }
 
     var c = await save("chats", data);
-    console.log("c====", c);
+
     if (c) {
       return res.json({ success: true, message: "sent." });
     } else {
@@ -678,10 +655,9 @@ exports.sendFiles = async (req, res) => {
         message: " Please select image.",
       });
     }
-    console.log("============", data.images);
 
     var c = await save("chats", data);
-    console.log("c====", c);
+
     if (c) {
       return res.json({
         success: true,
@@ -787,13 +763,9 @@ WHERE
     billing_group_users.group_id = ${req.query.group_id}
 GROUP BY
     users.id`;
-
-    console.log("ssq1========", sql1);
   }
 
   connection.query(sql1, async function (err, splitDetails) {
-    console.log(err, splitDetails);
-
     if (splitDetails.length > 0) {
       let s1 = await dbScript(db_sql["Q1"], {
         var1: req.query.group_id,
@@ -862,7 +834,6 @@ exports.getChats3 = async (req, res) => {
   //  i have to write logic for
   // sql1= `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = ${}`;
 
-  console.log("req.query===", req.query);
   var sql = "";
   var page = req.query.page ? req.query.page : 0;
   var condition = " ";
@@ -916,7 +887,6 @@ exports.getChats3 = async (req, res) => {
   // const newArr = numbers.map(myFunction)
 
   connection.query(sql, function (err, chatList) {
-    console.log(err, chatList);
     if (chatList.length > 0) {
       function parseImagesSync(chatList, index, callback) {
         if (index < chatList.length) {
@@ -966,7 +936,6 @@ exports.getChats2 = async (req, res) => {
   const { page1, search, login_user_id, user_id, is_group } = req.query;
   // sql1= `UPDATE chats SET is_seen = 1 WHERE is_seen=0 AND chats.sent_to = ${}`;
 
-  console.log("req.query===", req.query);
   var sql = "";
   var page = page ? page : 0;
   var condition = " ";
@@ -1012,7 +981,7 @@ exports.getChats2 = async (req, res) => {
         var2: csgu[0].to_chat_id,
       });
       let chatListdataIsEmpty = await queryAsync(s5);
-      console.log(csgu[0].to_chat_id, "===============");
+
       sql =
         "SELECT chats.*,CONCAT('" +
         constants.BASE_URL +
@@ -1036,9 +1005,7 @@ exports.getChats2 = async (req, res) => {
   // const numbers = [65, 44, 12, 4];
   // const newArr = numbers.map(myFunction)
 
-  console.log(sql, " =====sql=");
   connection.query(sql, async function (err, chatList) {
-    console.log(err, chatList);
     if (chatList.length > 0) {
       function parseImagesSync(chatList, index, callback) {
         if (index < chatList.length) {
@@ -1066,7 +1033,6 @@ exports.getChats2 = async (req, res) => {
       function processChatList(chatList) {
         parseImagesSync(chatList, 0, () => {
           // Perform any further operations on the chatList
-          // console.log(chatList);
         });
       }
 

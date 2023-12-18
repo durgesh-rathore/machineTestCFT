@@ -15,7 +15,7 @@ var a =
   "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
 
 exports.add = function (req, res) {
-  console.log("===========", req.body);
+  
   try {
     var groupData = {
       group_admin_id: req.body.group_admin_id,
@@ -28,7 +28,7 @@ exports.add = function (req, res) {
         req.body.name +
         "' ",
       async function (err, presentgroup) {
-        if (err) console.log(err);
+        if (err) 
         if (presentgroup.length > 0) {
           return res.json({
             success: 1,
@@ -39,9 +39,9 @@ exports.add = function (req, res) {
             "INSERT INTO users SET ?",
             groupData,
             async function (err, group) {
-              if (err) console.log(err);
+              // if (err) 
               if (group) {
-                console.log(req.body.group_members, "group_members ");
+                
                 var group_members = req.body.group_members.split(",");
                 group_members.push(req.body.group_admin_id);
                 group_members.forEach(async (element) => {
@@ -52,22 +52,20 @@ exports.add = function (req, res) {
 
                   await save("groups_users", group_users);
                   group_users = {};
-                  if(req.body.group_admin_id!=element){
-                  var data = {
-                    send_by: req.body.group_admin_id,
-                    sent_to: group.insertId,
-                    is_group: 1,
-                    left_user_at: 1,
-                    images: 1,
-                    message: element,
-                  };
-                  await save("chats", data);
-                  data={};
-                }
-                  console.log("group_user======", group_users);
-                 
+                  if (req.body.group_admin_id != element) {
+                    var data = {
+                      send_by: req.body.group_admin_id,
+                      sent_to: group.insertId,
+                      is_group: 1,
+                      left_user_at: 1,
+                      images: 1,
+                      message: element,
+                    };
+                    await save("chats", data);
+                    data = {};
+                  }
+                  
                 });
-              
 
                 return res.json({
                   success: true,
@@ -107,8 +105,8 @@ exports.addMembersInGroup = async function (req, res) {
       let sql = "INSERT INTO groups_users SET ?";
       connection.query(sql, group_users, async (error) => {
         group_users = {};
-        if (error) console.log(error);
-        // console.log("ddd"); //item added!
+        // if (error) 
+        
       });
     } else {
       let sql = `UPDATE 
@@ -121,12 +119,9 @@ exports.addMembersInGroup = async function (req, res) {
           AND user_id=${element}`;
       connection.query(sql, async (error) => {
         if (error) {
-          console.log(error);
+          
         }
-
-       
       });
-
     }
 
     var data = {
@@ -138,13 +133,8 @@ exports.addMembersInGroup = async function (req, res) {
       message: element,
     };
     await save("chats", data);
-    data={}
-
+    data = {};
   });
-  
-  
-
- 
 
   return res.json({
     success: true,
@@ -180,9 +170,9 @@ exports.getGroupList = function (req, res) {
     " GROUP BY users.id  ORDER BY users.id DESC Limit " +
     page * 10 +
     ",10";
-  console.log(sql);
+  
   connection.query(sql, function (err, groupUsers) {
-    console.log(err);
+    
     var sqlCounts =
       "SELECT users.id FROM users  LEFT JOIN groups_users ON groups_users.group_id=users.id  WHERE users.is_group=1 AND  groups_users.user_id=" +
       req.query.login_user_id +
@@ -190,7 +180,7 @@ exports.getGroupList = function (req, res) {
       " GROUP BY users.id ";
     connection.query(sqlCounts, function (err, group_user_count) {
       if (err) {
-        console.log(err);
+        
       }
       if (groupUsers.length > 0) {
         return res.json({
@@ -212,7 +202,7 @@ exports.getGroupList = function (req, res) {
 };
 
 exports.addSplitGroup = function (req, res) {
-  console.log("===========", req.body);
+  
   try {
     var group = {
       name: req.body.name,
@@ -225,7 +215,7 @@ exports.addSplitGroup = function (req, res) {
       async function (err, users) {
         var group_members = req.body.group_members.split(",");
         group_members.push(req.body.group_admin_id);
-        if (err) console.log(err);
+        // if (err) 
         if (group) {
           var groupData = {
             spliting_amount: req.body.spliting_amount,
@@ -243,9 +233,9 @@ exports.addSplitGroup = function (req, res) {
             "INSERT INTO billing_group SET ?",
             groupData,
             async function (err, group) {
-              if (err) console.log(err);
+              
               if (group) {
-                console.log(req.body.group_members, "group_members ");
+             
                 // var group_members=[1,2,3,4];
 
                 group_members.forEach((element) => {
@@ -255,14 +245,12 @@ exports.addSplitGroup = function (req, res) {
                   };
                   let sql = "INSERT INTO billing_group_users SET ?";
                   connection.query(sql, group_users, async (error) => {
-                    if (error) console.log(error);
-                    console.log("ddd"); //item added!
-                  });
+                    
+                                 });
                   group_users = {};
                 });
 
-                // console.log("group_user======", group_users);
-                return res.json({
+                  return res.json({
                   success: true,
                   response: { group_id: users.insertId },
                   message: "Group created successful.",
@@ -291,9 +279,8 @@ exports.addMembersInSplitGroup = function (req, res) {
     };
     let sql = "INSERT INTO billing_group_users SET ?";
     connection.query(sql, group_users, async (error) => {
-      if (error) console.log(error);
-      // console.log("ddd"); //item added!
-    });
+      // if (error) 
+          });
   });
   return res.json({
     success: true,
@@ -349,7 +336,7 @@ exports.getSplitGroupList = function (req, res) {
            users2.id DESC  
        Limit  
           ${page * 10} ,10`;
-  console.log(sql);
+  
   connection.query(sql, function (err, groupUsers) {
     var sqlCountsDM =
       "SELECT  COUNT(*) AS counts  FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id<>" +
@@ -364,7 +351,7 @@ exports.getSplitGroupList = function (req, res) {
       req.query.login_user_id +
       "'  GROUP BY users.id  ";
 
-    console.log("sqlCountsDM============>>", sqlCountsDM);
+    
 
     var sqlCountsSplit =
       "SELECT COUNT(*) AS counts FROM users AS users2 LEFT JOIN billing_group ON billing_group.group_id=users2.id  LEFT JOIN billing_group_users ON billing_group_users.group_id=billing_group.group_id  LEFT JOIN users AS user1 ON user1.id=billing_group_users.user_id  WHERE users2.is_group=2 AND billing_group_users.user_id=" +
@@ -376,14 +363,14 @@ exports.getSplitGroupList = function (req, res) {
       sqlCountsSplit,
       async function (err, sqlCountsSplitResult) {
         if (err) {
-          console.log(err);
+          
         }
 
         connection.query(sqlCountsDM, async function (err, sqlCountsDMResult) {
           if (err) {
-            console.log(err);
+            
           }
-          console.log(sqlCountsDMResult, "==========sqlCountsDMResult");
+          
           if (sqlCountsDMResult.length) {
           }
 
@@ -441,45 +428,40 @@ exports.leftGroup = async function (req, res) {
       message: "Something went wrong.",
     });
   } else {
-    
-    let s14 = await dbScript(db_sql['Q14'], {
+    let s14 = await dbScript(db_sql["Q14"], {
       var1: group_id,
-      var2:login_user_id
+      var2: login_user_id,
     });
     let DeleteGroupIf = await queryAsync(s14);
-    if(DeleteGroupIf.length>0){
-      console.log(" all the data is clearing.===========");
-      let s15 = await dbScript(db_sql['Q15'], {
+    if (DeleteGroupIf.length > 0) {
+      
+      let s15 = await dbScript(db_sql["Q15"], {
         var1: group_id,
-        var2:login_user_id
+        var2: login_user_id,
       });
       let DeletedGroup = await queryAsync(s15);
 
-      let s16 = await dbScript(db_sql['Q16'], {
+      let s16 = await dbScript(db_sql["Q16"], {
         var1: group_id,
-           });
+      });
       let DeletedGroupUsers = await queryAsync(s16);
 
-
-      let s17 = await dbScript(db_sql['Q17'], {
+      let s17 = await dbScript(db_sql["Q17"], {
         var1: group_id,
-        
       });
       let DeletedGroupChats = await queryAsync(s17);
 
-      if(DeletedGroup){
+      if (DeletedGroup) {
         return res.json({
           success: true,
           message: "Group is deleted successfully.",
         });
       }
-
     }
 
     // data.send_by = forGroupAdminId[0].group_admin_id;
 
-// 'Q14': " SELECT * FROM users WHERE group_admin_id={var1}",
-
+    // 'Q14': " SELECT * FROM users WHERE group_admin_id={var1}",
 
     var data = {
       // send_by: login_user_id,
@@ -490,12 +472,11 @@ exports.leftGroup = async function (req, res) {
     };
 
     if (is_left_by_admin == 1) {
-      let s3 = await dbScript(db_sql['Q3'], {
+      let s3 = await dbScript(db_sql["Q3"], {
         var1: group_id,
       });
       let forGroupAdminId = await queryAsync(s3);
       data.send_by = forGroupAdminId[0].group_admin_id;
-
     } else {
       data.send_by = login_user_id;
     }
@@ -507,7 +488,6 @@ exports.leftGroup = async function (req, res) {
       ${login_user_id}`;
     connection.query(sql, async (error) => {
       if (error) {
-        console.log(error);
       } else {
         return res.json({
           success: true,
@@ -549,7 +529,6 @@ exports.deleteGroup = function (req, res) {
           "DELETE FROM groups_users WHERE group_id =" + req.body.group_id;
         connection.query(sql, async function (error, result) {
           if (error) {
-            console.log(error);
           } else {
             return res.json({
               success: true,
@@ -574,11 +553,8 @@ exports.informationOfGroup = function (req, res) {
     "  ) AS group_users_image  FROM users    WHERE users.is_group=1 AND users.id=" +
     req.query.group_id;
 
-  console.log("group details sql==================", group_details_sql);
-
   connection.query(group_details_sql, function (err, group_details) {
     if (err) {
-      console.log("somthing went wrong");
       return res.json({
         success: false,
         message: "Something went wrong",
@@ -589,7 +565,6 @@ exports.informationOfGroup = function (req, res) {
       req.query.group_id;
     connection.query(sqlCounts, function (err, group_user_count) {
       if (err) {
-        console.log(err);
       }
       return res.json({
         response: group_details,
@@ -627,15 +602,13 @@ exports.getGroupUsers = function (req, res) {
       ELSE 1
       END,
   users.id DESC`;
-  console.log(sql);
+
   connection.query(sql, function (err, groupUsers) {
-    console.log(err);
     var sqlCounts =
       "SELECT groups_users.id  FROM groups_users  LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.is_not_exist<>1 AND  groups_users.group_id=" +
       group_id;
     connection.query(sqlCounts, function (err, group_user_count) {
       if (err) {
-        console.log(err);
       }
       if (groupUsers.length > 0) {
         return res.json({
@@ -663,7 +636,6 @@ exports.getPaymentMethod = function (req, res) {
 
   connection.query(sql, function (err, paymentMethod) {
     if (err) {
-      console.log("somthing went wrong", err);
       return res.json({
         success: false,
         message: "Something went wrong",
@@ -687,13 +659,11 @@ exports.getPaymentMethod = function (req, res) {
 
 exports.contributorsList = function (req, res) {
   const { group_id } = req.query;
-  console.log(req.query, " in the fight ");
 
   var sql = `SELECT users.name, ${a} ,bgu.* FROM billing_group_users AS bgu LEFT JOIN users ON users.id=bgu.user_id WHERE bgu.group_id=${group_id}`;
 
   connection.query(sql, function (err, paymentMethod) {
     if (err) {
-      console.log("somthing went wrong", err);
       return res.json({
         success: false,
         message: "Something went wrong",
@@ -706,21 +676,14 @@ exports.contributorsList = function (req, res) {
         });
       } else {
         var sql1 = `SELECT CASE WHEN bgu.payment_amount IS NULL THEN 0 ELSE SUM(bgu.payment_amount) END AS total_contributed_payment FROM billing_group_users AS bgu  WHERE  bgu.status=1 AND bgu.group_id=${group_id}`;
-        console.log(sql1);
+
         connection.query(sql1, function (err, totalContributedAmount) {
           if (err) {
-            console.log("somthing went wrong", err);
             return res.json({
               success: false,
               message: "Something went wrong",
             });
           } else {
-            console.log(
-              " dddd ===",
-              totalContributedAmount,
-              totalContributedAmount[0].total_contributed_payment
-            );
-
             return res.json({
               success: true,
               message: "Payment Method",
@@ -738,13 +701,13 @@ exports.contributorsList = function (req, res) {
 exports.paymentStatus = function (req, res) {
   const { group_id, user_id } = req.body;
   let status = 1;
-  console.log(" in ffdd");
+  
 
   var sql1 = `SELECT each_split FROM billing_group WHERE group_id=${group_id}`;
 
   connection.query(sql1, function (err, splitAmount) {
     if (err) {
-      console.log("somthing went wrong", err);
+      
       return res.json({
         success: false,
         message: "Something went wrong",
@@ -754,7 +717,7 @@ exports.paymentStatus = function (req, res) {
 
       connection.query(sql, function (err, paymentMethod) {
         if (err) {
-          console.log("somthing went wrong", err);
+          
           return res.json({
             success: false,
             message: "Something went wrong",
@@ -802,11 +765,11 @@ exports.informationOfSplitGroup = function (req, res) {
     "  ) AS group_users_image  FROM users  LEFT JOIN billing_group ON billing_group.group_id=users.id   WHERE users.is_group=2 AND users.id=" +
     req.query.group_id;
 
-  console.log("group details sql==================", group_details_sql);
+  
 
   connection.query(group_details_sql, function (err, group_details) {
     if (err) {
-      console.log("somthing went wrong");
+      
       return res.json({
         success: false,
         message: "Something went wrong",
@@ -818,15 +781,15 @@ exports.informationOfSplitGroup = function (req, res) {
       a +
       "  FROM billing_group_users  LEFT JOIN users ON users.id=billing_group_users.user_id     WHERE billing_group_users.group_id=" +
       req.query.group_id;
-    console.log(sql);
+    
     connection.query(sql, function (err, groupUsers) {
-      console.log(err);
+      
       var sqlCounts =
         "SELECT billing_group_users.id  FROM billing_group_users  WHERE billing_group_users.group_id=" +
         req.query.group_id;
       connection.query(sqlCounts, function (err, group_user_count) {
         if (err) {
-          console.log(err);
+          
         }
         if (groupUsers.length > 0) {
           return res.json({
@@ -858,7 +821,7 @@ exports.isMuted = function (req, res) {
     message = "Muted.";
   }
 
-  console.log(" in ffdd", req.body);
+  
   var sql = " ";
   if (group_id != "" && group_id && group_id != "undefined") {
     if (group_type == 2) {
@@ -868,7 +831,7 @@ exports.isMuted = function (req, res) {
     }
     connection.query(sql, function (err, muteData) {
       if (err) {
-        console.log("somthing went wrong", err);
+        
         return res.json({
           success: false,
           message: "Something went wrong",
@@ -896,7 +859,7 @@ exports.isMuted = function (req, res) {
 
           connection.query(sql, function (err, muteData) {
             if (err) {
-              console.log("somthing went wrong", err);
+              
               return res.json({
                 success: false,
                 message: "Something went wrong",

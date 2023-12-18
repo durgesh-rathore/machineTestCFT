@@ -10,7 +10,7 @@ const fs = require("fs");
 
 exports.signup = function (req, res) {
   try {
-    console.log(req.body, "req.body");
+    
     if (
       req.body.name == "" ||
       req.body.email == "" ||
@@ -150,7 +150,7 @@ exports.signin = async function (req, res) {
                   { divice_token: req.body.divice_token },
                   " id=" + users[0].id
                 );
-                console.log("   dddddddddddd update divice token==", j);
+                
               }
               return res.json({
                 success: true,
@@ -176,7 +176,7 @@ exports.logout = async function (req, res) {
                   { divice_token: null },
                   " id=" + req.body.login_user_id
                 );
-                console.log("   dddddddddddd update divice token==", j);
+                
               
               return res.json({
                 success: true,
@@ -186,7 +186,7 @@ exports.logout = async function (req, res) {
 };
 
 exports.socialLogin = async function (req, res) {
-  console.log("socialLogin==========",req.body);
+  
   if (!req.body.email) {
     res.json({ success: false, message: "Email id is required." });
   } else {
@@ -260,7 +260,7 @@ exports.socialLogin = async function (req, res) {
                   { divice_token: req.body.divice_token },
                   " id=" + users[0].id
                 );
-                console.log("   dddddddddddd update divice token==", j);
+                
               }
             var token = jwt.sign({ id: users[0].id }, constants.SECRET, {
               expiresIn: "7d", // expires in 24 hours
@@ -341,7 +341,7 @@ exports.socialLogin = async function (req, res) {
   }
 };
 exports.socialLogin1 = async function (req, res) {
-  console.log("socialLogin==========",req.body);
+  
   const {email,insta_id,is_insta_login,facebook_id,is_facebook_login, google_id,is_gogle_login,apple_id,is_apple_login}=req.body
  var condition=" WHERE 1"
 if(email){
@@ -423,7 +423,7 @@ if(is_facebook_login=1){
                   { divice_token: req.body.divice_token },
                   " id=" + users[0].id
                 );
-                console.log("   dddddddddddd update divice token==", j);
+                
               }
             var token = jwt.sign({ id: users[0].id }, constants.SECRET, {
               expiresIn: "7d", // expires in 24 hours
@@ -550,7 +550,7 @@ exports.getInterestList = function (req, res) {
 };
 
 exports.userInterest = function (req, res) {
-  console.log(req.body,"  userInterest api ========");
+  
   if (!req.body || !req.body.user_id || !req.body.interest_fields || req.body.interest_fields.length==0 || req.body.interest_fields=="undefind") {
     return res.json({
       success: false,
@@ -568,7 +568,7 @@ exports.userInterest = function (req, res) {
             message: "Please enter required  detail.",
           });
         } else {
-          // console.log(JSON.parse(req.body.interest_fields)," ====ddddddddd");
+          
           if(req.body.interest_fields.length>0){
           connection.query(
             "DELETE FROM users_interest WHERE user_id = ?",
@@ -585,7 +585,7 @@ exports.userInterest = function (req, res) {
           });
           return res.json({
             success: true,
-            message: "Interest  saved successfully.",
+            message: "Interest saved successfully.",
           });
         }
       }
@@ -616,7 +616,7 @@ exports.userFavoriteColors1 = function (req, res) {
             "'	 WHERE id = " +
             req.body.user_id +
             "";
-          console.log("=======", sql);
+          
           connection.query(sql, function (err, result) {
             if (err) {
               return res.json({
@@ -686,13 +686,13 @@ exports.forgotPassword = async function (req, res) {
     return res.json({ success: true, message: "Please enter email id" });
   } else {
     var sql = 'SELECT * FROM users WHERE  email="' + req.body.email + '"';
-    console.log(sql, "sql");
+    
     connection.query(sql, async function (err, users) {
       if (err) {
-        console.log("======", err);
+        
       } else if (users.length > 0) {
         var otp = Math.floor(1000 + Math.random() * 90000000);
-        console.log("otp===========", otp);
+        
         let password = await encryptPassword(otp + "");
 
         connection.query(
@@ -701,7 +701,7 @@ exports.forgotPassword = async function (req, res) {
             "'  WHERE id= " +
             users[0].id,
           function (err, campaign) {
-            console.log(err, "err");
+            
             if (!err) {
               // send email of this email id
               var data = {
@@ -751,7 +751,7 @@ exports.resetPassword = async function (req, res) {
 
     connection.query(sql, function (err, result) {
       if (err) {
-        console.log("error-=======", err);
+        
       } else {
         return res.json({ success: true, message: "Password reset." });
       }
@@ -800,7 +800,7 @@ exports.changePassword = async function (req, res) {
 
           connection.query(sql, function (err, result) {
             if (err) {
-              console.log("error-=======", err);
+              
             } else {
               return res.json({ success: true, message: "Password reset." });
             }
@@ -828,10 +828,10 @@ exports.getProfile = function (req, res) {
     "','images/profiles/',users.profile_picture) AS profile_picture,(SELECT COUNT(*) FROM users_requests WHERE users_requests.user_id=users.id AND (users_requests.is_follow=1 OR users_requests.is_request=1)  ) AS following_count,    (SELECT COUNT(*) FROM users_requests WHERE users_requests.request_for=users.id AND (users_requests.is_follow=1 OR users_requests.is_request=1) ) AS followers_count  FROM users  WHERE users.id = " +
     req.query.login_user_id +
     "";
-    console.log(sql," ======dddd dd=")
+    
     connection.query(sql,     
       function (err, users) {
-        console.log(err);
+        
 
         return res.json({
           success: true,
@@ -845,7 +845,7 @@ exports.getProfile = function (req, res) {
 
 exports.updateUserProfile = function (req, res) {
   try {
-    console.log(req.body, "req.body");
+    
     if (
       req.body.name == "" ||
       req.body.name == undefined ||
@@ -907,7 +907,7 @@ exports.updateUserProfile = function (req, res) {
               "UPDATE users SET ? WHERE id=" + req.body.login_user_id + " ",
               newUser,
               async function (err, user) {
-                console.log("err===", err);
+                
                 if (err) throw err;
                 if (user) {
                   return res.json({
@@ -933,12 +933,12 @@ exports.updateUserProfile = function (req, res) {
 };
 
 async function x() {
-  console.log("in x method ====");
+  
   // /home/user/Desktop/durgesh/ForgetMeNote/forgetmenote/public/images/profiles/Rectangle21png-1681901239083.png
   fs.unlink(
     "./public/images/profiles/" + "Rectangle21png-1681901239083.png",
     function (err) {
-      console.log(err);
+      
     }
   );
 }
@@ -963,13 +963,13 @@ if(!user_id){
              LEFT JOIN colors AS c 
               ON c.id=ufc.color_id   
                  WHERE ufc.user_id=${user_id}) AS favorite_colors`;
-                 console.log(sql,"=====");
+                 
   
         connection.query(
           sql,
           function (err, user_interest) {
-            console.log(err);
-            console.log(user_interest);
+            
+            
             if (user_interest.length > 0) {
               if(user_interest[0].interests){
                 user_interest[0].interests=user_interest[0].interests.split(',');
@@ -1012,8 +1012,8 @@ var sql=` DELETE FROM users WHERE users.id=${login_user_id}`
   connection.query(
     sql,
     function (err, user_interest) {
-      console.log(err);
-  console.log("   dddddddddddd user deleted ==")
+      
+  
 
 return res.json({
   success: true,
