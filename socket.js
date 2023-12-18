@@ -4,6 +4,11 @@ var {
   findByIdAndUpdate,
   pushNotification2,
 } = require("./helpers/helper");
+
+var {
+  db_sql, dbScript, queryAsync
+} = require("./helpers/db_scripts");
+
 var clients = [];
 module.exports = (io) => {
   io.on("connection", (socket) => {
@@ -186,6 +191,14 @@ function isUserInRoom(roomId) {
           //     is_meta_data,
           //   });
         } else if (is_group == 1 || is_group == 2) {
+          var group_name="";
+          let s3 = await dbScript(db_sql["Q3"], {
+            var1: sent_to,
+          });
+          let forGroupName = await queryAsync(s3);
+          group_name = forGroupName[0].name
+
+
           console.log("send into group========");
 
           if (is_group == 1) {
@@ -268,6 +281,7 @@ function isUserInRoom(roomId) {
                   profile_picture,
                   mute_users,
                   is_meta_data,
+                  group_name
                 });
               } else {
                 mute_users = muteUsersData[0].mute_users;
@@ -286,6 +300,7 @@ function isUserInRoom(roomId) {
                   profile_picture,
                   mute_users,
                   is_meta_data,
+                  group_name
                 });
               }
             });
