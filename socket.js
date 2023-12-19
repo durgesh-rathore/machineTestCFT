@@ -254,7 +254,7 @@ function isUserInRoom(roomId) {
           let muteUsersSql ="";
           if (is_group == 1) {
              muteUsersSql =
-              "SELECT GROUP_CONCAT(user_id) AS mute_users FROM  billing_group_users   WHERE billing_group_users.is_muted=1  AND  billing_group_users.group_id=" +
+              "SELECT GROUP_CONCAT(user_id) AS mute_users FROM  groups_users   WHERE groups_users.is_muted=1  AND  groups_users.group_id=" +
               sent_to +
               " ";
           } else{
@@ -285,6 +285,7 @@ function isUserInRoom(roomId) {
                 });
               } else {
                 mute_users = muteUsersData[0].mute_users;
+                console.log(mute_users," ========muthe dddddd=")
                  if(mute_users==null){
                 mute_users='';
               }

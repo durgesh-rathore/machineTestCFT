@@ -516,6 +516,8 @@ GROUP BY users.id
 ORDER BY last_times_user_in IS NULL, last_times_user_in ASC
 LIMIT ${page * 10}, 20`;
 
+console.log(sql," ====================directmessage")
+
   connection.query(sql, function (err, directMessages) {
     // var sqlCountsDM= "  SELECT COUNT(*) AS counts FROM users LEFT JOIN users_requests ON (   users.id =  case when users_requests.user_id!=1 Then users_requests.user_id ELSE users_requests.request_for END)  LEFT JOIN groups_users ON groups_users.group_id= users.id WHERE  ( (users_requests.user_id='"+req.query.login_user_id +"' OR users_requests.request_for='"+req.query.login_user_id +"') AND ( users_requests.is_follow=1 AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1 )  OR (users.is_group=1 AND groups_users.user_id='"+req.query.login_user_id +"')   )  AND users.id <> '"+req.query.login_user_id +"' "  + search + "  GROUP BY users.id    "
 
