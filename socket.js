@@ -79,6 +79,18 @@ function isUserInRoom(roomId) {
   return rooms.includes(`chat-${roomId}`);
 }
 
+socket.on(
+  "muteUser",
+  async ({
+    group_id,
+    mute_user_id
+    }) => {
+
+clients[group_id].emit("muteUserReceive", {
+  group_id,
+  mute_user_id  
+});
+})
     // {'send_by': userId,'sent_to' :'2', 'newMessage': message, 'name': login_userName,'group_id':''    ,'image': ''};
     socket.on(
       "user-send-message",
