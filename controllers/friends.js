@@ -409,8 +409,18 @@ exports.rejectUser = function (req, res) {
         " AND user_id=" +
         req.body.request_for +
         " )",
-      function (err, usersRequest) {
+      async function (err, usersRequest) {
         if (usersRequest.length > 0) {
+
+          if(usersRequest[0].is_accepted==1){
+          let s18 = await dbScript(db_sql["Q18"], {
+            var1: req.body.login_user_id,
+            var2: req.body.request_for
+          });
+          let DeletedChats = await queryAsync(s18);
+        }
+
+
           var updateSql =
             " UPDATE users_requests SET  is_both_follow=0,is_follow=0,is_request=0,is_accepted=0,request_by=0 WHERE ( user_id=" +
             req.body.login_user_id +
