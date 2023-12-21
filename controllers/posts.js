@@ -1113,7 +1113,7 @@ async function pushNotificationEventUpdateTime(data) {
     if (
        eventDetails[0].visibilitySelectUsers == 2
     ) {
-var m=`SELECT GROUP_CONCAT(visibility.user_id) AS userId  FROM visibility LEFT JOIN users  ON users.id=visibility.user_id  WHERE post_id=${data.post_id}`
+var m=`(SELECT GROUP_CONCAT(visibility.user_id) AS userId  FROM visibility LEFT JOIN users  ON users.id=visibility.user_id  WHERE post_id=${data.post_id})`
 
 
       sql =
@@ -1141,7 +1141,7 @@ var m=`SELECT GROUP_CONCAT(visibility.user_id) AS userId  FROM visibility LEFT J
     } else if (
          eventDetails[0].visibilitySelectUsers == 4
     ) {
-      var m=`SELECT GROUP_CONCAT(visibility.group_id) AS group_id  FROM visibility LEFT JOIN users  ON users.id=visibility.user_id  WHERE post_id=${data.post_id} `
+      var m=`(SELECT GROUP_CONCAT(visibility.group_id) AS group_id  FROM visibility LEFT JOIN users  ON users.id=visibility.user_id  WHERE post_id=${data.post_id} )`
 
       sql =
         "SELECT GROUP_CONCAT(users.divice_token SEPARATOR ', ') AS divice_token FROM groups_users LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id IN ( " +
