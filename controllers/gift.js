@@ -11,8 +11,8 @@ var connection = require("../config/db");
 // AccessKey: "AKIAJBCOXCXX6YAQD7PA",
 //   SecretKey: "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",
 const commonParameters = {
-  AccessKey: "AKIAISCVCP3EE2MZIHBA",
-  SecretKey: "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",
+ AccessKey: "AKIAJZSWTDXCJYYGAVVQ",
+  SecretKey: "cGIR9ct7UWDfrHqJDgFULm/k+GFFYWCwFaMgedqw",
   PartnerTag: "forgetmenote-20", // yourtag-20
   PartnerType: "Associates", // Default value is Associates.
   Marketplace: "www.amazon.com", // Default value is US. Note: Host and Region are predetermined based on the marketplace value. There is no need for you to add Host and Region as soon as you specify the correct Marketplace value. If your region is not US or .com, please make sure you add the correct Marketplace value.
