@@ -15,7 +15,7 @@ var a =
   "images/profiles/',users.profile_picture)  ELSE '' END AS profile_picture";
 
 exports.add = function (req, res) {
-  
+  console.log("dddd");
   try {
     var groupData = {
       group_admin_id: req.body.group_admin_id,
@@ -28,7 +28,9 @@ exports.add = function (req, res) {
         req.body.name +
         "' ",
       async function (err, presentgroup) {
-        if (err) 
+        if (err) {
+          console.log(err,"       dddddd 32");
+        }
         if (presentgroup.length > 0) {
           return res.json({
             success: 1,
@@ -39,6 +41,7 @@ exports.add = function (req, res) {
             "INSERT INTO users SET ?",
             groupData,
             async function (err, group) {
+              console.log(err,"dddddddddd");
               // if (err) 
               if (group) {
                 
