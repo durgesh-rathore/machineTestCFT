@@ -345,7 +345,7 @@ exports.postEvent = async function (req, res) {
     var PNF = {
       post_id: c,
       message:
-        "Event Created By  " +
+        "Event created by  " +
         (req.body.login_user_name ? req.body.login_user_name : "") +
         "",
       post_type: "0",
@@ -873,10 +873,8 @@ exports.attending = async function (req, res) {
         " ",
       async function (err, notificationFor) {
         if (notificationFor.length > 0) {
-          if (req.body.attending_type == 1) {
-            var message =
-              "Frieds request for you by " +
-              (req.body.login_user_name ? req.body.login_user_name : " ") +
+          // if (req.body.attending_type == 1) {
+            var message =      
               " ";
 
             switch (req.body.attending_type) {
@@ -884,19 +882,19 @@ exports.attending = async function (req, res) {
                 message =
                   " " +
                   (req.body.login_user_name ? req.body.login_user_name : " ") +
-                  "  will  attend the  event ";
+                  "  will  attend this  event ";
                 break;
               case "2":
                 message =
                   " " +
                   (req.body.login_user_name ? req.body.login_user_name : " ") +
-                  "  may be  attend the  event ";
+                  "  may be  attend this  event ";
                 break;
               case "3":
                 message =
                   " " +
                   (req.body.login_user_name ? req.body.login_user_name : " ") +
-                  "  will not attend the  event ";
+                  "  will not attend this  event ";
                 break;
               default:
             }
@@ -904,7 +902,7 @@ exports.attending = async function (req, res) {
 
           pushNotification(notificationFor[0].divice_token, message, "5");
         }
-      }
+      // }
     );
 
     var c = await save("attending", data);
