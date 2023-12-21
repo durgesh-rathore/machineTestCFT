@@ -1,6 +1,7 @@
 var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
+const { db_sql, dbScript, queryAsync } = require("../helpers/db_scripts");
 
 var {
   save,
@@ -328,6 +329,16 @@ exports.postEvent = async function (req, res) {
   if (conditionForPost) {
     var con = ` events.id=${req.body.post_id} AND events.user_id=${req.body.login_user_id} `;
     c = await findByIdAndUpdate("events", data, con);
+    var PNF = {
+      post_id: req.body.post_id,
+      message:
+        "Edit in Event  By  " +
+        (req.body.login_user_name ? req.body.login_user_name : "") +
+        "",
+       login_user_id: req.body.login_user_id + "",
+       };
+
+     pushNotificationEventUpdateTime(PNF);
   } else {
     c = await save("events", data);
 
@@ -506,7 +517,10 @@ exports.getPostsAndEventsList = function (req, res) {
 
   // OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )
   var condition1 = " ";
-  var v = `(CASE WHEN (events.start_date>=CURRENT_DATE() AND events.start_time>= DATE_FORMAT(NOW(), '%H:%i:%s')  OR ( events.user_id=${req.query.login_user_id} AND events.start_date>=CURRENT_DATE()  AND events.start_time>= DATE_FORMAT(NOW(), '%H:%i:%s')) )
+  var v = `(CASE WHEN (events.end_date>=CURRENT_DATE() AND events.end_time>= DATE_FORMAT(NOW(), '%H:%i:%s')
+           OR ( events.user_id=${req.query.login_user_id} AND events.end_date>=CURRENT_DATE()  
+          AND events.end_time>= DATE_FORMAT(NOW(), '%H:%i:%s')
+          ) )
          OR events.post_type=1 THEN true ELSE false END) AND `;
 
   var condition = ` ${v} ( (               (users_requests.user_id=${req.query.login_user_id} AND 
@@ -1076,6 +1090,93 @@ async function pushNotificationForMultipleUser(data) {
           "4",
           data.post_id + "",
           data.post_type + ""
+        );
+      }
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+
+
+async function pushNotificationEventUpdateTime(data) {
+  var sql = " ";
+  try {
+    let s19 = await dbScript(db_sql["Q19"], {
+      var1: data.post_id,
+      var2: data.login_user_id,
+    });
+    let eventDetails = await queryAsync(s19);
+
+
+    if (
+       eventDetails[0].visibilitySelectUsers == 2
+    ) {
+var m=`SELECT GROUP_CONCAT(visibility.user_id) AS userId  FROM visibility LEFT JOIN users  ON users.id=visibility.user_id  WHERE post_id=${data.post_id}`
+
+
+      sql =
+        "SELECT GROUP_CONCAT(users.divice_token SEPARATOR ', ') AS divice_token  FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id<>" +
+        data.login_user_id +
+        " Then users_requests.user_id ELSE users_requests.request_for END)  WHERE  ( users_requests.user_id='" +
+        data.login_user_id +
+        " ' OR users_requests.request_for='" +
+        data.login_user_id +
+        "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1    AND ( users.id <>'" +
+        data.login_user_id +
+        " '  OR users.id NOT IN ('" +
+        m+
+        "') )  ";
+    } else if (
+       eventDetails[0].visibilitySelectUsers == 3
+    ) {
+
+       sql=`SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token  FROM visibility LEFT JOIN users  ON users.id=visibility.user_id  WHERE post_id=${data.post_id}`;
+
+      // sql =
+      //   "SELECT GROUP_CONCAT(divice_token SEPARATOR ', ') AS divice_token FROM users WHERE users.id IN (" +
+      //   data.user_id +
+      //   ")";
+    } else if (
+         eventDetails[0].visibilitySelectUsers == 4
+    ) {
+      var m=`SELECT GROUP_CONCAT(visibility.group_id) AS group_id  FROM visibility LEFT JOIN users  ON users.id=visibility.user_id  WHERE post_id=${data.post_id} `
+
+      sql =
+        "SELECT GROUP_CONCAT(users.divice_token SEPARATOR ', ') AS divice_token FROM groups_users LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id IN ( " +
+        m+
+        ")  AND groups_users.is_not_exist=1  AND users.id<>" +
+        data.login_user_id +
+        " ";
+     
+    } else {
+    //  Case of every One
+
+      sql =
+        "SELECT GROUP_CONCAT(users.divice_token SEPARATOR ', ') AS divice_token  FROM users_requests LEFT JOIN users ON (   users.id =  case when users_requests.user_id<>" +
+        data.login_user_id +
+        " Then users_requests.user_id ELSE users_requests.request_for END)  WHERE  ( users_requests.user_id='" +
+        data.login_user_id +
+        " ' OR users_requests.request_for='" +
+        data.login_user_id +
+        "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1    AND users.id <>'" +
+        data.login_user_id +
+        " '   ";
+    }
+console.log(sql," ===================================== at that time when ");
+    connection.query(sql, async function (err, device_tokens) {
+      if (device_tokens[0].divice_token && device_tokens.length > 0) {
+        const originalTokenString = device_tokens[0].divice_token;
+        const tokenArray = originalTokenString.split(", ");
+        // const newArray = [{ divice_token: tokenArray }];
+
+        await pushNotification1(
+          tokenArray,
+          data.message,
+          "4",
+          data.post_id + "",
+          '0'
         );
       }
     });

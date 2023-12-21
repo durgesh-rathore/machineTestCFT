@@ -38,6 +38,7 @@ WHERE id IN ({var2})`,
 'Q16': " DELETE FROM groups_users WHERE  group_id={var1}",
 'Q17': " DELETE FROM chats WHERE  sent_to={var1} AND is_group=1",
 'Q18': " DELETE FROM chats WHERE  (sent_to={var1} AND send_by={var2}) OR (sent_to={var2} AND send_by={var1}) ",
+'Q19': " SELECT * FROM events WHERE id={var1} AND user_id={var2}",
 
 };
 // IS  NOT NULL

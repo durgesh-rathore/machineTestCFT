@@ -83,12 +83,20 @@ socket.on(
   "muteUser",
   async ({
     group_id,
-    mute_user_id
+    mute_user_id,
+    forAdd,
     }) => {
+    console.log(" in muteUser event call ",group_id,mute_user_id);
 
-clients[group_id].emit("muteUserReceive", {
-  group_id,
-  mute_user_id  
+// clients[group_id].emit("muteUserReceive", {
+//   group_id,
+//   mute_user_id  
+// });
+
+socket.broadcast.to(`chat-${group_id}`).emit("muteUserReceive", {
+   group_id,
+  mute_user_id,
+  forAdd  
 });
 })
     // {'send_by': userId,'sent_to' :'2', 'newMessage': message, 'name': login_userName,'group_id':''    ,'image': ''};
@@ -154,6 +162,7 @@ clients[group_id].emit("muteUserReceive", {
 
           connection.query(muteUsersSql, async function (err, muteUsersData) {
             // console.log(err,muteUsersData," dddddddddddddddddd ");
+            var group_name='';
             if (err) {
               mute_users = "";
               clients[sent_to].emit("receive-message", {
@@ -167,6 +176,7 @@ clients[group_id].emit("muteUserReceive", {
                 profile_picture,
                 mute_users,
                 is_meta_data,
+                group_name
               });
             } else {
               mute_users = muteUsersData[0].mute_users;
@@ -184,6 +194,7 @@ clients[group_id].emit("muteUserReceive", {
                 profile_picture,
                 mute_users,
                 is_meta_data,
+                group_name
               });
             }
           });
