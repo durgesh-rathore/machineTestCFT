@@ -259,3 +259,61 @@ exports.getWishListItems = function (req, res) {
       console.error(error);
     }
   };
+
+
+
+
+
+
+
+  // const express = require('express');
+const ogs = require('open-graph-scraper');
+
+// const app = express();
+// const PORT = 3000;
+
+app.get('/shareable-content', async (req, res) => {
+  const postId = req.query.id;
+
+  // Replace this with your logic to fetch content based on postId
+  const post = await fetchPostById(postId);
+
+  // If the post is found, generate Open Graph meta tags
+  if (post) {
+    const ogTags = generateOpenGraphTags(post);
+    res.send(ogTags);
+  } else {
+    res.status(404).send('Post not found');
+  }
+});
+
+// Function to simulate fetching a post from a database
+async function fetchPostById(postId) {
+  // Replace this with your logic to fetch content based on postId
+  // This is a placeholder, you might fetch the data from a database or another source
+  return {
+    title: `Post ${postId} Title`,
+    description: `This is the description for post ${postId}.`,
+    image: 'https://example.com/image.jpg',
+  };
+}
+
+// Function to generate Open Graph meta tags
+function generateOpenGraphTags(post) {
+  return `
+    <html>
+      <head>
+        <meta property="og:title" content="${post.title}" />
+        <meta property="og:description" content="${post.description}" />
+        <meta property="og:image" content="${post.image}" />
+        <meta property="og:url" content="https://www.yourwebsite.com/shareable-content?id=${postId}" />
+        <!-- Other Open Graph tags as needed -->
+      </head>
+      <body>
+        <!-- Your page content goes here -->
+      </body>
+    </html>
+  `;
+}
+
+

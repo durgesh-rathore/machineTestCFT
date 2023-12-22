@@ -332,7 +332,7 @@ exports.postEvent = async function (req, res) {
     var PNF = {
       post_id: req.body.post_id,
       message:
-        "Edit in Event  By  " +
+        "The event has been edited by " +
         (req.body.login_user_name ? req.body.login_user_name : "") +
         "",
        login_user_id: req.body.login_user_id + "",
@@ -1033,7 +1033,7 @@ async function pushNotificationForMultipleUser(data) {
         data.login_user_id +
         "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1    AND ( users.id <>'" +
         data.login_user_id +
-        " '  OR users.id NOT IN ('" +
+        " '  AND users.id NOT IN ('" +
         data.user_id +
         "') )  ";
     } else if (
@@ -1099,6 +1099,7 @@ async function pushNotificationForMultipleUser(data) {
 
 
 async function pushNotificationEventUpdateTime(data) {
+  console.log(data," =============data 1102  ==");
   var sql = " ";
   try {
     let s19 = await dbScript(db_sql["Q19"], {
@@ -1107,6 +1108,8 @@ async function pushNotificationEventUpdateTime(data) {
     });
     let eventDetails = await queryAsync(s19);
 
+
+console.log(eventDetails," =============eventDetails 1102  ==");
 
     if (
        eventDetails[0].visibilitySelectUsers == 2
@@ -1123,9 +1126,9 @@ var m=`(SELECT GROUP_CONCAT(visibility.user_id) AS userId  FROM visibility LEFT 
         data.login_user_id +
         "' )  AND users_requests.is_reject=0 AND users_requests.is_block=0 AND users_requests.is_accepted=1    AND ( users.id <>'" +
         data.login_user_id +
-        " '  OR users.id NOT IN ('" +
+        " '  AND users.id NOT IN (" +
         m+
-        "') )  ";
+        ") )  ";
     } else if (
        eventDetails[0].visibilitySelectUsers == 3
     ) {
@@ -1144,7 +1147,7 @@ var m=`(SELECT GROUP_CONCAT(visibility.user_id) AS userId  FROM visibility LEFT 
       sql =
         "SELECT GROUP_CONCAT(users.divice_token SEPARATOR ', ') AS divice_token FROM groups_users LEFT JOIN users ON users.id=groups_users.user_id WHERE groups_users.group_id IN ( " +
         m+
-        ")  AND groups_users.is_not_exist=1  AND users.id<>" +
+        ")  AND groups_users.is_not_exist<>1  AND users.id<>" +
         data.login_user_id +
         " ";
      

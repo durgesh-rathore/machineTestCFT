@@ -10,6 +10,10 @@ var connection = require("../config/db");
 // Created 6 Nov
 // AccessKey: "AKIAJBCOXCXX6YAQD7PA",
 //   SecretKey: "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",
+
+// Created 21 Dec
+// AccessKey: "AKIAJZSWTDXCJYYGAVVQ",
+// SecretKey: "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",
 const commonParameters = {
  AccessKey: "AKIAJZSWTDXCJYYGAVVQ",
   SecretKey: "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",
