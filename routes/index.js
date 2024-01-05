@@ -4,7 +4,7 @@ var checkUserStatus = require('../config/checkUserStatus')
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  return res.send({massage:"jay shree ram"});
+  return res.send({massage:"Server working"});
 });
 
 module.exports = router;
