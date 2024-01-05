@@ -266,14 +266,20 @@ exports.getWishListItems = function (req, res) {
 
 
 
+
+  
   // const express = require('express');
 const ogs = require('open-graph-scraper');
 
 // const app = express();
 // const PORT = 3000;
-
-app.get('/shareable-content', async (req, res) => {
+exports.metadata = async function (req, res) {
+//  (req, res) => {
   const postId = req.query.id;
+
+  const htmlContent = generateHtmlContent("http://3.18.242.37:4000/images/postImage/image_cropper_1702894004408jpg-1702894011693.jpg", "durgehs", "durgehs");
+
+
 
   // Replace this with your logic to fetch content based on postId
   const post = await fetchPostById(postId);
@@ -285,7 +291,7 @@ app.get('/shareable-content', async (req, res) => {
   } else {
     res.status(404).send('Post not found');
   }
-});
+};
 
 // Function to simulate fetching a post from a database
 async function fetchPostById(postId) {
@@ -294,7 +300,7 @@ async function fetchPostById(postId) {
   return {
     title: `Post ${postId} Title`,
     description: `This is the description for post ${postId}.`,
-    image: 'https://example.com/image.jpg',
+    image: 'http://3.18.242.37:4000/images/postImage/image_cropper_1702894004408jpg-1702894011693.jpg',
   };
 }
 
@@ -306,7 +312,7 @@ function generateOpenGraphTags(post) {
         <meta property="og:title" content="${post.title}" />
         <meta property="og:description" content="${post.description}" />
         <meta property="og:image" content="${post.image}" />
-        <meta property="og:url" content="https://www.yourwebsite.com/shareable-content?id=${postId}" />
+        <meta property="og:url" content="https://www.yourwebsite.com/shareable-content?id=${post}" />
         <!-- Other Open Graph tags as needed -->
       </head>
       <body>
@@ -317,3 +323,21 @@ function generateOpenGraphTags(post) {
 }
 
 
+
+function generateHtmlContent(imageUrl, name, description) {
+  return `
+    <html>
+      <head>
+        <meta property="og:title" content="${name}" />
+        <meta property="og:description" content="${description}" />
+        <meta property="og:image" content="${imageUrl}" />
+        <!-- Other Open Graph tags as needed -->
+      </head>
+      <body>
+        <img src="${imageUrl}" alt="${name}" style="max-width: 100%;" />
+        <h1>${name}</h1>
+        <p>${description}</p>
+      </body>
+    </html>
+  `;
+}

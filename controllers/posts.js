@@ -958,7 +958,7 @@ exports.getPostOrEventById = function (req, res) {
   sql =
     "SELECT ( CASE WHEN (events.image IS NOT NULL AND  events.image<>'' ) THEN CONCAT('" +
     constants.BASE_URL +
-    "','images/postImage/',events.image) ELSE '' END ) AS post_image,events.*,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,TIME_FORMAT(events.end_time, '%H:%i') AS end_time FROM  events   WHERE events.id= " +
+    "','images/postImage/',events.image) ELSE '' END ) AS post_image,events.*,TIME_FORMAT(events.start_time, '%H:%i') AS start_time,TIME_FORMAT(events.end_time, '%H:%i') AS end_time,TIMESTAMPDIFF(MINUTE, events.updated_datetime, CURRENT_TIMESTAMP) AS create_minute_ago,users.name, CONCAT('"+ constants.BASE_URL    +"','images/profiles/', users.profile_picture) AS profile_picture FROM  events LEFT JOIN users ON users.id = events.user_id  WHERE events.id= " +
     req.query.post_id +
     "   ";
 
