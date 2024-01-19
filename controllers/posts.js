@@ -231,9 +231,44 @@ exports.new = async function (req, res) {
 //     console.error(error);
 //   }
 // };
+async function dr(){ 
+const startTime = '17:44';
+const endTime = '18:15';
+
+const startDate = '2024-01-16'
+const endDate = '2024-01-16'
+console.log(startDate,endDate);
+
+if (startDate == endDate &&  endTime > startTime  ) {
+  console.log('Condition satisfied: Start date is less than or equal to end date.');
+} else {
+  console.log('Condition not satisfied: Start date is greater than end date.');
+}
+
+
+}
+// dr();
 
 exports.postEvent = async function (req, res) {
   var data = {};
+
+console.log(req.body," post envet====");
+if ( req.body.start_date ==  req.body.end_date &&  req.body.end_time <= req.body.start_time  ) {
+  console.log("dddddddddddddddddddddddddddd=========+++++++++");
+if (req.file && req.file.filename) {
+  fs.unlink(
+              "./public/images/postImage/" +  req.file.filename,
+              function (err) {}
+            );
+}
+  
+return res.json({
+        success: false,
+        message: "Please setect correct time.",
+      });
+
+
+}
 
   const conditionForPost =
     req.body.post_id &&
@@ -272,6 +307,8 @@ exports.postEvent = async function (req, res) {
   ) {
     data.type = req.body.type;
   }
+
+
   if (
     req.body.start_date &&
     req.body.start_date != "undefined" &&
@@ -512,8 +549,18 @@ async function visibility(data) {
 }
 
 exports.getPostsAndEventsList = function (req, res) {
+  console.log(req.query," ===== req.query")
   // Focuse on Bracess
   var page = req.query.page ? req.query.page : 0;
+
+let attent=' ';
+if(req.query.attending==1){
+      attent= "  AND  attending.attending_type=1    ";
+       
+    }
+    let limit=` LIMIT  ${page * 8}, 8 `
+
+
 
   // OR  CASE WHEN (      SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)   FROM users_interest      WHERE user_id = users.id GROUP BY users_interest.user_id  ) = (     SELECT GROUP_CONCAT(interest_id ORDER BY interest_id)      FROM users_interest      WHERE user_id = "+    req.query.login_user_id + " GROUP BY users_interest.user_id  ) THEN true ELSE false  END  )
   var condition1 = " ";
@@ -528,7 +575,7 @@ exports.getPostsAndEventsList = function (req, res) {
       AND users_requests.is_reject=0  AND users_requests.is_block=0 ) 
       OR (users_requests.request_for=${req.query.login_user_id} AND (users_requests.is_accepted=1 
 
-    OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  )         ) AND
+    OR users_requests.is_follow_by_request_for=1 )   AND users_requests.is_reject=0  AND users_requests.is_block=0  ) OR events.user_id=${req.query.login_user_id}        ) AND
     (
       events.visibilitySelectUsers=1
      OR (events.visibilitySelectUsers=2 AND CASE WHEN visibility.user_id=${req.query.login_user_id} THEN false ELSE true END  )
@@ -541,7 +588,9 @@ exports.getPostsAndEventsList = function (req, res) {
     condition = " ( events.user_id   =" + req.query.login_user_id;
 
     if (req.query.type == "feed") {
-      condition += "  AND  events.post_type=1  )";
+      condition += "  AND  events.post_type=1 AND events.image IS NOT NULL  AND events.image<>''  )";
+      limit=` LIMIT  ${page * 12}, 12 `
+
     } else {
       if (req.query.type == "event") {
         condition += "  AND  events.post_type=0 )";
@@ -563,6 +612,8 @@ exports.getPostsAndEventsList = function (req, res) {
   ) {
     if (req.query.type == "event" && req.query.myProfile != "1") {
       condition += "  AND  events.post_type=0    ";
+
+
 
       // OR (events.user_id =" +
       // req.query.login_user_id +
@@ -684,17 +735,17 @@ exports.getPostsAndEventsList = function (req, res) {
     LEFT JOIN attending ON (attending.post_id=events.id AND attending.user_id=${
       req.query.login_user_id
     })
-  WHERE (attending.attending_type IS null OR attending.attending_type IN(1,2)) AND 
+  WHERE (attending.attending_type IS null OR attending.attending_type IN(1,2)) ${attent}  AND 
     (${condition}) ${condition1}
   GROUP BY
     events.id
   ORDER BY
     events.id DESC
-  LIMIT
-    ${page * 8}, 8;
+  ${limit};
 `;
 
   // Now you can use the 'query' string in your database query execution.
+console.log(sql,"  at the time post or event dashboard")
 
   connection.query(sql, function (err, post_list) {
     if (post_list.length > 0) {

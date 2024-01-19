@@ -817,6 +817,7 @@ exports.changePassword = async function (req, res) {
 };
 
 exports.getProfile = function (req, res) {
+  console.log(req.query," get profiles api ==");
   if (!req.query.login_user_id) {
     return res.json({
       success: false,

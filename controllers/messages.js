@@ -90,6 +90,8 @@ exports.getChats = async (req, res) => {
           LIMIT
              ${page * 30}, 30`;
 
+
+console.log("ddddd",sql);
     connection.query(sql, async function (err, chatList) {
       if (chatList.length > 0) {
         let s8 = await dbScript(db_sql["Q8"], {
@@ -132,6 +134,7 @@ exports.getChats = async (req, res) => {
         }
 
         processChatList(chatList);
+        console.log("chat data==",chatList);
         return res.json({
           response: chatList,
           from_chat_id: from_chat_id,
@@ -628,6 +631,8 @@ exports.sendMessage = async (req, res) => {
   }
 };
 exports.sendFiles = async (req, res) => {
+  console.log(req.body," ddd ddd");
+
   if (!req.body.login_user_id) {
     return res.status(400).json({ message: "Missing some data" });
   } else {
