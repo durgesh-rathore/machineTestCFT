@@ -4,7 +4,9 @@ var checkUserStatus = require("../config/checkUserStatus");
 
 var router = express.Router();
 
-router.post("/followUser", checkUserStatus.userStatus, friend.followUser);
+router.post("/followUser",
+  //  checkUserStatus.userStatus, 
+    friend.followUser);
 router.post("/requestForUser", checkUserStatus.userStatus, friend.requestForUser);
 
 router.put("/unFollowUser", checkUserStatus.userStatus, friend.unFollowUser);

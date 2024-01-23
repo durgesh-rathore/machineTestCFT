@@ -1136,3 +1136,79 @@ console.log(err);
   }
   
 };
+
+exports.getNotificationList = async (req, res) => {
+  const { login_user_id} = req.query;
+
+  if (
+    login_user_id &&
+    login_user_id != "undefined" 
+      ) {
+
+var sql=`SELECT * FROM notification WHERE user_id=${login_user_id} AND is_seen=0`;
+console.log(sql," dddddd");
+   connection.query(sql,(err,notificationList)=>{
+    if(err){
+console.log(err);
+    }else
+    if (notificationList.length>=0) {
+      return res.json({
+        success: true,
+        notificationList:notificationList,
+        message: "Notification list.",
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: "Notification list..",
+      });
+    }
+  })
+  } else {
+    return res.json({
+      success: false,
+      message: "Something went wrong.",
+    });
+  }
+  
+};
+
+exports.NotificationSeen = async (req, res) => {
+  const { login_user_id,notification_id} = req.body;
+
+  if (
+    login_user_id &&
+    login_user_id != "undefined" && notification_id && notification_id != "undefined"
+      ) {
+
+ var sql=`UPDATE notification SET is_seen=1 WHERE user_id=${login_user_id} AND is_seen=0 AND id=${notification_id}`;
+console.log(sql," dddddd");
+   connection.query(sql,(err,notificationList)=>{
+    if(err){
+console.log(err);
+return res.json({
+  success: false,
+  message: "Something went wrong",
+});
+    }else
+    if (notificationList) {
+      return res.json({
+        success: true,
+        notificationList:notificationList,
+        message: "Notification seen.",
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: "some went wrong",
+      });
+    }
+  })
+  } else {
+    return res.json({
+      success: false,
+      message: "Something went wrong.",
+    });
+  }
+  
+};

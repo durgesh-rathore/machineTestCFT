@@ -18,6 +18,7 @@ admin.initializeApp({
 async function pushNotification(device_token, message, status) {
   title = "ForgetMeNote";
 
+
   var sender = new gcm.Sender(constants.FIREBASE_NOTIFICATION_KEY);
   var message = new gcm.Message({
     data: { title: title, message: message, status: status },
@@ -345,7 +346,17 @@ async function pushNotification2(
 //   transporter1.close();
 // });
 
+async function savePushNotification(user_id,notification,status){
 
+
+  var obj={
+    user_id:user_id,
+    notifcation_masage:notification,
+    type:status
+  }
+await save("notification",obj);
+
+}
 
 
 
@@ -358,4 +369,5 @@ module.exports = {
   pushNotification1,
   pushNotification2,
   addWatermarkToImage,
+  savePushNotification
 };

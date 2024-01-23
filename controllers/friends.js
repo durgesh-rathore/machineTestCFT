@@ -4,7 +4,7 @@ var constants = require("../config/constants");
 var { encryptPassword, checkPassword } = require("../config/custom");
 var multer = require("multer");
 const path = require("path");
-var { pushNotification, findOne,save } = require("../helpers/helper");
+var { pushNotification,savePushNotification, findOne,save } = require("../helpers/helper");
 const { db_sql, dbScript, queryAsync } = require("../helpers/db_scripts");
 const fs = require("fs");
 const e = require("express");
@@ -60,6 +60,11 @@ exports.followUser = function (req, res) {
                     "",
                   "2"
                 );
+                savePushNotification( req.body.request_for,"Followed you by " +
+                (req.body.login_user_name ? req.body.login_user_name : "") +
+                "",
+              "2")
+
               } else {
                 if (req.body.login_user_id == usersRequest[0].user_id) {
                   forf = " is_follow=1 ";
@@ -74,6 +79,17 @@ exports.followUser = function (req, res) {
                         "",
                       "3"
                     );
+                    
+                    savePushNotification(
+                      req.body.request_for,
+                      "Followed you by " +
+                        (req.body.login_user_name
+                          ? req.body.login_user_name
+                          : "") +
+                        "",
+                      "3"
+                    );
+
                   } else {
                     pushNotification(
                       notificationFor[0].divice_token,
@@ -84,6 +100,16 @@ exports.followUser = function (req, res) {
                         "",
                       "2"
                     );
+                    savePushNotification(
+                      req.body.request_for,
+                      "Followed you by " +
+                      (req.body.login_user_name
+                        ? req.body.login_user_name
+                        : "") +
+                      "",
+                    "2"
+                  );
+
                   }
                 } else {
                   forf = "is_follow_by_request_for=1  ";
@@ -98,6 +124,15 @@ exports.followUser = function (req, res) {
                         "",
                       "3"
                     );
+                    savePushNotification(
+                      req.body.request_for,
+                    "Followed you by " +
+                    (req.body.login_user_name
+                      ? req.body.login_user_name
+                      : "") +
+                    "",
+                  "2"
+                );
                   } else {
                     pushNotification(
                       notificationFor[0].divice_token,
@@ -108,6 +143,16 @@ exports.followUser = function (req, res) {
                         "",
                       "2"
                     );
+
+                    savePushNotification(
+                      req.body.request_for,
+                      "Followed you by " +
+                      (req.body.login_user_name
+                        ? req.body.login_user_name
+                        : "") +
+                      "",
+                    "2"
+                  );
                   }
                 }
               }
@@ -120,6 +165,14 @@ exports.followUser = function (req, res) {
                   "",
                 "3"
               );
+              savePushNotification(
+                req.body.request_for,
+                "Followed Back  you by " +
+                (req.body.login_user_name ? req.body.login_user_name : "") +
+                "",
+              "3"
+            );
+
             }
             connection.query(
               " UPDATE users_requests SET " +
@@ -171,6 +224,15 @@ exports.followUser = function (req, res) {
                         "",
                       "2"
                     );
+
+                    savePushNotification( notificationFor[0].id,
+                    "Followed you by " +
+                      (req.body.login_user_name
+                        ? req.body.login_user_name
+                        : "") +
+                      "",
+                    "2"
+                  );
                   }
                 );
 
@@ -192,6 +254,9 @@ exports.followUser = function (req, res) {
     );
   }
 };
+
+
+
 exports.requestForUser = function (req, res) {
   if (req.body.login_user_id && req.body.request_for) {
     connection.query(
@@ -234,6 +299,14 @@ exports.requestForUser = function (req, res) {
                   "",
                 render
               );
+
+              savePushNotification( notificationFor[0].id,
+                "Friend request for you by " +
+                  (req.body.login_user_name ? req.body.login_user_name : "") +
+                  "",
+                render
+              );
+
             } else {
               updateSql =
                 " UPDATE users_requests SET is_request=1,request_by=" +

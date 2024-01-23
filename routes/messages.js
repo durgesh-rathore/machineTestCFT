@@ -53,6 +53,17 @@ router.get(
   messagesController.chatNotificationCount
 );
 
+router.get(
+  "/getNotificationList",
+//   checkUserStatus.userStatus,
+  messagesController.getNotificationList
+);
+router.post(
+  "/NotificationSeen",
+//   checkUserStatus.userStatus,
+  messagesController.NotificationSeen
+);
+
 
 
 module.exports = router;
