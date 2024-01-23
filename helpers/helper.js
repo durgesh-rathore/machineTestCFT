@@ -37,14 +37,15 @@ async function pushNotification(device_token, message, status) {
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
+  // port: 587,
+  port: 993,
   secure: false,
   requireTLS: true,
   auth: {
     user: "vastram823@gmail.com",
     pass: "zydrbnnikwjzwkgt",
-    // user: "nebor.global@gmail.com",
-    // pass: "yclngaunzovlucah",
+    // user: "webdev@laughmd.app",
+    // pass: "EYn0EfmJ6LfdV*wz*4swP6q)",
   },
 });
 async function sendMail(data) {
@@ -52,7 +53,7 @@ async function sendMail(data) {
   try {
     var option = {
       from: "vastram823@gmail.com",
-      // from: "nebor.global@gmail.com",
+      // from: "webdev@laughmd.app",
       to: data.email,
       subject: "Reset you password",
       html: "<h1>Your  dummy password is :</h2>" + data.password,
@@ -63,6 +64,16 @@ async function sendMail(data) {
   }
 }
 // sendMail({email:"durgeshrathore060@gmail.com"});
+
+
+
+
+
+
+
+
+
+// ============================
 
 async function save(tbl, data) {
   var sql = "INSERT INTO " + tbl + " SET ?";
@@ -290,6 +301,53 @@ async function pushNotification2(
       console.error("Error sending message:", error);
     });
 }
+
+
+
+
+
+
+
+// const nodemailer = require('nodemailer');
+
+// // Create a transporter object
+// var from="ns2.carmothosting.com"
+// const transporter1 = nodemailer.createTransport({
+//   // host: 'hello@laughmd.app', // e.g., smtp.gmail.com for Gmail
+//   // host:"5597810.carmothosting.com",
+//   host:from,
+//   port: 465, // Port number (can be different for different email providers)
+//   secure: false, // Set to true if using SSL
+//   auth: {
+//     user: 'hello@laughmd.app',
+//     pass: 'Dr)nLl{d0dB$'
+//   }
+// });
+
+// // Email content
+// const mailOptions = {
+//   from: from,
+//   to: 'durgeshrathore060@gmail.com',
+//   subject: 'Test Email',
+//   text: 'This is a test email sent from Node.js.'
+// };
+
+// // Send the email
+// transporter1.sendMail(mailOptions, (error, info) => {
+//   console.log(" in   dddddddddweb mail")
+//   if (error) {
+//     console.error(error);
+//   } else {
+//     console.log('Email sent: ' + info.response);
+//   }
+  
+//   // Close the transporter1 to release resources
+//   transporter1.close();
+// });
+
+
+
+
 
 module.exports = {
   save,

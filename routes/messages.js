@@ -42,6 +42,16 @@ router.post(
 //   checkUserStatus.userStatus,
   messagesController.messagesSeen
 );
+router.get(
+  "/notificationCount",
+//   checkUserStatus.userStatus,
+  messagesController.notificationCount
+);
+router.get(
+  "/chatNotificationCount",
+//   checkUserStatus.userStatus,
+  messagesController.chatNotificationCount
+);
 
 
 

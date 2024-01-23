@@ -4,7 +4,7 @@ var constants = require("../config/constants");
 var { encryptPassword, checkPassword } = require("../config/custom");
 var multer = require("multer");
 const path = require("path");
-var { pushNotification, findOne } = require("../helpers/helper");
+var { pushNotification, findOne,save } = require("../helpers/helper");
 const { db_sql, dbScript, queryAsync } = require("../helpers/db_scripts");
 const fs = require("fs");
 const e = require("express");
@@ -520,6 +520,8 @@ exports.acceptRequest = function (req, res) {
       async function (err, result) {
         if (err) throw err;
         if (result) {
+
+          var c = await save("chats", {send_by:req.body.login_user_id,sent_to:req.body.request_for,message:''});
           let s3 = await dbScript(db_sql["Q3"], { var1: req.body.request_for });
           let notificationFor = await queryAsync(s3);
           pushNotification(

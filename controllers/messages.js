@@ -1063,3 +1063,76 @@ exports.getChats2 = async (req, res) => {
     }
   });
 };
+
+
+exports.notificationCount = async (req, res) => {
+  const { login_user_id } = req.query;
+
+  if (
+    login_user_id &&
+    login_user_id != "undefined" 
+      ) {
+
+var sql=`SELECT COUNT(*) AS cou FROM notification WHERE user_id=${login_user_id} AND is_seen=0`;
+console.log(sql," dddddd");
+   connection.query(sql,(err,counts)=>{
+    if(err){
+console.log(err);
+    }else
+    if (counts) {
+      return res.json({
+        success: true,
+        notificationCount:counts[0].cou,
+        message: " Unseen notification count.",
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: "Message aren't seen.",
+      });
+    }
+  })
+  } else {
+    return res.json({
+      success: false,
+      message: "Something went wrong.",
+    });
+  }
+  
+};
+
+exports.chatNotificationCount = async (req, res) => {
+  const { login_user_id} = req.query;
+
+  if (
+    login_user_id &&
+    login_user_id != "undefined" 
+      ) {
+
+var sql=`SELECT COUNT(*) AS cou FROM notification WHERE user_id=${login_user_id} AND is_seen=0`;
+console.log(sql," dddddd");
+   connection.query(sql,(err,counts)=>{
+    if(err){
+console.log(err);
+    }else
+    if (counts) {
+      return res.json({
+        success: true,
+        notificationCount:counts[0].cou,
+        message: "Chat unseen notification count.",
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: "Message aren't seen.",
+      });
+    }
+  })
+  } else {
+    return res.json({
+      success: false,
+      message: "Something went wrong.",
+    });
+  }
+  
+};
