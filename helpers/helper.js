@@ -358,7 +358,7 @@ async function savePushNotification(user_id,notification,status){
   }
 await save("notification",obj);
 
-var sql=`SELECT COUNT(*) AS cou FROM notification WHERE user_id=${login_user_id} AND is_seen=0`;
+var sql=`SELECT COUNT(*) AS cou FROM notification WHERE user_id=${user_id} AND is_seen=0`;
 console.log(sql," dddddd");
 connection.query(sql,(err,counts)=>{
   if(err){
