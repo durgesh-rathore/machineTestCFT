@@ -366,7 +366,7 @@ console.log(err);
   }else
   if (counts) {
 
-    clients[user_id].emit('notificationCount', { message: counts[0].cou  });
+    // clients[user_id].emit('notificationCount', { message: counts[0].cou  });
     }})
 
 }
