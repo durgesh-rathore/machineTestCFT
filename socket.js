@@ -10,7 +10,8 @@ var {
 } = require("./helpers/db_scripts");
 
 var clients = [];
-module.exports = (io) => {
+
+ var iost= (io) => {
   io.on("connection", (socket) => {
     // console.log("User has connect55");
     socket.on("disconnect", (_) => {
@@ -388,3 +389,6 @@ socket.broadcast.to(`chat-${group_id}`).emit("muteUserReceive", {
     });
   });
 };
+
+ 
+module.exports={clients,iost}

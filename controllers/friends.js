@@ -329,6 +329,13 @@ exports.requestForUser = function (req, res) {
                   "",
                 render
               );
+
+              savePushNotification( notificationFor[0].id,
+                "Friend request for you by " +
+                  (req.body.login_user_name ? req.body.login_user_name : "") +
+                  "",
+                render
+              );
             }
             connection.query(updateSql, async function (err, result) {
               if (err) throw err;
@@ -359,6 +366,13 @@ exports.requestForUser = function (req, res) {
                 pushNotification(
                   notificationFor[0].divice_token,
                   "Frieds request for you by " +
+                    (req.body.login_user_name ? req.body.login_user_name : "") +
+                    "",
+                  render
+                );
+
+                savePushNotification( notificationFor[0].id,
+                  "Friend request for you by " +
                     (req.body.login_user_name ? req.body.login_user_name : "") +
                     "",
                   render
@@ -605,6 +619,12 @@ exports.acceptRequest = function (req, res) {
             "5"
           );
 
+          savePushNotification( notificationFor[0].id,
+            "Your request is accepted by " +
+            (req.body.login_user_name ? req.body.login_user_name : "") +
+            "",
+          "5"
+          );
           return res.json({
             success: true,
 
