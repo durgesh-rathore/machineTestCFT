@@ -47,6 +47,19 @@ var clients = [];
       });
     });
 
+
+    socket.on("forPushNotificationCount",  async ({ user_id,post_id,login_user_id    }) => {
+      console.log("forPushNotificationCount : ggg", user_id,post_id,login_user_id);
+      // clients[uid.uid] = socket;
+      var sql=`SELECT COUNT(*) AS cou FROM notification WHERE user_id=${user_id} AND is_seen=0`;
+      // console.log("clients==================", clients, sql);
+      connection.query(sql, function (err, counts) {
+        console.log(err);
+        // console.log("uid for ",uid,clients[uid.uid])
+         clients[user_id].emit('notificationCount', { message: counts[0].cou  });
+      });
+    });
+
     socket.on("user-setOffline", (uid) => {
       // console.log("user-offline : ", uid);
     });
