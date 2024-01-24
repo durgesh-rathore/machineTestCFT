@@ -11,7 +11,7 @@ var {
 
 var clients = [];
 
- var iost= (io) => {
+module.exports = (io) => {
   io.on("connection", (socket) => {
     // console.log("User has connect55");
     socket.on("disconnect", (_) => {
@@ -404,4 +404,3 @@ socket.broadcast.to(`chat-${group_id}`).emit("muteUserReceive", {
 };
 
  
-module.exports={clients,iost}

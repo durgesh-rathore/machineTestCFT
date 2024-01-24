@@ -2,8 +2,7 @@ var multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 var connection = require("../config/db");
-const io=require("../socket");
-const clients=require("../socket");
+
 
 var constants = require("../config/constants");
 const nodemailer = require("nodemailer");
@@ -358,16 +357,16 @@ async function savePushNotification(user_id,notification,status){
   }
 await save("notification",obj);
 
-var sql=`SELECT COUNT(*) AS cou FROM notification WHERE user_id=${user_id} AND is_seen=0`;
-console.log(sql," dddddd");
-connection.query(sql,(err,counts)=>{
-  if(err){
-console.log(err);
-  }else
-  if (counts) {
+// var sql=`SELECT COUNT(*) AS cou FROM notification WHERE user_id=${user_id} AND is_seen=0`;
+// console.log(sql," dddddd");
+// connection.query(sql,(err,counts)=>{
+//   if(err){
+// console.log(err);
+//   }else
+//   if (counts) {
 
-    // clients[user_id].emit('notificationCount', { message: counts[0].cou  });
-    }})
+//     // clients[user_id].emit('notificationCount', { message: counts[0].cou  });
+//     }})
 
 }
 
