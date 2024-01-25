@@ -56,7 +56,10 @@ module.exports = (io) => {
       connection.query(sql, function (err, counts) {
         console.log(err);
         // console.log("uid for ",uid,clients[uid.uid])
+
+        if(clients[user_id]){
          clients[user_id].emit('notificationCount', { message: counts[0].cou  });
+        }
       });
     });
 
