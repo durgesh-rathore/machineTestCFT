@@ -1152,6 +1152,7 @@ console.log(sql," dddddd");
 console.log(err);
     }else
     if (notificationList.length>=0) {
+      connection.query(`UPDATE notification SET is_seen=1 WHERE user_id=${login_user_id} AND is_seen=0`,(err,result)=>{});
       return res.json({
         success: true,
         notificationList:notificationList,
