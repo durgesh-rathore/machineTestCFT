@@ -60,7 +60,8 @@ exports.new = async function (req, res) {
       const watermarkedImageBuffer = await addWatermarkToImage(
         uploadedImageBuffer,
         watermarkText,
-        
+        "Ram ram "
+
       );
       try {
         const outputImagePath = path.join(

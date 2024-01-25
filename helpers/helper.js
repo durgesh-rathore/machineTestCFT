@@ -300,34 +300,112 @@ async function addWatermarkToImage1(imageBuffer, watermarkText) {
   // Convert the canvas to a Buffer
   return canvas.toBuffer('image/jpeg');
 }
-async function addWatermarkToImage(imageBuffer, text) {
-  const logoImage = await Jimp.read('/home/user/Desktop/durgesh/ForgetMeNote/forgetmenote/public/images/postImage/Rectangle21png-1681901239083.png');
-  const image = await Jimp.read(imageBuffer);
+// async function addWatermarkToImage(imageBuffer, text) {
+//   // const logoImage = path.join(
+//   //   "public/images/postImage/",
+//   //   "" + fileName + "")
+//   const logoImage = await Jimp.read( path.join("public/images/logo.png"));
+//   const image = await Jimp.read(imageBuffer);
   
-  // Add text watermark
+//   // Add text watermark
+//   image.print(
+//     await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK),
+//     10,
+//     10,
+//     {
+//       text: text,
+//       alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
+//       alignmentY: Jimp.VERTICAL_ALIGN_TOP,
+//     },
+//     image.getWidth(),
+//     image.getHeight()
+//   );
+  
+//   // Add logo watermark
+//   image.composite(logoImage, 0, 0, {
+//     mode: Jimp.BLEND_DESTIN
+//   });
+
+//   return image.getBufferAsync(Jimp.MIME_JPEG);
+// }
+
+
+
+// async function addWatermarkToImage(imageBuffer, mainText, additionalText) {
+//   const logoImage = await Jimp.read(path.join("public/images/logo.png"));
+//   const image = await Jimp.read(imageBuffer);
+
+//   // Add main text watermark
+//   image.print(
+//     await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK),
+//     10,
+//     10,
+//     {
+//       text: mainText,
+//       alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
+//       alignmentY: Jimp.VERTICAL_ALIGN_TOP,
+//     },
+//     image.getWidth(),
+//     image.getHeight()
+//   );
+
+//   // Add logo watermark
+//   image.composite(logoImage, 0, 0, {
+//     mode: Jimp.BLEND_DESTIN,
+//   });
+
+//   // Add additional text to the bottom right corner
+//   image.print(
+//     await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK),
+//     image.getWidth() - 10, // Adjust the X position based on your preference
+//     image.getHeight() - 20, // Adjust the Y position based on your preference
+//     {
+//       text: additionalText,
+//       alignmentX: Jimp.HORIZONTAL_ALIGN_RIGHT,
+//       alignmentY: Jimp.VERTICAL_ALIGN_BOTTOM,
+//     }
+//   );
+
+//   return image.getBufferAsync(Jimp.MIME_JPEG);
+// }
+
+async function addWatermarkToImage(imageBuffer, mainText, additionalText) {
+  const logoImage = await Jimp.read(path.join("public/images/logo.png"));
+  const image = await Jimp.read(imageBuffer);
+
+  // Add main text watermark
   image.print(
     await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK),
-    10,
-    10,
+    100,
+    100,
     {
-      text: text,
+      text: mainText,
       alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
       alignmentY: Jimp.VERTICAL_ALIGN_TOP,
     },
     image.getWidth(),
     image.getHeight()
   );
-  
+
+  // Add additional text above the icon
+  image.print(
+    await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK),
+    image.getWidth() - 100, // Adjust the X position based on your preference
+    image.getHeight() - 100, // Adjust the Y position based on your preference
+    {
+      text: additionalText,
+      alignmentX: Jimp.HORIZONTAL_ALIGN_RIGHT,
+      alignmentY: Jimp.VERTICAL_ALIGN_BOTTOM,
+    }
+  );
+
   // Add logo watermark
-  image.composite(logoImage, 0, 0, {
-    mode: Jimp.BLEND_DESTIN
+  image.composite(logoImage, image.getWidth() - 300, image.getHeight() - 200, {
+    mode: Jimp.BLEND_DESTIN,
   });
 
   return image.getBufferAsync(Jimp.MIME_JPEG);
 }
-
-
-
 
 
 
