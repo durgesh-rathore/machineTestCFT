@@ -38,7 +38,7 @@ router.get(
 );
 router.post(
   "/postEvent",
-  checkUserStatus.userStatus,
+  // checkUserStatus.userStatus,
   uploadFiles("public/images/postImage").single("image"),
   postController.postEvent
 );

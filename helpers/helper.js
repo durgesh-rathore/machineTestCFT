@@ -39,23 +39,25 @@ async function pushNotification(device_token, message, status) {
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  // port: 587,
-  port: 993,
+  port: 587,
+  // port: 993,
   secure: false,
   requireTLS: true,
   auth: {
-    user: "vastram823@gmail.com",
-    pass: "zydrbnnikwjzwkgt",
+    user: "dev.team.nl@gmail.com",
+    pass: "jmksadtfylyuakuy",
     // user: "webdev@laughmd.app",
     // pass: "EYn0EfmJ6LfdV*wz*4swP6q)",
   },
 });
+
+
 async function sendMail(data) {
   console.log("in mail");
   try {
     var option = {
-      from: "vastram823@gmail.com",
-      // from: "webdev@laughmd.app",
+      // from: "vastram823@gmail.com",
+      from: "dev.team.nl@gmail.com",
       to: data.email,
       subject: "Reset you password",
       html: "<h1>Your  dummy password is :</h2>" + data.password,
@@ -207,11 +209,39 @@ async function pushNotification1(
 //   // Convert the canvas to a Buffer
 //   return canvas.toBuffer("image/jpeg");
 // }
-
-
-async function addWatermarkToImage(imageBuffer, watermarkText) {
-  const sharp = require('sharp');
+const sharp = require('sharp');
+  const Jimp = require('jimp');
   const { createCanvas, loadImage, registerFont } = require('canvas');
+
+// async function addWatermarkImageToImage(imageBuffer, text, logoImage) {
+//   const image = await Jimp.read(imageBuffer);
+  
+//   // Add text watermark
+//   image.print(
+//     await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK),
+//     10,
+//     10,
+//     {
+//       text: text,
+//       alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
+//       alignmentY: Jimp.VERTICAL_ALIGN_TOP,
+//     },
+//     image.getWidth(),
+//     image.getHeight()
+//   );
+  
+//   // Add logo watermark
+//   image.composite(logoImage, 0, 0, {
+//     mode: Jimp.BLEND_DESTIN
+//   });
+
+//   return image.getBufferAsync(Jimp.MIME_JPEG);
+// }
+
+async function addWatermarkToImage1(imageBuffer, watermarkText) {
+  
+  
+  addWatermarkImageToImage(imageBuffer, watermarkText);
 
   // Load your custom font (optional, for watermark text)
   // registerFont('path/to/your/font.ttf', { family: 'CustomFont' });
@@ -270,6 +300,36 @@ async function addWatermarkToImage(imageBuffer, watermarkText) {
   // Convert the canvas to a Buffer
   return canvas.toBuffer('image/jpeg');
 }
+async function addWatermarkToImage(imageBuffer, text) {
+  const logoImage = await Jimp.read('/home/user/Desktop/durgesh/ForgetMeNote/forgetmenote/public/images/postImage/Rectangle21png-1681901239083.png');
+  const image = await Jimp.read(imageBuffer);
+  
+  // Add text watermark
+  image.print(
+    await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK),
+    10,
+    10,
+    {
+      text: text,
+      alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
+      alignmentY: Jimp.VERTICAL_ALIGN_TOP,
+    },
+    image.getWidth(),
+    image.getHeight()
+  );
+  
+  // Add logo watermark
+  image.composite(logoImage, 0, 0, {
+    mode: Jimp.BLEND_DESTIN
+  });
+
+  return image.getBufferAsync(Jimp.MIME_JPEG);
+}
+
+
+
+
+
 
 
 async function pushNotification2(

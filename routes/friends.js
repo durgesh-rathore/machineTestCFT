@@ -34,4 +34,12 @@ router.get("/friendsListAccordingToAddInGroup",
 // checkUserStatus.userStatus,
  friend.friendsListAccordingToAddInGroup);
 
+ router.get("/getFollowerUserList", 
+// checkUserStatus.userStatus,
+ friend.getFollowerUserList);
+
+ router.get("/getFollowingUserlist", 
+// checkUserStatus.userStatus,
+ friend.getFollowingUserlist);
+
 module.exports = router;

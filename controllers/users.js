@@ -734,12 +734,29 @@ exports.resetPassword = async function (req, res) {
   ) {
     return res.json({ success: false, message: "Please Enter Valid" });
   } else {
+    // console.log()
     if (req.body.password.length < 8) {
       return res.json({
         success: false,
         message: "Password must be 8 character",
       });
     }
+
+
+    connection.query(
+      "SELECT * FROM users WHERE users.id = '" +
+        req.body.user_id +
+        "'",
+      async function (err, users) {
+        if (users.length > 0) {
+          var is_Password = "";
+          is_Password = await checkPassword(
+            req.body.password,
+            users[0].dumy_password
+          );
+     
+
+if(is_Password){
     let password = await encryptPassword(req.body.password);
 
     sql =
@@ -756,8 +773,17 @@ exports.resetPassword = async function (req, res) {
         return res.json({ success: true, message: "Password reset." });
       }
     });
+  }else{
+    return res.json({ success: false, message: "Please enter valid password" });
+  }
+}else{
+
+}
+})
+
   }
 };
+
 
 exports.changePassword = async function (req, res) {
   if (
