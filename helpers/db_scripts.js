@@ -39,6 +39,41 @@ WHERE id IN ({var2})`,
 'Q17': " DELETE FROM chats WHERE  sent_to={var1} AND is_group=1",
 'Q18': " DELETE FROM chats WHERE  (sent_to={var1} AND send_by={var2}) OR (sent_to={var2} AND send_by={var1}) ",
 'Q19': " SELECT * FROM events WHERE id={var1} AND user_id={var2}",
+'Q20':  `SELECT COUNT(chats.id) AS cou
+            FROM chats
+            INNER JOIN chat_seen_in_group_by_user AS csi 
+            ON 
+            (
+            (chats.is_group = 0 AND csi.user_id = chats.sent_to AND csi.seen_chat_user_id = chats.send_by)
+            OR
+            (chats.is_group IN (1, 2) AND chats.sent_to = csi.seen_chat_user_id)
+            )
+            AND csi.user_id = {var1}
+            AND chats.id > csi.from_chat_id 
+            WHERE
+            chats.sent_to = {var1}
+            OR (
+            (chats.is_group = 1 AND chats.send_by <> {var1} AND chats.sent_to IN (
+              SELECT GROUP_CONCAT(groups_users.group_id) 
+              FROM groups_users 
+              WHERE groups_users.group_id = chats.sent_to AND groups_users.user_id = {var1}
+            ))
+            )
+            OR (
+            chats.is_group = 2 
+            AND chats.send_by <> {var1} 
+            AND chats.sent_to IN (
+              SELECT GROUP_CONCAT(bgu.group_id) 
+              FROM billing_group_users bgu 
+              WHERE bgu.group_id = chats.sent_to AND bgu.user_id = {var1}
+            ) 
+            AND chats.send_by <> {var1} 
+            AND chats.id > csi.from_chat_id 
+            AND chats.id <> csi.from_chat_id
+            );
+  `,
+  'Q21':`UPDATE chat_seen_in_group_by_user SET from_chat_id={var1} WHERE user_id={var2} AND 
+  seen_chat_user_id={var3} AND from_chat_id>{var1} `,
 
 };
 // IS  NOT NULL

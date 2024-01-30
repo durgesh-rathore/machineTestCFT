@@ -609,6 +609,20 @@ exports.acceptRequest = function (req, res) {
         if (result) {
 
           var c = await save("chats", {send_by:req.body.login_user_id,sent_to:req.body.request_for,message:''});
+          var obj1 = {
+            from_chat_id: 0,
+            user_id: req.body.login_user_id,
+            seen_chat_user_id: req.body.request_for,
+          };
+          var obj2 = {
+            from_chat_id: 0,
+            user_id: req.body.request_for,
+            seen_chat_user_id: req.body.login_user_id,
+          };
+           await save("chat_seen_in_group_by_user", obj1);
+           await save("chat_seen_in_group_by_user", obj2);
+
+
           let s3 = await dbScript(db_sql["Q3"], { var1: req.body.request_for });
           let notificationFor = await queryAsync(s3);
           pushNotification(
@@ -1187,7 +1201,9 @@ exports.getFollowerUserList = function (req, res) {
 
 var sql=`SELECT users.dob,users.mobile_number,users.created_datetime,email,users.id,users.name,CONCAT('${
 constants.BASE_URL}','images/profiles/',users.profile_picture) AS profile_picture
- FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id WHERE users_requests.request_for=${req.query.login_user_id} AND (users_requests.is_follow=1 OR users_requests.is_request=1) `;
+ FROM users_requests LEFT JOIN users ON users.id=users_requests.user_id 
+ WHERE users_requests.request_for=${req.query.login_user_id} 
+ AND (users_requests.is_follow=1 OR users_requests.is_request=1) `;
  console.log(sql," for follower ");
     
     connection.query(sql,     
@@ -1205,6 +1221,43 @@ constants.BASE_URL}','images/profiles/',users.profile_picture) AS profile_pictur
 };
 
 exports.getFollowingUserlist = function (req, res) {
+  //  for All friend list of user 
+  console.log(req.query," get profiles api ==");
+  if (!req.query.login_user_id) {
+    return res.json({
+      success: false,
+      message: "You not login user.",
+    });
+  } else {
+   
+    var sql=`SELECT users.dob,users.mobile_number,users.created_datetime,email,users.id,users.name,CONCAT('${
+    constants.BASE_URL }','images/profiles/',users.profile_picture) AS profile_picture 
+          FROM users_requests 
+          INNER JOIN 
+            users 
+             ON (   users.id =  case when users_requests.user_id<>${
+             req.query.login_user_id} Then users_requests.user_id ELSE users_requests.request_for END) 
+
+           WHERE (users_requests.user_id=${req.query.login_user_id} OR users_requests.request_for=${req.query.login_user_id})
+               AND users_requests.is_accepted=1 AND users_requests.is_block=0`;
+               console.log(sql,"    ===========getFollowingUserlist")
+    
+    connection.query(sql,     
+      function (err, users) {
+        console.log(err," rrrrrreeeeee");
+        
+
+        return res.json({
+          success: true,
+          message: "getFollowingUserlist",
+          response: users,
+        });
+      }
+    );
+  }
+};
+
+exports.getFollowingUserlistO = function (req, res) {
   console.log(req.query," get profiles api ==");
   if (!req.query.login_user_id) {
     return res.json({

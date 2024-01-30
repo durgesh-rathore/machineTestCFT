@@ -691,7 +691,7 @@ exports.forgotPassword = async function (req, res) {
       if (err) {
         
       } else if (users.length > 0) {
-        var otp = Math.floor(1000 + Math.random() * 90000000);
+        var otp = ""+Math.floor(1000 + Math.random() * 90000000);
         
         let password = await encryptPassword(otp + "");
 

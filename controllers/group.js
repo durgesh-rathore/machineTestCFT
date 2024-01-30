@@ -53,6 +53,12 @@ exports.add = function (req, res) {
                     user_id: element,
                   };
 
+                  var obj2 = {
+                    from_chat_id: 0,
+                    user_id: element,
+                    seen_chat_user_id: group.insertId,
+                  };
+                  await save("chat_seen_in_group_by_user", obj2);
                   await save("groups_users", group_users);
                   group_users = {};
                   if (req.body.group_admin_id != element) {
@@ -104,12 +110,20 @@ exports.addMembersInGroup = async function (req, res) {
         group_id: req.body.group_id,
         user_id: element,
       };
-
+      
+    
+      
       let sql = "INSERT INTO groups_users SET ?";
       connection.query(sql, group_users, async (error) => {
         group_users = {};
         // if (error) 
-        
+        var obj2 = {
+          from_chat_id: 0,
+          user_id: element,
+          seen_chat_user_id:req.body.group_id,
+        };
+        await save("chat_seen_in_group_by_user", obj2);
+
       });
     } else {
       let sql = `UPDATE 
@@ -251,6 +265,18 @@ exports.addSplitGroup = function (req, res) {
                     
                                  });
                   group_users = {};
+
+                  var obj2 = {
+                    from_chat_id: 0,
+                    user_id: element,
+                    seen_chat_user_id: users.insertId,
+                  };
+                  let sql1 = "INSERT INTO chat_seen_in_group_by_user SET ?";
+                  connection.query(sql1, obj2, async (error) => {
+                    
+                                 });
+                                 obj2={};
+                  // await save("chat_seen_in_group_by_user", obj2);
                 });
 
                   return res.json({

@@ -146,7 +146,7 @@ socket.broadcast.to(`chat-${group_id}`).emit("muteUserReceive", {
           if (is_meta_data == 1) {
             data.is_meta_data = is_meta_data;
           }
-          await save("chats", data);
+         var chat_id= await save("chats", data);
         }
         console.log(
           "{ conversation, newMessage }========",
@@ -157,7 +157,8 @@ socket.broadcast.to(`chat-${group_id}`).emit("muteUserReceive", {
           is_group,
           images,
           createdDatetime,
-          profile_picture
+          profile_picture,
+          chat_id
         );
         // socket
         // .to(`chat-${conversation._id}`)
@@ -193,7 +194,9 @@ socket.broadcast.to(`chat-${group_id}`).emit("muteUserReceive", {
                 profile_picture,
                 mute_users,
                 is_meta_data,
-                group_name
+                group_name,
+                chat_id
+
               });
             } else {
               mute_users = muteUsersData[0].mute_users;
@@ -211,7 +214,8 @@ socket.broadcast.to(`chat-${group_id}`).emit("muteUserReceive", {
                 profile_picture,
                 mute_users,
                 is_meta_data,
-                group_name
+                group_name,
+                chat_id
               });
             }
           });
@@ -321,7 +325,8 @@ socket.broadcast.to(`chat-${group_id}`).emit("muteUserReceive", {
                   profile_picture,
                   mute_users,
                   is_meta_data,
-                  group_name
+                  group_name,
+                  chat_id
                 });
               } else {
                 mute_users = muteUsersData[0].mute_users;
@@ -341,7 +346,8 @@ socket.broadcast.to(`chat-${group_id}`).emit("muteUserReceive", {
                   profile_picture,
                   mute_users,
                   is_meta_data,
-                  group_name
+                  group_name,
+                  chat_id
                 });
               }
             });

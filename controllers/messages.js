@@ -419,7 +419,7 @@ exports.getDirectMessages = async (req, res) => {
            LIMIT 1
        ) END ) AS message,
 
-
+       csig.from_chat_id,
 
     CASE
         WHEN users.is_group = 1
@@ -468,7 +468,10 @@ exports.getDirectMessages = async (req, res) => {
          } AND chat_seen_in_group_by_user.seen_chat_user_id=users.id 
          ORDER BY  chat_seen_in_group_by_user.id DESC
          LIMIT 1 )    END  ) )
+
+
     AS newMessageCount,
+
 
     CASE
     WHEN users.is_group = 1 AND is_not_exist=1
@@ -498,6 +501,10 @@ LEFT JOIN users_requests ON (
         END
     )
 LEFT JOIN groups_users ON groups_users.group_id = users.id
+LEFT JOIN chat_seen_in_group_by_user AS csig ON csig.seen_chat_user_id = users.id AND csig.user_id= ${req.query.login_user_id}
+
+
+
 WHERE (
         (
             users_requests.user_id = ${req.query.login_user_id}
@@ -801,7 +808,7 @@ GROUP BY
   });
 };
 
-exports.messagesSeen = async (req, res) => {
+exports.messagesSeen1 = async (req, res) => {
   const { login_user_id, seen_chat_user_id, from_chat_id } = req.body;
 
   if (
@@ -1109,25 +1116,27 @@ exports.chatNotificationCount = async (req, res) => {
     login_user_id != "undefined" 
       ) {
 
-var sql=`SELECT COUNT(*) AS cou FROM notification WHERE user_id=${login_user_id} AND is_seen=0`;
-console.log(sql," dddddd");
-   connection.query(sql,(err,counts)=>{
-    if(err){
-console.log(err);
-    }else
-    if (counts) {
+        let s20 = await dbScript(db_sql["Q20"], {
+               var1: login_user_id
+        });
+        
+        let counts = await queryAsync(s20);
+
+console.log(counts,"  get message not seen counts ========");
+    if (counts.length>0) {
       return res.json({
         success: true,
         notificationCount:counts[0].cou,
         message: "Chat unseen notification count.",
       });
-    } else {
+    } else{
       return res.json({
-        success: false,
-        message: "Message aren't seen.",
+        success: true,
+        notificationCount:counts[0].cou,
+        message: "Chat unseen notification count.",
       });
     }
-  })
+  
   } else {
     return res.json({
       success: false,
@@ -1205,6 +1214,49 @@ return res.json({
       });
     }
   })
+  } else {
+    return res.json({
+      success: false,
+      message: "Something went wrong.",
+    });
+  }
+  
+};
+
+exports.messagesSeen = async (req, res) => {
+  const { login_user_id,seen_chat_user_id,from_chat_id} = req.body;
+
+  if (
+    login_user_id &&
+    login_user_id != "undefined"  && 
+    seen_chat_user_id &&
+    seen_chat_user_id != "undefined" && 
+    from_chat_id && 
+    from_chat_id != "undefined" 
+   
+      ) {
+
+
+        let s21 = await dbScript(db_sql["Q21"], {
+          var1: from_chat_id,
+          var2: login_user_id,
+          var3: seen_chat_user_id
+   });
+   
+   let messagesSeen = await queryAsync(s21);
+
+    if (messagesSeen) {
+      return res.json({
+        success: true,
+        message: "Messages seen.",
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: "some went wrong",
+      });
+    }
+  
   } else {
     return res.json({
       success: false,
