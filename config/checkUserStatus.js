@@ -11,7 +11,7 @@ exports.userStatus = (req, res, next) => {
 
          token = req.headers.authorization;
 
-         payload = jwt.verify(token.split(" ")[1],"nodeauthsecret");
+         payload = jwt.verify(token.split(" ")[1],"seecret_key");
          var user_id = payload.id;
          connection.query('SELECT * FROM users WHERE id = ?',user_id, function(err, users) {
         if (err) throw err;
@@ -29,6 +29,7 @@ exports.userStatus = (req, res, next) => {
             // }
             next();
           } else {
+            console.log("ddd 11")
             res.status(401).send({status:false,message:"Unauthorized"});
              
           }

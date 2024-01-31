@@ -49,7 +49,7 @@ module.exports = (io) => {
 
       await save("chats", data);
 
-      if (clients[sent_to] != undefined && is_group == 0) {
+      if (clients[sent_to] != undefined ) {
         mute_users = "";
         clients[sent_to].emit("receive-message", {
           send_by,
@@ -58,6 +58,26 @@ module.exports = (io) => {
         });
       }
     });
+
+    socket.on("broadcast_message", async ({ send_by, newMessage }) => {
+      var data = {
+        message: newMessage,
+        send_by: send_by,
+         };
+
+      await save("chats", data);
+
+      if (clients[sent_to] != undefined ) {
+        mute_users = "";
+        socket.broadcast.to(`chat-${sent_to}`).emit("receive-message", {
+          send_by,
+          sent_to,
+          newMessage,
+        });
+      }
+    });
+
+
 
     socket.on("user-typing-message", ({ cid, uid, isTyping, name }) => {
       console.log("user-typing-message", cid, uid, isTyping, name, result);

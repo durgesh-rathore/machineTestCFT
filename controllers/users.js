@@ -1,14 +1,16 @@
 var jwt = require("jsonwebtoken");
 var connection = require("../config/db");
 var constants = require("../config/constants");
+const { body, validationResult } = require('express-validator');
+
 var { encryptPassword, checkPassword } = require("../config/custom");
-var { sendMail, save, findByIdAndUpdate } = require("../helpers/helper");
-var multer = require("multer");
-const path = require("path");
-
-const fs = require("fs");
-
 exports.signup = function (req, res) {
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     
     if (
@@ -52,15 +54,9 @@ exports.signup = function (req, res) {
                     email: req.body.email.toLowerCase(),
                     password: password,
                     mobile_number: req.body.mobile_number,
-                    profie_step:1
+                    
                   };
-                  if (
-                    req.body.divice_token &&
-                    req.body.divice_token != "undefined" &&
-                    req.body.divice_token != "null"
-                  ) {
-                    newUser.divice_token = req.body.divice_token;
-                  }
+                 
                   connection.query(
                     "INSERT INTO users SET ?",
                     newUser,
@@ -74,12 +70,21 @@ exports.signup = function (req, res) {
                             expiresIn: "7d", // expires in 24 hours
                           }
                         );
+
+                        const sessionId = Math.random().toString(36).substring(7);
+
+                        // Store user information in the session
+                        req.session.user = { user_id:user.insertId , sessionId };
+                    
+                        // Add the session to the list of active sessions
+                        activeSessions[sessionId] = req.sessionID;
+
+                        res.cookie('token', token, { httpOnly: true });
                         return res.json({
                           success: true,
                           user_id: user.insertId,
                           token: "JWT " + token,
                           name: req.body.name,
-                          profile_picture: null,
                           message: "Signup successfully.",
                         });
                       } else {
@@ -103,55 +108,32 @@ exports.signup = function (req, res) {
 };
 
 exports.signin = async function (req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   if (!req.body.email) {
     res.json({ success: false, message: "Email id is required." });
   } else if (!req.body.password) {
     res.json({ success: false, message: "Password is required." });
   } else {
     connection.query(
-      "SELECT users.*, CASE WHEN users.profile_picture IS NOT NULL THEN CONCAT('" +
-        constants.BASE_URL +
-        "','images/profiles/',users.profile_picture) ELSE '' END AS profile_picture FROM users WHERE users.email = '" +
+      "SELECT * FROM users WHERE users.email = '" +
         req.body.email +
         "'",
       async function (err, users) {
         if (users.length > 0) {
-          var Password = "";
-          if (users[0].is_reset == 1) {
-            Password = await checkPassword(
-              req.body.password,
-              users[0].dumy_password
-            );
-          } else {
-            Password = await checkPassword(
+          let Password = "";
+                Password = await checkPassword(
               req.body.password,
               users[0].password
             );
-          }
-
+          
           if (Password) {
             var token = jwt.sign({ id: users[0].id }, constants.SECRET, {
               expiresIn: "7d", // expires in 24 hours
             });
-            if (users[0].is_reset == 1) {
-              return res.json({
-                success: true,
-                response: users[0],
-                message: "Login successfully.",
-              });
-            } else {
-              if (
-                req.body.divice_token &&
-                req.body.divice_token != "undefined" &&
-                req.body.divice_token != "null"
-              ) {
-                var j = await findByIdAndUpdate(
-                  "users",
-                  { divice_token: req.body.divice_token },
-                  " id=" + users[0].id
-                );
-                
-              }
+            res.cookie('token', token, { httpOnly: true });
               return res.json({
                 success: true,
                 token: "JWT " + token,
@@ -162,9 +144,7 @@ exports.signin = async function (req, res) {
           } else {
             return res.json({ success: false, message: "Password not match." });
           }
-        } else {
-          return res.json({ success: false, message: "Email id not match." });
-        }
+       
       }
     );
   }
@@ -183,5 +163,44 @@ exports.logout = async function (req, res) {
                 message: "Logout successfully.",
               });
             
+};
+
+
+
+exports.userList = function (req, res) {
+  try {
+    let sql=`SELECT users.name,users.id, 
+                ( SELECT COUNT(chats.id)  FROM chats
+                   WHERE 
+                    (chats.sent_by=${ req.query.login_user_id} AND chats.sent_to=users.id) 
+                    OR (chats.sent_by=users.id AND chats.sent_to=${ req.query.login_user_id}) ) 
+                  AS newMessageCount
+               FROM  users  WHERE role=2 `;
+               console.log(sql," dddddd");
+    
+      connection.query(sql,     
+      async function (err, userList) {
+        if (userList.length >=0) {
+          return res.json({
+            response:userList,
+            success: true,
+            message: "Users list.",
+          });
+        } else {
+          return res.json({
+            success: false,
+            message: "Something went wrong.",
+          });
+        }
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    return res.json({
+      success: false,
+      message: "Something went wrong.",
+      error:error
+    });
+  }
 };
 
