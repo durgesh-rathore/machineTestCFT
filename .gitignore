@@ -1,8 +1,8 @@
-app.js
-config/db.js
-config/constants.js
+# app.js
+# config/db.js
+# config/constants.js
  
- bin/
+#  bin/
 logs
 *.log
 npm-debug.log*
